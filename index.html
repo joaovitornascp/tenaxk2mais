@@ -1135,6 +1135,8 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
       <div class="kpi-sub">0 de 0</div>
     </div></div>
 
+<div id="a_lastUpdate" class="last-update-tag"></div>
+
 <div class="pdf-export-bar">
   <button class="pdf-export-btn" id="pdfReportBtn" type="button">📑 Exportar relatório (PDF)</button>
   <span class="pdf-export-hint">Inclui: fluxograma de blocos (resumo geral), curva S consolidada (geral e por pilar) e mapa de entregas por semana</span>
@@ -3041,7 +3043,8 @@ function handleAreaUpload(e, area, label){
       initZoom('zoomIndividual','a_curvaIndividualSvg');
       initZoom('zoomConsolidada','a_curvaConsSvg');
 
-      const now = new Date().toLocaleTimeString('pt-BR');
+      const agoraUp = new Date();
+      const now = agoraUp.toLocaleDateString('pt-BR') + ' ' + agoraUp.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
       setSharedStatus(label + ' atualizada manualmente: ' + file.name + ' (' + n + ' itens)', 'ok');
       const tag = document.getElementById('a_lastUpdate');
       if(tag){
@@ -3132,23 +3135,6 @@ document.getElementById('treePlanejamentoGantt').addEventListener('click', funct
 });
 
 
-// Tentar restaurar dados da última sessão; se não houver, renderizar dashboard vazio
-if(!restaurarDadosSalvos()){
-  AssetDash.renderAll();
-}
-initExpand();
-initDownloadButtons();
-document.getElementById('pdfReportBtn').addEventListener('click', function(){
-  AssetDash.generatePdfReport(this);
-});
-initZoom('zoomFluxo','a_fluxoSvg');
-initZoom('zoomIndividual','a_curvaIndividualSvg');
-initZoom('zoomConsolidada','a_curvaConsSvg');
-initZoom('zoomIndividual_fs','a_curvaIndividualSvg_fs');
-initZoom('zoomConsolidada_fs','a_curvaConsSvg_fs');
-setSharedStatus('nenhuma planilha carregada - selecione um arquivo acima', 'muted');
-
-
 // ===================== PERSISTÊNCIA LOCAL =====================
 // Salva os dados da planilha no localStorage para restaurar entre sessões.
 const STORAGE_KEY_DATA = 'salobo3_dashboard_data';
@@ -3167,7 +3153,7 @@ function salvarDadosLocal(arrayBuffer, nomeArquivo){
     const meta = {
       arquivo: nomeArquivo,
       dataHora: agora.toISOString(),
-      display: agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR')
+      display: agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
     };
     localStorage.setItem(STORAGE_KEY_META, JSON.stringify(meta));
     return meta;
@@ -3237,6 +3223,23 @@ function restaurarDadosSalvos(){
 }
 
 
+// Tentar restaurar dados da última sessão; se não houver, renderizar dashboard vazio
+if(!restaurarDadosSalvos()){
+  AssetDash.renderAll();
+}
+initExpand();
+initDownloadButtons();
+document.getElementById('pdfReportBtn').addEventListener('click', function(){
+  AssetDash.generatePdfReport(this);
+});
+initZoom('zoomFluxo','a_fluxoSvg');
+initZoom('zoomIndividual','a_curvaIndividualSvg');
+initZoom('zoomConsolidada','a_curvaConsSvg');
+initZoom('zoomIndividual_fs','a_curvaIndividualSvg_fs');
+initZoom('zoomConsolidada_fs','a_curvaConsSvg_fs');
+setSharedStatus('nenhuma planilha carregada - selecione um arquivo acima', 'muted');
+
+
 // Upload combinado: uma única planilha contém BRT+ENE, é despachada para as duas áreas.
 // Cada área é tolerante à ausência do outro processo (se só houver BRT, Energia fica vazia).
 function handleCombinedUpload(e){
@@ -3285,7 +3288,8 @@ function handleCombinedUpload(e){
     initZoom('zoomIndividual','a_curvaIndividualSvg');
     initZoom('zoomConsolidada','a_curvaConsSvg');
 
-    const now = new Date().toLocaleTimeString('pt-BR');
+    const agoraUp = new Date();
+    const now = agoraUp.toLocaleDateString('pt-BR') + ' ' + agoraUp.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
     const partes = resultados.map(function(r){
       const nome = r.area === 'britagem' ? 'Britagem III' : 'Energia';
       return nome + ': ' + r.n + ' itens';
