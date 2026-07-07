@@ -3222,22 +3222,78 @@ function restaurarDadosSalvos(){
   }
 }
 
+// ===================== PLANILHA DO SERVIDOR (dados.xlsx) =====================
+// Fonte única para TODOS os visitantes: se um arquivo "dados.xlsx" existir na
+// mesma pasta do index.html (ex.: enviado pelo Gerenciador de Arquivos do
+// Hostinger), ele é carregado automaticamente ao abrir a página — sem exigir
+// upload manual de cada pessoa. Para atualizar os dados de todo mundo, basta
+// substituir esse arquivo no servidor (mesmo nome). Se ele não existir (ex.:
+// ao abrir o index.html localmente com duplo clique), cai nos fallbacks de
+// sempre (dados salvos no navegador ou painel vazio).
+const NOME_PLANILHA_SERVIDOR = 'dados.xlsx';
 
-// Tentar restaurar dados da última sessão; se não houver, renderizar dashboard vazio
-if(!restaurarDadosSalvos()){
-  AssetDash.renderAll();
+function carregarPlanilhaDoServidor(){
+  if(typeof XLSX === 'undefined') return Promise.resolve(false);
+  return fetch(NOME_PLANILHA_SERVIDOR + '?t=' + Date.now(), {cache:'no-store'})
+    .then(function(resp){
+      if(!resp.ok) return null;
+      return resp.arrayBuffer().then(function(buf){ return {buf:buf, lastModified:resp.headers.get('Last-Modified')}; });
+    })
+    .then(function(res){
+      if(!res) return false;
+      const wb = XLSX.read(new Uint8Array(res.buf), {type:'array', cellDates:true});
+      const resultados = [];
+      ['britagem','energia'].forEach(function(area){
+        try{
+          const n = AssetDash.rebuildAreaFromWorkbook(wb, area);
+          resultados.push({ area: area, n: n });
+        }catch(err){ /* área sem dados — ok, fica vazia */ }
+      });
+      const total = resultados.reduce(function(s,r){ return s+r.n; }, 0);
+      if(total === 0) return false;
+
+      AssetDash.renderAll();
+
+      const partes = resultados.map(function(r){
+        const nome = r.area === 'britagem' ? 'Britagem III' : 'Energia';
+        return nome + ': ' + r.n + ' itens';
+      });
+      const quando = res.lastModified ? new Date(res.lastModified) : new Date();
+      const display = quando.toLocaleDateString('pt-BR') + ' às ' + quando.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+      setSharedStatus('dados carregados do arquivo do servidor (' + NOME_PLANILHA_SERVIDOR + ')', 'ok');
+      const tag = document.getElementById('a_lastUpdate');
+      if(tag){
+        tag.textContent = '📄 planilha do servidor — última atualização: ' + display + ' · arquivo "' + NOME_PLANILHA_SERVIDOR + '" · ' + partes.join(' · ');
+        tag.classList.add('fresh');
+      }
+      return true;
+    })
+    .catch(function(){ return false; });
 }
-initExpand();
-initDownloadButtons();
-document.getElementById('pdfReportBtn').addEventListener('click', function(){
-  AssetDash.generatePdfReport(this);
+
+function iniciarControlesDashboard(){
+  initExpand();
+  initDownloadButtons();
+  document.getElementById('pdfReportBtn').addEventListener('click', function(){
+    AssetDash.generatePdfReport(this);
+  });
+  initZoom('zoomFluxo','a_fluxoSvg');
+  initZoom('zoomIndividual','a_curvaIndividualSvg');
+  initZoom('zoomConsolidada','a_curvaConsSvg');
+  initZoom('zoomIndividual_fs','a_curvaIndividualSvg_fs');
+  initZoom('zoomConsolidada_fs','a_curvaConsSvg_fs');
+}
+
+// Ordem de prioridade da fonte de dados: 1) planilha do servidor (todos veem
+// igual) → 2) última planilha salva neste navegador → 3) painel vazio.
+carregarPlanilhaDoServidor().then(function(carregouDoServidor){
+  if(!carregouDoServidor && !restaurarDadosSalvos()){
+    AssetDash.renderAll();
+    setSharedStatus('nenhuma planilha carregada - selecione um arquivo acima', 'muted');
+  }
+  iniciarControlesDashboard();
 });
-initZoom('zoomFluxo','a_fluxoSvg');
-initZoom('zoomIndividual','a_curvaIndividualSvg');
-initZoom('zoomConsolidada','a_curvaConsSvg');
-initZoom('zoomIndividual_fs','a_curvaIndividualSvg_fs');
-initZoom('zoomConsolidada_fs','a_curvaConsSvg_fs');
-setSharedStatus('nenhuma planilha carregada - selecione um arquivo acima', 'muted');
 
 
 // Upload combinado: uma única planilha contém BRT+ENE, é despachada para as duas áreas.
