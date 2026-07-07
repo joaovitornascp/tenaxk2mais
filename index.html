@@ -685,20 +685,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .download-btn:disabled{opacity:.5;cursor:wait;}
   .panel-divider{height:1px;background:var(--border);margin:24px 0 18px;}
 
-  /* ===== Diverging bars (desvio padrão) ===== */
-  .diverge-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
-  .diverge-label{width:200px;flex:none;font-size:12.5px;display:flex;align-items:center;gap:6px;font-weight:600;}
-  .diverge-track{position:relative;flex:1;height:20px;background:var(--bg);border-radius:5px;overflow:hidden;}
-  .diverge-center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border);z-index:1;}
-  .diverge-bar{position:absolute;top:1px;bottom:1px;border-radius:3px;transition:width .2s ease;}
-  .diverge-value{width:150px;flex:none;text-align:right;font-size:12px;font-weight:700;}
-  .diverge-state{font-weight:500;font-size:10.5px;opacity:.85;margin-left:2px;}
-  .breakdown-wrap{margin:2px 0 16px 0;padding-left:0;}
-  .breakdown-track{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--bg);margin-bottom:6px;}
-  .breakdown-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--muted);align-items:center;}
-  .breakdown-legend span{display:inline-flex;align-items:center;gap:5px;}
-  .breakdown-total{margin-left:auto;color:var(--muted2);font-size:10.5px;}
-  .desvio-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .pdf-export-bar{
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;
     margin:14px 0 18px; padding:12px 16px; background:var(--card2);
@@ -960,12 +946,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   --gnt-done:#0052cc;--gnt-doing:#ff991f;--gnt-plan:#c1c7d0;
   --gnt-row-h:32px;--gnt-day-w:6px;--gnt-left-w:420px;--gnt-head-h:52px;
   height:calc(100vh - 0px);
-  display:flex;
   background:var(--gnt-bg);
   color:var(--gnt-txt);
   font-size:12px;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
+#page-planejamento.active{ display:flex; }
 body.dark-mode #page-planejamento{
   --gnt-bg:#16202B;--gnt-panel:#0F1620;--gnt-line:#283543;--gnt-line2:#1F2A35;
   --gnt-txt:#E6EDF3;--gnt-muted:#9AABB8;--gnt-accent:#3FCBE8;--gnt-today:#FF6B6B;
@@ -1233,22 +1219,6 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
   </div>
 
   <div class="panel">
-    <h2>Desvio padrão</h2>
-    <div class="sub" id="a_desvioSub">Atraso/adiantamento <strong>médio</strong> (dias) dos itens já concluídos, com a divisão entre quantos foram entregues adiantados, no prazo ou com atraso — Geral combina as equipes selecionadas acima; Por pilar mostra uma barra para cada uma</div>
-    <div class="desvio-toolbar">
-      <div class="view-toggle" id="a_desvioToggle">
-        <button data-mode="geral" class="active">Geral</button>
-        <button data-mode="pilar">Por pilar</button>
-      </div>
-      <div class="view-toggle" id="a_desvioSubToggle">
-        <button data-sub="resumo" class="active">Resumo</button>
-        <button data-sub="atrasado">Tipos de atraso</button>
-      </div>
-    </div>
-    <div id="a_desvioBarras"><div style="text-align:center;color:#667085;padding:24px;font-size:13px;">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</div></div>
-  </div>
-
-  <div class="panel">
     <div class="chart-panel-header">
       <div>
         <h2>Mapa de entregas por equipe</h2>
@@ -1469,25 +1439,7 @@ const SISTEMA_META_ENERGIA = {
 };
 
 let SISTEMA_META = SISTEMA_META_BRITAGEM;
-let desvioViewMode = 'geral';
-let desvioSubView = 'resumo'; // 'resumo' | 'atrasado'
 
-function normalizeValidado(v){
-  return (v||'').toString().toLowerCase().replace(/\./g,'').trim();
-}
-function classifyDelayCause(item){
-  const v = normalizeValidado(item.validado);
-  if(v.includes('em analise') || v.includes('em análise')){
-    const dPrev = parseDate(item.retorno_previsto);
-    const dReal = parseDate(item.retorno_real);
-    if(dPrev && dReal && dReal > dPrev) return 'Vale';
-    return null; // ainda dentro do prazo de retorno esperado
-  }
-  if(v === 'ag envio' || (item.status && item.status !== 'Concluído')){
-    return 'Tenax';
-  }
-  return null;
-}
 let individualViewMode = 'pilar'; // 'pilar' | 'geral'
 
 // Seletor exclusivo para consolidada: Todos ou 1 pilar
@@ -1689,13 +1641,6 @@ function parsePriorizacaoVale(workbook, area){
     const realEnd = toISO(r['Data real de conclusão']);
     const status = normalizeStatus(r['Status'], !!(planStart || planEnd));
 
-    // desvio: usa a coluna "Desvio padrão" quando numérica; senão calcula (real − planejado) em dias
-    const desvioRaw = r['Desvio padrão'];
-    let desvio = (typeof desvioRaw === 'number' && isFinite(desvioRaw)) ? desvioRaw : null;
-    if(desvio===null && status==='Concluído' && planEnd && realEnd){
-      desvio = Math.round((new Date(realEnd+'T00:00:00') - new Date(planEnd+'T00:00:00'))/(1000*60*60*24));
-    }
-
     const validadoRaw = (r['Validação']!==null && r['Validação']!==undefined) ? r['Validação'] : r['Validado'];
     const validado = (validadoRaw && validadoRaw!=='-') ? validadoRaw : (status!=='Concluído' ? 'Ag. Envio' : null);
     const depValeRaw = r['Dependêcia Vale'];
@@ -1707,7 +1652,7 @@ function parsePriorizacaoVale(workbook, area){
       id: recs.length+1, pilar, sistema, ativo, floc, denom, n3: n3Nivel,
       plan_start: planStart || planEnd, plan_end: planEnd,
       real_start: realStart, real_end: realEnd, status,
-      desvio, dep_vale, dep_tenax, validado,
+      dep_vale, dep_tenax, validado,
       retorno_previsto: toISO(r['Retorno previsto']), retorno_real: toISO(r['Retorno real'])
     });
   });
@@ -1874,160 +1819,6 @@ function renderKPIs(){
 }
 
 // ---------- curvas individuais ----------
-function weeklyAvgDesvio(pilarList, start, weeksTotal){
-  const sums = new Array(weeksTotal+1).fill(0);
-  const counts = new Array(weeksTotal+1).fill(0);
-  items.forEach(i=>{
-    if(!pilarList.includes(i.pilar)) return;
-    if(i.desvio===null || i.desvio===undefined) return;
-    const d = parseDate(i.real_end);
-    if(!d) return;
-    const w = Math.max(0, Math.min(weeksTotal, weekIndexOf(d, start)));
-    sums[w] += i.desvio;
-    counts[w] += 1;
-  });
-  const avg = sums.map((s,w)=> counts[w] ? s/counts[w] : null);
-  return {avg, counts};
-}
-
-function renderDesvioBarras(){
-  if(desvioSubView==='atrasado'){ renderDesvioAtrasados(); return; }
-  renderDesvioResumo();
-}
-
-function renderDesvioResumo(){
-  const activeList = PILAR_ORDER.filter(p=>selectedIndividual.has(p));
-  let bars = [];
-  if(desvioViewMode==='pilar'){
-    bars = activeList.map(p=>{
-      const itemsP = items.filter(i=>i.pilar===p && i.desvio!==null && i.desvio!==undefined);
-      const avg = itemsP.length ? itemsP.reduce((s,i)=>s+i.desvio,0)/itemsP.length : null;
-      const adiantados = itemsP.filter(i=>i.desvio<0).length;
-      const noPrazo = itemsP.filter(i=>i.desvio===0).length;
-      const atrasados = itemsP.filter(i=>i.desvio>0).length;
-      return {label:p, color:PILAR_COLOR_HEX[p], avg, count:itemsP.length, adiantados, noPrazo, atrasados};
-    });
-  } else {
-    const itemsAll = items.filter(i=>activeList.includes(i.pilar) && i.desvio!==null && i.desvio!==undefined);
-    const avg = itemsAll.length ? itemsAll.reduce((s,i)=>s+i.desvio,0)/itemsAll.length : null;
-    const adiantados = itemsAll.filter(i=>i.desvio<0).length;
-    const noPrazo = itemsAll.filter(i=>i.desvio===0).length;
-    const atrasados = itemsAll.filter(i=>i.desvio>0).length;
-    bars = [{label:'Geral (equipes selecionadas)', color:'#045552', avg, count:itemsAll.length, adiantados, noPrazo, atrasados}];
-  }
-
-  const el = document.getElementById('a_desvioBarras');
-  if(bars.length===0){
-    el.innerHTML = '<div class="dep-empty">Nenhuma equipe selecionada</div>';
-    return;
-  }
-
-  const valuesValid = bars.filter(b=>b.avg!==null).map(b=>Math.abs(b.avg));
-  const maxAbs = valuesValid.length ? Math.max(1, ...valuesValid) : 1;
-
-  el.innerHTML = bars.map(b=>{
-    if(b.avg===null){
-      return `<div class="diverge-row">
-        <span class="diverge-label" style="color:${b.color};">${b.label}</span>
-        <div class="diverge-track"><div class="diverge-center"></div></div>
-        <span class="diverge-value" style="color:var(--muted);">sem dados</span>
-      </div>`;
-    }
-    const isAhead = b.avg < 0;   // desvio negativo = adiantado; positivo = atrasado
-    const color = isAhead ? '#16A34A' : (b.avg>0 ? '#DC2626' : '#8A95A3');
-    const pct = Math.min(50, Math.abs(b.avg)/maxAbs*50);
-    const barStyle = isAhead
-      ? `left:${50-pct}%;width:${pct}%;`
-      : `left:50%;width:${pct}%;`;
-    const valueLabel = `${b.avg>0?'+':''}${b.avg.toFixed(1)}d`;
-    const stateLabel = isAhead ? 'adiantado em média' : (b.avg>0 ? 'atrasado em média' : 'no prazo em média');
-
-    const total = b.count || 1;
-    const segOrder = [
-      {key:'adiantados', label:'Adiantado', color:'#16A34A'},
-      {key:'noPrazo',     label:'No prazo',  color:'#8A95A3'},
-      {key:'atrasados',   label:'Atrasado',  color:'#DC2626'},
-    ];
-    const breakdownSegs = segOrder.map(s=>{
-      const w = b[s.key]/total*100;
-      if(w<=0) return '';
-      return `<div title="${s.label}: ${b[s.key]}" style="width:${w}%;background:${s.color};height:100%;"></div>`;
-    }).join('');
-    const breakdownLegend = segOrder.map(s=>
-      `<span style="color:${s.color};"><span class="dot" style="background:${s.color};"></span>${b[s.key]} ${s.label.toLowerCase()}</span>`
-    ).join('');
-
-    return `<div class="diverge-row">
-      <span class="diverge-label" style="color:${b.color};"><span class="dot" style="background:${b.color};"></span>${b.label}</span>
-      <div class="diverge-track">
-        <div class="diverge-center"></div>
-        <div class="diverge-bar" style="${barStyle}background:${color};"></div>
-      </div>
-      <span class="diverge-value" style="color:${color};">${valueLabel} <span class="diverge-state">${stateLabel}</span></span>
-    </div>
-    <div class="breakdown-wrap">
-      <div class="breakdown-track">${breakdownSegs}</div>
-      <div class="breakdown-legend">${breakdownLegend}<span class="breakdown-total">${b.count} ${b.count===1?'item concluído':'itens concluídos'} com desvio registrado</span></div>
-    </div>`;
-  }).join('');
-}
-
-function renderDesvioAtrasados(){
-  const activeList = PILAR_ORDER.filter(p=>selectedIndividual.has(p));
-  const CAUSE_COLORS = {'Tenax':'#7C3AED','Vale':'#00B0CA','Não classificado':'#98A2B3'};
-  const CAUSE_ORDER = ['Tenax','Vale','Não classificado'];
-
-  function buildGroup(label, color, pilarFilter){
-    const atrasados = items.filter(i=>pilarFilter(i.pilar) && i.desvio!==null && i.desvio!==undefined && i.desvio>0);
-    const counts = {'Tenax':0,'Vale':0,'Não classificado':0};
-    atrasados.forEach(i=>{
-      const cause = classifyDelayCause(i) || 'Não classificado';
-      counts[cause]++;
-    });
-    return {label, color, total: atrasados.length, counts};
-  }
-
-  let groups = [];
-  if(desvioViewMode==='pilar'){
-    groups = activeList.map(p=> buildGroup(p, PILAR_COLOR_HEX[p], pl=>pl===p));
-  } else {
-    groups = [ buildGroup('Geral (equipes selecionadas)', '#045552', pl=>activeList.includes(pl)) ];
-  }
-
-  const el = document.getElementById('a_desvioBarras');
-  if(groups.length===0){
-    el.innerHTML = '<div class="dep-empty">Nenhuma equipe selecionada</div>';
-    return;
-  }
-
-  el.innerHTML = groups.map(g=>{
-    if(g.total===0){
-      return `<div class="diverge-row">
-        <span class="diverge-label" style="color:${g.color};"><span class="dot" style="background:${g.color};"></span>${g.label}</span>
-        <div class="diverge-track"><div class="diverge-center"></div></div>
-        <span class="diverge-value" style="color:var(--muted);">sem atrasos</span>
-      </div>`;
-    }
-    const segs = CAUSE_ORDER.map(k=>{
-      const w = g.counts[k]/g.total*100;
-      if(w<=0) return '';
-      return `<div title="${k}: ${g.counts[k]}" style="width:${w}%;background:${CAUSE_COLORS[k]};height:100%;"></div>`;
-    }).join('');
-    const legend = CAUSE_ORDER.map(k=>
-      `<span style="color:${CAUSE_COLORS[k]};"><span class="dot" style="background:${CAUSE_COLORS[k]};"></span>${g.counts[k]} ${k.toLowerCase()}</span>`
-    ).join('');
-    return `<div class="diverge-row">
-      <span class="diverge-label" style="color:${g.color};"><span class="dot" style="background:${g.color};"></span>${g.label}</span>
-      <span class="diverge-value" style="color:var(--muted);width:auto;flex:1;text-align:left;">${g.total} ${g.total===1?'item atrasado':'itens atrasados'}</span>
-    </div>
-    <div class="breakdown-wrap">
-      <div class="breakdown-track">${segs}</div>
-      <div class="breakdown-legend">${legend}</div>
-    </div>`;
-  }).join('');
-}
-
-
 
 function renderCurvaIndividual(){
   const start = startDateOverall();
@@ -2091,7 +1882,6 @@ function renderCurvaIndividual(){
   ['a_curvaIndividualSvg','a_curvaIndividualSvg_fs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=svg;
   });
-  renderDesvioBarras();
 }
 
 
@@ -2639,28 +2429,6 @@ document.getElementById('a_mapaToggle').addEventListener('click', function(e){
   renderHeatmap();
 });
 
-document.getElementById('a_desvioToggle').addEventListener('click', function(e){
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  desvioViewMode = btn.dataset.mode;
-  this.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
-  renderDesvioBarras();
-});
-
-document.getElementById('a_desvioSubToggle').addEventListener('click', function(e){
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  desvioSubView = btn.dataset.sub;
-  this.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
-  const subEl = document.getElementById('a_desvioSub');
-  if(subEl){
-    subEl.innerHTML = desvioSubView==='atrasado'
-      ? 'Dos itens classificados como <strong>atrasados</strong>, quantos têm a causa atribuída à <strong>Tenax</strong> (status ainda não concluído, ou validação "Ag. envio") e quantos à <strong>Vale</strong> (validação "Em análise" com retorno além do previsto)'
-      : 'Atraso/adiantamento <strong>médio</strong> (dias) dos itens já concluídos, com a divisão entre quantos foram entregues adiantados, no prazo ou com atraso — Geral combina as equipes selecionadas acima; Por pilar mostra uma barra para cada uma';
-  }
-  renderDesvioBarras();
-});
-
 // ===== Toggle Geral/Por pilar curva individual =====
 document.getElementById('a_geralToggle').addEventListener('click', function(e){
   const btn = e.target.closest('button');
@@ -2769,8 +2537,6 @@ function renderEmptyDashboard(){
   const clearIds = ['a_teamSelectIndividual','a_teamSelectConsolidada','a_legendIndividual','a_legendConsolidada','a_pilarBars','a_heatmapTable'];
   clearIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
   const sub = document.getElementById('a_curvaConsSub'); if(sub) sub.textContent = msg;
-  const desvio = document.getElementById('a_desvioBarras');
-  if(desvio) desvio.innerHTML = `<div style="text-align:center;color:${CHART_THEME.mutedText};padding:24px;font-size:13px;">${msg}</div>`;
   const fluxoSel = document.getElementById('a_fluxoPilarSelect'); if(fluxoSel) fluxoSel.style.display='none';
 
   safe('populateFilters', populateFilters);
