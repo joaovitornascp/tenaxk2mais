@@ -980,6 +980,8 @@ body.dark-mode #page-planejamento{
 #page-planejamento .gnt-btn:hover{background:var(--gnt-panel)}
 #page-planejamento .gnt-btn.gnt-active{background:var(--gnt-accent);color:#fff;border-color:var(--gnt-accent)}
 #page-planejamento .gnt-sep{width:1px;height:18px;background:var(--gnt-line)}
+#page-planejamento .gnt-select{border:1px solid var(--gnt-line);background:var(--gnt-bg);color:var(--gnt-txt);border-radius:5px;padding:5px 8px;cursor:pointer;font-size:11px;font-weight:500}
+#page-planejamento .gnt-select:hover{background:var(--gnt-panel)}
 #page-planejamento .gnt-legend{display:flex;gap:16px;flex-wrap:wrap;padding:6px 16px;border-bottom:1px solid var(--gnt-line);font-size:11px;color:var(--gnt-txt);align-items:center;background:var(--gnt-panel)}
 #page-planejamento .gnt-legend .gnt-grp{display:flex;gap:12px;align-items:center}
 #page-planejamento .gnt-legend b{color:var(--gnt-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.03em}
@@ -1320,6 +1322,21 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
      <button class="gnt-btn gnt-active" data-gnt-zoom="6" type="button">Zoom</button>
      <button class="gnt-btn" data-gnt-zoom="12" type="button">+</button>
      <button class="gnt-btn" data-gnt-zoom="22" type="button">++</button>
+     <span class="gnt-sep"></span>
+     <select class="gnt-select" id="gntStatusFilter" title="Filtrar por status">
+       <option value="all">Todos os status</option>
+       <option value="doing">Em andamento</option>
+       <option value="done">Concluído</option>
+       <option value="plan">Não iniciado</option>
+     </select>
+     <select class="gnt-select" id="gntTeamFilter" title="Filtrar por equipe">
+       <option value="all">Todas as equipes</option>
+       <option value="Inventário">Inventário</option>
+       <option value="Taxonomia">Taxonomia</option>
+       <option value="Lista BOM">Lista BOM</option>
+       <option value="Estratégia de Manutenção">Estratégia de Manutenção</option>
+     </select>
+     <span class="gnt-sep"></span>
      <button class="gnt-btn" id="gntTodayBtn" type="button">Hoje</button>
    </div>
  </header>
@@ -3553,6 +3570,9 @@ const PlanningGantt = (function(){
   let minD=null, maxD=null, totalDays=0, DW=6;
   const RH = 32;
   let bound = false;
+  let filterStatus = 'all'; // 'all' | 'doing' | 'done' | 'plan'
+  let filterTeam = 'all';   // 'all' | nome do pilar/equipe
+  let dataAvailable = false; // true se há itens carregados, mesmo que os filtros zerem o resultado
 
   function statusToSt(status){
     if(status==='Concluído') return 'done';
@@ -3568,12 +3588,16 @@ const PlanningGantt = (function(){
       {label:'Britagem III', items: areas.britagem || []},
       {label:'Energia', items: areas.energia || []}
     ];
+    dataAvailable = groups.some(g=>g.items.some(it=>it.pilar));
     const tree = [];
     groups.forEach(({label, items})=>{
       if(!items.length) return;
       const proc = {id:label, open:true, n3:[]};
       items.forEach(it=>{
         if(!it.pilar) return;
+        if(filterTeam!=='all' && it.pilar!==filterTeam) return;
+        const st = statusToSt(it.status);
+        if(filterStatus!=='all' && st!==filterStatus) return;
         const s = it.real_start || it.plan_start;
         const e = (it.status==='Concluído') ? (it.real_end || it.plan_end || s) : (it.plan_end || s);
         if(!s || !e) return;
@@ -3586,7 +3610,7 @@ const PlanningGantt = (function(){
         const assetTag = it.ativo || it.floc || ('item-'+it.id);
         let asset = n4.assets.find(x=>x.tag===assetTag);
         if(!asset){ asset = {tag:assetTag, nome: it.denom || it.floc || assetTag, open:false, teams:[]}; n4.assets.push(asset); }
-        asset.teams.push({team: it.pilar, s, e, st: statusToSt(it.status)});
+        asset.teams.push({team: it.pilar, s, e, st});
       });
       // poda níveis sem entregas com datas utilizáveis
       proc.n3.forEach(n3=>{ n3.n4 = n3.n4.filter(n4=>{ n4.assets = n4.assets.filter(a=>a.teams.length); return n4.assets.length; }); });
@@ -3629,7 +3653,9 @@ const PlanningGantt = (function(){
     let d=0,g=0,n=0;
     GANTT_DATA.forEach(p=>p.n3.forEach(n3=>n3.n4.forEach(n4=>n4.assets.forEach(a=>a.teams.forEach(t=>{ n++; if(t.st==='done')d++; else if(t.st==='doing')g++; })))));
     if(!n){
-      hd_setMeta('Nenhuma planilha carregada ainda — envie os dados pelo botão 🔄 Atualizar dados.');
+      hd_setMeta(dataAvailable
+        ? 'Nenhuma entrega encontrada para os filtros selecionados.'
+        : 'Nenhuma planilha carregada ainda — envie os dados pelo botão 🔄 Atualizar dados.');
       return;
     }
     hd_setMeta(`<b>${totalAssets()}</b> ativos · <b>${n}</b> entregas · <span style="color:var(--gnt-done)">● ${d} concluídas</span> · <span style="color:var(--gnt-doing)">● ${g} em andamento</span> · ${n-d-g} não iniciadas`);
@@ -3730,7 +3756,9 @@ const PlanningGantt = (function(){
 
   function render(){
     if(!GANTT_DATA.length){
-      lB.innerHTML = '<div class="gnt-empty">Nenhuma planilha carregada ainda.<br>Envie os dados pelo botão 🔄 Atualizar dados no topo do painel.</div>';
+      lB.innerHTML = dataAvailable
+        ? '<div class="gnt-empty">Nenhuma entrega encontrada para os filtros selecionados.</div>'
+        : '<div class="gnt-empty">Nenhuma planilha carregada ainda.<br>Envie os dados pelo botão 🔄 Atualizar dados no topo do painel.</div>';
       cv.innerHTML = ''; cv.style.width='0px'; cv.style.height='0px';
       hd.innerHTML=''; hd.style.width='0px';
       refreshMeta();
@@ -3834,6 +3862,14 @@ const PlanningGantt = (function(){
       renderHead(); render();
     }));
     document.getElementById('gntTodayBtn').addEventListener('click', toToday);
+    document.getElementById('gntStatusFilter').addEventListener('change', e=>{
+      filterStatus = e.target.value;
+      refresh();
+    });
+    document.getElementById('gntTeamFilter').addEventListener('change', e=>{
+      filterTeam = e.target.value;
+      refresh();
+    });
     rB.addEventListener('scroll', ()=>{ root.querySelector('.gnt-rhead').scrollLeft = rB.scrollLeft; lB.scrollTop = rB.scrollTop; });
     lB.addEventListener('scroll', ()=>{ rB.scrollTop = lB.scrollTop; });
   }
