@@ -1582,31 +1582,46 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
   <div id="valLastUpdate" class="last-update-tag"></div>
 
   <div class="panel">
-    <h2>Em análise – Vale · de quem é a próxima ação?</h2>
-    <div class="sub">Documentos com status "Em análise - Vale" (exceto Inventário), separados por responsabilidade</div>
+    <h2>Pendência atual — de quem é a próxima ação?</h2>
+    <div class="sub">A partir da coluna "Validação" (pré-aprovação Assets), refinada por "Retorno real" / "Data atendimento comentários" quando a Vale já respondeu. Cobre todas as linhas, inclusive Inventário.</div>
+    <div class="kpi-row" id="valPendKpiRow" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Pendente — Tenax</div>
+        <div class="kpi-value" id="valPendTenaxCount">—</div>
+        <div class="kpi-sub">precisa agir para destravar</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🔵 Pendente — Vale</div>
+        <div class="kpi-value" id="valPendValeCount">—</div>
+        <div class="kpi-sub">aguardando retorno/validação da Vale</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">✅ Validado</div>
+        <div class="kpi-value" id="valPendValidadoCount">—</div>
+        <div class="kpi-sub">sem pendência</div>
+      </div>
+    </div>
     <div class="grid2" id="valAnaliseGrid">
       <div>
-        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🟠 Minha responsabilidade <span class="badge-soft" id="valMinhaCount">0</span></h3>
-        <div class="sub" style="margin-bottom:8px;">Falta preencher "Data atendimento comentários"</div>
+        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🟠 Pendente — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h3>
         <div class="table-wrap" style="max-height:340px;">
           <table>
-            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:110px;">Emissão real</th></tr></thead>
-            <tbody id="valMinhaBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:130px;">Situação</th></tr></thead>
+            <tbody id="valPendTenaxBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
           </table>
         </div>
       </div>
       <div>
-        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🔵 Responsabilidade Vale <span class="badge-ok" id="valValeCount">0</span></h3>
-        <div class="sub" style="margin-bottom:8px;">Comentários já atendidos, aguardando retorno da Vale</div>
+        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🔵 Pendente — Vale <span class="badge-ok" id="valPendValeCount2">0</span></h3>
         <div class="table-wrap" style="max-height:340px;">
           <table>
-            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:110px;">Atendimento</th></tr></thead>
-            <tbody id="valValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:130px;">Situação</th></tr></thead>
+            <tbody id="valPendValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
-    <div class="footer-note">Fonte: aba "Priorização Vale" da planilha de cronograma. Regra exclui itens do pilar Inventário.</div>
+    <div class="footer-note">Fonte: coluna "Validação" + "Retorno real" / "Data atendimento comentários" da aba "Priorização Vale".</div>
   </div>
 </div>
 </div>
@@ -2037,6 +2052,24 @@ function normalizePilar(escopo){
   return null;
 }
 
+// Deriva quem trava o próximo passo de um item a partir da Coluna W (Validação)
+// da planilha Priorização Vale, refinado pelo par Retorno real / Data atendimento
+// comentários quando a Vale já deu retorno. Retorna 'tenax' | 'vale' | null (sem pendência).
+function computePendencia(validacaoRaw, retornoReal, dataAtendimento){
+  const v = _strip(validacaoRaw);
+  let base = null;
+  if(!v) base = null;
+  else if(v.includes('nao validado')) base = 'vale';
+  else if(v.includes('assets')) base = 'tenax';
+  else if(v.includes('envio')) base = 'tenax';
+  else if(v.includes('analise') && v.includes('vale')) base = 'vale';
+  else if(v.includes('validado')) base = null;
+
+  if(retornoReal && !dataAtendimento) return 'tenax';
+  if(retornoReal && dataAtendimento) return 'vale';
+  return base;
+}
+
 // Localiza a aba de dados: Priorização Vale, Cronograma priorizado, ou similar.
 function findScheduleSheet(workbook){
   const N = workbook.SheetNames;
@@ -2106,25 +2139,30 @@ function parsePriorizacaoVale(workbook, area){
     const status = normalizeStatus(r['Status'], !!(planStart || planEnd));
 
     const validadoRaw = (r['Validação']!==null && r['Validação']!==undefined) ? r['Validação'] : r['Validado'];
-    const validado = (validadoRaw && validadoRaw!=='-') ? validadoRaw : (status!=='Concluído' ? 'Ag. Envio' : null);
-    const depValeRaw = r['Dependêcia Vale'];
-    const dep_vale = (depValeRaw && depValeRaw!=='-') ? depValeRaw : null;
-    const depTenaxRaw = r['Dependêcia Tenax'];
-    const dep_tenax = (depTenaxRaw && depTenaxRaw!=='-') ? depTenaxRaw : (status!=='Concluído' ? 'Pendente (Ag. Envio)' : null);
+    const validado = (validadoRaw && validadoRaw!=='-') ? String(validadoRaw).trim() : (status!=='Concluído' ? 'Ag. Envio' : null);
 
     // aba de Retorno de Validação: acompanha o ciclo de envio/resposta de
     // documentos com a Vale (fora do fluxo de medição financeira do QQP).
     const statusDocRaw = r['Status do documento'];
     const status_documento = (statusDocRaw && statusDocRaw!=='-') ? String(statusDocRaw).trim() : null;
+    const retorno_real = toISO(r['Retorno real']);
+    const data_atendimento = toISO(r['Data atendimento comentários']);
+
+    // Pendência (Coluna W "Validação"): o Assets é a plataforma interna de
+    // pré-aprovação da Tenax — cada estado da coluna aponta de quem é a vez de agir.
+    // "Retorno real"/"Data atendimento comentários" refinam esse estado quando a
+    // Vale já respondeu: sem atendimento da Tenax ainda pendura em nós; com os dois
+    // preenchidos, só falta a Vale validar.
+    const pendencia = computePendencia(validado, retorno_real, data_atendimento);
 
     recs.push({
       id: recs.length+1, pilar, sistema, ativo, floc, denom, n3: n3Nivel,
       plan_start: planStart || planEnd, plan_end: planEnd,
       real_start: realStart, real_end: realEnd, status,
-      dep_vale, dep_tenax, validado,
-      retorno_previsto: toISO(r['Retorno previsto']), retorno_real: toISO(r['Retorno real']),
+      validado, pendencia,
+      retorno_previsto: toISO(r['Retorno previsto']), retorno_real,
       emissao_real: toISO(r['Data de emissão real']),
-      data_atendimento: toISO(r['Data atendimento comentários']),
+      data_atendimento,
       status_documento
     });
   });
@@ -2965,14 +3003,11 @@ function renderTable(){
 }
 
 // ---------- aba Validação: retorno de documentos enviados à Vale ----------
-function _isEmAnaliseVale(status_documento){
-  const s = _strip(status_documento);
-  return s.includes('analise') && s.includes('vale');
-}
 function renderValidacao(){
   // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) —
   // usa a fonte combinada das duas áreas, e não apenas a área selecionada no momento.
-  const base = areaItems.britagem.concat(areaItems.energia).filter(i=>i.pilar!=='Inventário');
+  const allItems = areaItems.britagem.concat(areaItems.energia);
+  const base = allItems.filter(i=>i.pilar!=='Inventário');
   const todayISO = new Date().toISOString().slice(0,10);
 
   const enviados = base.filter(i=>i.emissao_real);
@@ -2984,14 +3019,19 @@ function renderValidacao(){
   document.getElementById('valKpiRespondidosSub').textContent = enviados.length ? `${respondidos.length} de ${enviados.length} enviados` : '"Retorno real" preenchido';
   document.getElementById('valKpiAtrasados').textContent = atrasados.length;
 
-  const emAnalise = base.filter(i=>_isEmAnaliseVale(i.status_documento));
-  const minha = emAnalise.filter(i=>!i.data_atendimento);
-  const vale = emAnalise.filter(i=>i.data_atendimento);
+  // Pendência (coluna Validação + Retorno real/Data atendimento) considera todas as
+  // linhas, inclusive Inventário — a regra "Pendente - Assets" só existe nesse pilar.
+  const pendTenax = allItems.filter(i=>i.pendencia==='tenax');
+  const pendVale = allItems.filter(i=>i.pendencia==='vale');
+  const validados = allItems.filter(i=>i.pendencia===null);
 
-  document.getElementById('valMinhaCount').textContent = minha.length;
-  document.getElementById('valValeCount').textContent = vale.length;
+  document.getElementById('valPendTenaxCount').textContent = pendTenax.length;
+  document.getElementById('valPendTenaxCount2').textContent = pendTenax.length;
+  document.getElementById('valPendValeCount').textContent = pendVale.length;
+  document.getElementById('valPendValeCount2').textContent = pendVale.length;
+  document.getElementById('valPendValidadoCount').textContent = validados.length;
 
-  function rowsHtml(list, dateField){
+  function rowsHtml(list){
     if(list.length===0) return '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento nesta situação.</td></tr>';
     return list.map(i=>`
       <tr>
@@ -3001,11 +3041,11 @@ function renderValidacao(){
           <div class="floc-main">${i.ativo}</div>
           <div class="floc-sub">${i.floc}${i.denom?' · '+i.denom:''}</div>
         </td>
-        <td>${fmtDate(i[dateField])}</td>
+        <td>${i.validado || '—'}</td>
       </tr>`).join('');
   }
-  document.getElementById('valMinhaBody').innerHTML = rowsHtml(minha, 'emissao_real');
-  document.getElementById('valValeBody').innerHTML = rowsHtml(vale, 'data_atendimento');
+  document.getElementById('valPendTenaxBody').innerHTML = rowsHtml(pendTenax);
+  document.getElementById('valPendValeBody').innerHTML = rowsHtml(pendVale);
 
   const lastUpd = document.getElementById('a_lastUpdate');
   const valUpd = document.getElementById('valLastUpdate');
