@@ -1164,6 +1164,13 @@ body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; col
       </div>
     </div>
 
+    <div class="tree-node">
+      <div class="tree-row" id="treeValidacao" data-page="page-validacao" title="Retorno de Validação (Vale)">
+        <span class="num">3</span>
+        <span class="label">Validação</span>
+      </div>
+    </div>
+
   </div>
 
   <div class="sidebar-partners">
@@ -1426,6 +1433,58 @@ body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; col
  <div class="gnt-hint">Clique nas setas ▸ para expandir/recolher. Passe o mouse sobre as barras para detalhes. A linha vermelha marca a data de hoje. 🔵 Concluído · 🟠 Em andamento · ⬜ Não iniciado</div>
 </div>
 <div class="gnt-tip" id="gntTip"></div>
+</div>
+
+<div id="page-validacao" class="page-content">
+<div class="container">
+  <div class="kpi-row" id="valKpiRow" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card">
+      <div class="kpi-label">Documentos enviados para Vale</div>
+      <div class="kpi-value" id="valKpiEnviados">—</div>
+      <div class="kpi-sub">"Data de emissão real" preenchida (exceto Inventário)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Documentos respondidos</div>
+      <div class="kpi-value" id="valKpiRespondidos">—</div>
+      <div class="kpi-sub" id="valKpiRespondidosSub">"Retorno real" preenchido</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Com resposta atrasada</div>
+      <div class="kpi-value" id="valKpiAtrasados">—</div>
+      <div class="kpi-sub">"Retorno previsto" já vencido, sem retorno real</div>
+    </div>
+  </div>
+
+  <div id="valLastUpdate" class="last-update-tag"></div>
+
+  <div class="panel">
+    <h2>Em análise – Vale · de quem é a próxima ação?</h2>
+    <div class="sub">Documentos com status "Em análise - Vale" (exceto Inventário), separados por responsabilidade</div>
+    <div class="grid2" id="valAnaliseGrid">
+      <div>
+        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🟠 Minha responsabilidade <span class="badge-soft" id="valMinhaCount">0</span></h3>
+        <div class="sub" style="margin-bottom:8px;">Falta preencher "Data atendimento comentários"</div>
+        <div class="table-wrap" style="max-height:340px;">
+          <table>
+            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:110px;">Emissão real</th></tr></thead>
+            <tbody id="valMinhaBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🔵 Responsabilidade Vale <span class="badge-ok" id="valValeCount">0</span></h3>
+        <div class="sub" style="margin-bottom:8px;">Comentários já atendidos, aguardando retorno da Vale</div>
+        <div class="table-wrap" style="max-height:340px;">
+          <table>
+            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:110px;">Atendimento</th></tr></thead>
+            <tbody id="valValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">Fonte: aba "Priorização Vale" da planilha de cronograma. Regra exclui itens do pilar Inventário.</div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -1720,7 +1779,7 @@ function parsePriorizacaoVale(workbook, area){
       if(!niveis3.includes(n3)) return;
     }
 
-    const pilar = normalizePilar(r['Escopo'] || r['Entregáveis']);
+    const pilar = normalizePilar(r['Pilar'] || r['Escopo'] || r['Entregáveis']);
     if(!pilar) return;
     // RCM não entra na contagem total nem nos gráficos — mesma regra para Britagem e Energia
     if(pilar === 'RCM') return;
@@ -1750,12 +1809,20 @@ function parsePriorizacaoVale(workbook, area){
     const depTenaxRaw = r['Dependêcia Tenax'];
     const dep_tenax = (depTenaxRaw && depTenaxRaw!=='-') ? depTenaxRaw : (status!=='Concluído' ? 'Pendente (Ag. Envio)' : null);
 
+    // aba de Retorno de Validação: acompanha o ciclo de envio/resposta de
+    // documentos com a Vale (fora do fluxo de medição financeira do QQP).
+    const statusDocRaw = r['Status do documento'];
+    const status_documento = (statusDocRaw && statusDocRaw!=='-') ? String(statusDocRaw).trim() : null;
+
     recs.push({
       id: recs.length+1, pilar, sistema, ativo, floc, denom, n3: n3Nivel,
       plan_start: planStart || planEnd, plan_end: planEnd,
       real_start: realStart, real_end: realEnd, status,
       dep_vale, dep_tenax, validado,
-      retorno_previsto: toISO(r['Retorno previsto']), retorno_real: toISO(r['Retorno real'])
+      retorno_previsto: toISO(r['Retorno previsto']), retorno_real: toISO(r['Retorno real']),
+      emissao_real: toISO(r['Data de emissão real']),
+      data_atendimento: toISO(r['Data atendimento comentários']),
+      status_documento
     });
   });
 
@@ -2594,6 +2661,55 @@ function renderTable(){
   `).join('');
 }
 
+// ---------- aba Validação: retorno de documentos enviados à Vale ----------
+function _isEmAnaliseVale(status_documento){
+  const s = _strip(status_documento);
+  return s.includes('analise') && s.includes('vale');
+}
+function renderValidacao(){
+  // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) —
+  // usa a fonte combinada das duas áreas, e não apenas a área selecionada no momento.
+  const base = areaItems.britagem.concat(areaItems.energia).filter(i=>i.pilar!=='Inventário');
+  const todayISO = new Date().toISOString().slice(0,10);
+
+  const enviados = base.filter(i=>i.emissao_real);
+  const respondidos = enviados.filter(i=>i.retorno_real);
+  const atrasados = enviados.filter(i=>!i.retorno_real && i.retorno_previsto && i.retorno_previsto < todayISO);
+
+  document.getElementById('valKpiEnviados').textContent = enviados.length;
+  document.getElementById('valKpiRespondidos').textContent = respondidos.length;
+  document.getElementById('valKpiRespondidosSub').textContent = enviados.length ? `${respondidos.length} de ${enviados.length} enviados` : '"Retorno real" preenchido';
+  document.getElementById('valKpiAtrasados').textContent = atrasados.length;
+
+  const emAnalise = base.filter(i=>_isEmAnaliseVale(i.status_documento));
+  const minha = emAnalise.filter(i=>!i.data_atendimento);
+  const vale = emAnalise.filter(i=>i.data_atendimento);
+
+  document.getElementById('valMinhaCount').textContent = minha.length;
+  document.getElementById('valValeCount').textContent = vale.length;
+
+  function rowsHtml(list, dateField){
+    if(list.length===0) return '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento nesta situação.</td></tr>';
+    return list.map(i=>`
+      <tr>
+        <td><span class="pilar-chip" style="background:${PILAR_COLOR_HEX[i.pilar]}22;color:${PILAR_COLOR_HEX[i.pilar]};">${i.pilar}</span></td>
+        <td>${i.sistema}</td>
+        <td>
+          <div class="floc-main">${i.ativo}</div>
+          <div class="floc-sub">${i.floc}${i.denom?' · '+i.denom:''}</div>
+        </td>
+        <td>${fmtDate(i[dateField])}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('valMinhaBody').innerHTML = rowsHtml(minha, 'emissao_real');
+  document.getElementById('valValeBody').innerHTML = rowsHtml(vale, 'data_atendimento');
+
+  const lastUpd = document.getElementById('a_lastUpdate');
+  const valUpd = document.getElementById('valLastUpdate');
+  if(valUpd) valUpd.textContent = lastUpd ? lastUpd.textContent : '';
+  if(valUpd) valUpd.className = lastUpd ? lastUpd.className : 'last-update-tag';
+}
+
 function showChartError(svgId, subId, err){
   console.error(err);
   const svg = document.getElementById(svgId);
@@ -2646,6 +2762,9 @@ function renderEmptyDashboard(){
 }
 
 function renderAll(){
+  // A aba Validação cruza os dados das duas áreas (Britagem III + Energia), então
+  // é renderizada sempre, mesmo quando a área selecionada no momento está vazia.
+  safe('renderValidacao', renderValidacao);
   if(items.length===0){ renderEmptyDashboard(); return; }
   safe('renderKPIs', renderKPIs);
   safe('renderFluxoBlocos', renderFluxoBlocos);
@@ -2657,6 +2776,7 @@ function renderAll(){
   safe('renderHeatmap', renderHeatmap);
   safe('populateFilters', populateFilters);
   safe('renderTable', renderTable);
+  safe('renderValidacao', renderValidacao);
 }
 
 ['a_searchInput','a_pilarFilter','a_sistemaFilter','a_statusFilter'].forEach(id=>{
@@ -3240,6 +3360,11 @@ document.getElementById('treeEnergia').addEventListener('click', function(){
 document.getElementById('treePlanejamentoGantt').addEventListener('click', function(){
   document.querySelectorAll('#treePlanejamentosChildren .tree-row').forEach(r=>r.classList.remove('active'));
   showPage('page-planejamento');
+});
+
+document.getElementById('treeValidacao').addEventListener('click', function(){
+  document.querySelectorAll('#treePlanejamentosChildren .tree-row').forEach(r=>r.classList.remove('active'));
+  showPage('page-validacao');
 });
 
 
