@@ -1061,6 +1061,123 @@ body.dark-mode .login-sub{ color:#9AABB8; }
 body.dark-mode .login-field{ color:#E6EDF3; }
 body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; color:#E6EDF3; }
 .auth-user-tag{ font-size:11px; color:var(--muted); margin-right:4px; white-space:nowrap; }
+
+/* ===================== Indicadores de Contrato (page-contrato) — prefixo ct- ===================== */
+#page-contrato .ct-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+@media (max-width:1100px){ #page-contrato .ct-kpi-row{grid-template-columns:repeat(2,1fr);} }
+#page-contrato .ct-upload-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+#page-contrato .ct-upload-btn{
+  background:var(--teal,#007E7A);color:#fff;border:none;border-radius:7px;
+  padding:8px 14px;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-weight:600;
+}
+#page-contrato .ct-upload-btn:hover{opacity:.9;}
+#page-contrato .ct-file-status{font-size:11.5px;color:var(--muted);}
+#page-contrato .ct-toggle{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+#page-contrato .ct-toggle button{border:none;background:var(--bg2);color:var(--muted);padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;}
+#page-contrato .ct-toggle button.active{background:var(--teal,#007E7A);color:#fff;}
+#page-contrato .ct-view{display:none;}
+#page-contrato .ct-view.active{display:block;}
+#page-contrato .ct-grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media (max-width:1100px){ #page-contrato .ct-grid2{grid-template-columns:1fr;} }
+#page-contrato .ct-cycle-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#page-contrato .ct-cycle-wrap select{min-width:200px;font-weight:600;}
+#page-contrato .ct-tag{display:inline-block;border-radius:14px;padding:4px 11px;font-size:11px;font-weight:600;white-space:nowrap;}
+#page-contrato .ct-tag-naoiniciado{background:#EEF0F3;color:#5F6B7A;}
+#page-contrato .ct-tag-inicial{background:#FDEEE2;color:#B45309;}
+#page-contrato .ct-tag-emandamento{background:#FBF0DC;color:var(--orange,#D97706);}
+#page-contrato .ct-tag-avancado{background:#E6EEFD;color:#2563EB;}
+#page-contrato .ct-tag-concluido{background:#E2F5EC;color:var(--green,#16A34A);}
+#page-contrato .ct-tag-risco{background:#FBE3E3;color:#DC2626;}
+#page-contrato .ct-tag-medido{background:#E2F5EC;color:var(--green,#16A34A);}
+#page-contrato .ct-tag-naomedido{background:#FDF1DC;color:#B45309;}
+#page-contrato .ct-tag-semlanc{background:#EEF0F3;color:#98A2B3;}
+#page-contrato .ct-tag-parcial{background:#E6EEFD;color:#2563EB;}
+#page-contrato .ct-bar-bg{height:9px;border-radius:4px;background:#EAEDF2;overflow:hidden;position:relative;}
+body.dark-mode #page-contrato .ct-bar-bg{background:#243140;}
+#page-contrato .ct-bar-fill{height:100%;border-radius:4px;}
+#page-contrato .ct-bar-bg.ct-stacked{display:flex;}
+#page-contrato .ct-bar-bg.ct-stacked .ct-seg{height:100%;}
+#page-contrato .ct-item-row{margin-bottom:12px;}
+#page-contrato .ct-item-row:last-child{margin-bottom:0;}
+#page-contrato .ct-item-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;gap:10px;}
+#page-contrato .ct-item-name{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#page-contrato .ct-item-val{color:var(--muted);white-space:nowrap;font-size:11.5px;}
+#page-contrato .ct-dist-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px;}
+#page-contrato .ct-dist-label{width:150px;flex:0 0 150px;}
+#page-contrato .ct-dist-count{width:26px;flex:0 0 26px;text-align:right;color:var(--muted);font-weight:600;}
+#page-contrato .ct-cash-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+@media (max-width:900px){ #page-contrato .ct-cash-stats{grid-template-columns:1fr;} }
+#page-contrato .ct-cash-stat{padding:14px 16px;border-radius:10px;border:1px solid var(--border);}
+#page-contrato .ct-cash-stat.medido{background:#F1FBF6;border-color:#C9F2DA;}
+#page-contrato .ct-cash-stat.naomedido{background:#FEF7EC;border-color:#F6E0BB;}
+#page-contrato .ct-cash-stat.meta{background:#EEF2FF;border-color:#DCE3FB;}
+body.dark-mode #page-contrato .ct-cash-stat.medido{background:#12281C;border-color:#1E4D33;}
+body.dark-mode #page-contrato .ct-cash-stat.naomedido{background:#2B2113;border-color:#57431F;}
+body.dark-mode #page-contrato .ct-cash-stat.meta{background:#131F35;border-color:#243B63;}
+#page-contrato .ct-cash-stat .lbl{font-size:11.5px;color:var(--muted);}
+#page-contrato .ct-cash-stat .val{font-size:20px;font-weight:700;margin-top:6px;}
+#page-contrato .ct-cash-stat.medido .val{color:var(--green,#16A34A);}
+#page-contrato .ct-cash-stat.naomedido .val{color:#B45309;}
+#page-contrato .ct-cash-stat.meta .val{color:#2563EB;}
+#page-contrato .ct-cash-stat .sub{font-size:11px;color:var(--muted2);margin-top:2px;}
+#page-contrato .ct-cash-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;}
+#page-contrato .ct-cash-label{width:80px;flex:0 0 80px;font-weight:600;}
+#page-contrato .ct-cash-track{flex:1;}
+#page-contrato .ct-cash-val{width:150px;flex:0 0 150px;text-align:right;color:var(--muted);font-size:11px;}
+#page-contrato .ct-glossary dt{font-weight:700;font-size:12.5px;color:var(--text);margin-top:12px;}
+#page-contrato .ct-glossary dt:first-child{margin-top:0;}
+#page-contrato .ct-glossary dd{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.6;}
+#page-contrato details.panel summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--text);list-style:none;}
+#page-contrato details.panel summary::-webkit-details-marker{display:none;}
+#page-contrato details.panel summary::before{content:'▸ ';color:var(--teal,#007E7A);}
+#page-contrato details.panel[open] summary::before{content:'▾ ';}
+#page-contrato .ct-scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media (max-width:900px){ #page-contrato .ct-scenario-grid{grid-template-columns:1fr;} }
+#page-contrato .ct-scenario{border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+#page-contrato .ct-scenario.otimista{background:#F1FBF6;border-color:#C9F2DA;}
+#page-contrato .ct-scenario.medio{background:#EEF2FF;border-color:#DCE3FB;}
+#page-contrato .ct-scenario.pessimista{background:#FDEEEE;border-color:#F6C9C9;}
+body.dark-mode #page-contrato .ct-scenario.otimista{background:#12281C;border-color:#1E4D33;}
+body.dark-mode #page-contrato .ct-scenario.medio{background:#131F35;border-color:#243B63;}
+body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-color:#5A2727;}
+#page-contrato .ct-scenario .lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+#page-contrato .ct-scenario .ritmo{font-size:11px;color:var(--muted2);margin-top:4px;}
+#page-contrato .ct-scenario .meses{font-size:22px;font-weight:700;margin-top:10px;color:var(--text);}
+#page-contrato .ct-scenario .data{font-size:12.5px;color:var(--muted);margin-top:2px;}
+#page-contrato .ct-pareto-detail-title{margin-top:22px;margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
+#page-contrato .ct-pareto-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px;}
+#page-contrato .ct-pareto-row.vital .ct-pareto-label{font-weight:700;color:var(--text);}
+#page-contrato .ct-pareto-label{width:220px;flex:0 0 220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);}
+#page-contrato .ct-pareto-track{flex:1;}
+#page-contrato .ct-pareto-val{width:190px;flex:0 0 190px;text-align:right;color:var(--muted);font-size:11px;white-space:nowrap;}
+#page-contrato .ct-whatif-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media (max-width:900px){ #page-contrato .ct-whatif-grid{grid-template-columns:1fr;} }
+#page-contrato .ct-wi-field{margin-bottom:14px;}
+#page-contrato .ct-wi-field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+#page-contrato .ct-wi-field input{width:100%;box-sizing:border-box;padding:9px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);}
+#page-contrato .ct-wi-field .hint{font-size:10.5px;color:var(--muted2);margin-top:3px;}
+#page-contrato .ct-wi-results{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+#page-contrato .ct-wi-results .row{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border);gap:12px;}
+#page-contrato .ct-wi-results .row:last-child{border-bottom:none;}
+#page-contrato .ct-wi-results .row .v{font-weight:700;color:var(--text);text-align:right;}
+#page-contrato .ct-wi-results .row .v.warn{color:#DC2626;}
+#page-contrato .ct-wi-results .row .v.ok{color:var(--green,#16A34A);}
+#page-contrato .ct-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;}
+#page-contrato .ct-contract-note{font-size:11px;color:var(--muted2);margin-top:10px;line-height:1.6;}
+#page-contrato .ct-qty-row{display:grid;grid-template-columns:1.4fr 1.6fr 1fr 1.4fr;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+#page-contrato .ct-qty-row:last-child{border-bottom:none;}
+@media (max-width:900px){ #page-contrato .ct-qty-row{grid-template-columns:1fr;gap:8px;} }
+#page-contrato .ct-qty-name{font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;}
+#page-contrato .ct-qty-stats{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted);}
+#page-contrato .ct-qty-input-wrap label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:4px;}
+#page-contrato .ct-qty-input{width:100%;box-sizing:border-box;padding:7px 9px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;font-size:12.5px;color:var(--text);}
+#page-contrato .ct-qty-result{font-size:12px;font-weight:600;color:var(--text);}
+#page-contrato .ct-qty-result.ok{color:var(--green,#16A34A);}
+#page-contrato .ct-qty-result.warn{color:#DC2626;}
+#page-contrato .ct-qty-row.ct-qty-total{border-top:2px solid var(--text);border-bottom:none;margin-top:4px;padding-top:14px;}
+#page-contrato .ct-qty-row.ct-qty-total .ct-qty-name{font-weight:700;font-size:13.5px;}
+#page-contrato .ct-qty-row.ct-qty-total .ct-qty-result{font-size:15px;font-weight:700;color:var(--teal,#007E7A);}
+
 </style>
 </head>
 <body>
@@ -1168,6 +1285,13 @@ body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; col
       <div class="tree-row" id="treeValidacao" data-page="page-validacao" title="Retorno de Validação (Vale)">
         <span class="num">3</span>
         <span class="label">Validação</span>
+      </div>
+    </div>
+
+    <div class="tree-node">
+      <div class="tree-row" id="treeContrato" data-page="page-contrato" title="Indicadores de Contrato — Estratégia de Ativos (planejado x realizado por medição)">
+        <span class="num">4</span>
+        <span class="label">Contrato</span>
       </div>
     </div>
 
@@ -1484,6 +1608,185 @@ body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; col
     </div>
     <div class="footer-note">Fonte: aba "Priorização Vale" da planilha de cronograma. Regra exclui itens do pilar Inventário.</div>
   </div>
+</div>
+</div>
+
+<div id="page-contrato" class="page-content">
+<div class="container">
+
+  <div class="panel">
+    <div class="ct-upload-bar">
+      <label class="ct-upload-btn" for="ctFileInput">📊 Carregar planilha (Planejamento Orçamentário)
+        <input type="file" id="ctFileInput" accept=".xlsx,.xls" hidden>
+      </label>
+      <span class="ct-file-status" id="ctFileStatus">nenhuma planilha carregada</span>
+      <span style="margin-left:auto;"></span>
+      <div class="ct-toggle">
+        <button id="ctTabInd" class="active" type="button">Indicadores</button>
+        <button id="ctTabSim" type="button">Simulação</button>
+      </div>
+    </div>
+    <div class="ct-cycle-wrap">
+      <label for="ctCycleSelect" style="font-size:12.5px;font-weight:600;color:var(--muted);">Ciclo de medição:</label>
+      <select id="ctCycleSelect"></select>
+      <span class="row-count" id="ctRitmoInfo"></span>
+    </div>
+  </div>
+
+  <div id="ctViewInd" class="ct-view active">
+
+    <div class="ct-kpi-row" id="ctKpiRow"></div>
+
+    <details class="panel">
+      <summary>O que significa cada indicador — conforme a Especificação Técnica do contrato</summary>
+      <dl class="ct-glossary" style="margin-top:14px;">
+        <dt>Ciclo de medição (ET, item 11)</dt>
+        <dd>Cada medição abrange o período do dia 21 do mês anterior ao dia 20 do mês corrente. O Boletim de Medição (BM) é emitido entre os dias 21 e 25 no SGC, e a Nota Fiscal entre os dias 1 e 10 do mês seguinte (cadastro no portal até o dia 15). O seletor de ciclo acima corresponde a esses períodos.</dd>
+        <dt>Valor Previsto Total do Contrato (QQP)</dt>
+        <dd>Soma de quantidade × preço unitário de cada linha do Quadro de Quantidades e Preços, contada uma única vez — teto de referência do contrato inteiro. <strong>Atenção (ET, item 11):</strong> as quantidades do QQP são estimadas; a Vale pode executá-las parcialmente, totalmente ou em maior quantidade, e pode excluir itens, sem direito a reivindicação.</dd>
+        <dt>Executado Acumulado</dt>
+        <dd>Soma de tudo o que foi realizado (Realizado no Mês × preço unitário) desde o início do contrato até o ciclo selecionado.</dd>
+        <dt>Medido (Caixa) — aprovado pela fiscalização</dt>
+        <dd>Conforme a ET (item 11), <strong>só é faturável o serviço verificado e aceito pela fiscalização da Vale</strong>; relatórios não aprovados não geram medição. "Medido" é, portanto, o valor que passou pela aprovação e compõe o Relatório de Faturamento — é o que efetivamente vira caixa.</dd>
+        <dt>Não Medido (Pendente)</dt>
+        <dd>Realizado pela contratada, mas ainda não aprovado/medido pela fiscalização no ciclo — não é faturável ainda. Acompanhar esse valor evita surpresa de fluxo de caixa e aponta onde cobrar validação.</dd>
+        <dt>Prazo Contratual (ET, item 4)</dt>
+        <dd>Vigência de 1095 dias (incluindo 60 de mobilização) contados da assinatura. O painel compara o % do prazo já decorrido com o % de execução financeira — se o prazo corre mais rápido que a execução, é sinal de risco de não consumir o contrato dentro da vigência.</dd>
+        <dt>Pilares de medição (ET, item 6)</dt>
+        <dd>A medição é realizada conforme entrega e aprovação dos pilares: <strong>Taxonomia, Equipamentos, Lista BOM e Estratégia de Ativos (RCM/RAM)</strong> — que correspondem às linhas da planilha QQP acompanhadas aqui.</dd>
+        <dt>SLA (ET, item 11)</dt>
+        <dd>A partir da 2ª medição a contratada é avaliada mensalmente (na 1ª o SLA vale 1,0). Desempenho abaixo de 80% exige Plano de Ação em até 3 dias úteis e pode gerar multa/rescisão. A penalidade incide sobre o valor da medição <em>excluindo</em> Despesas Reembolsáveis.</dd>
+        <dt>Despesas Reembolsáveis (ET, item 12)</dt>
+        <dd>Item à parte do QQP: reembolso via Nota de Débito com comprovantes, sem retenção de tributos, usado a exclusivo critério da Vale — por isso pode ter execução baixa sem indicar problema.</dd>
+        <dt>Status dos itens</dt>
+        <dd>Calculado sobre o executado acumulado ÷ previsto do item: Não Iniciado (0%), Inicial (&lt;30%), Em Andamento (30–70%), Avançado (70–100%), Concluído (≥100%) e <strong>Acima do Previsto</strong> (executado ultrapassou o valor da linha do QQP — risco de estouro; requer renegociação ou realocação).</dd>
+      </dl>
+    </details>
+
+    <div class="panel">
+      <h2>Situação do Ciclo Selecionado — Medido x Meta</h2>
+      <div class="sub" id="ctCashSub">Visão de caixa: aprovado pela fiscalização Vale, comparado à meta do período</div>
+      <div class="ct-cash-stats">
+        <div class="ct-cash-stat medido">
+          <div class="lbl">Medido (aprovado fiscalização → faturável)</div>
+          <div class="val" id="ctCashMedVal">—</div>
+          <div class="sub" id="ctCashMedSub"></div>
+        </div>
+        <div class="ct-cash-stat meta">
+          <div class="lbl" id="ctCashMetaLbl">Restante para a meta do período</div>
+          <div class="val" id="ctCashMetaVal">—</div>
+          <div class="sub" id="ctCashMetaSub"></div>
+        </div>
+      </div>
+      <div class="ct-bar-bg ct-stacked" id="ctCashBar" style="height:12px;"></div>
+    </div>
+
+    <div class="ct-grid2">
+      <div class="panel">
+        <h2>Evolução da % Execução Acumulada por Ciclo</h2>
+        <div class="sub" id="ctTrendSub">Carregue a planilha para ver a evolução entre ciclos.</div>
+        <div class="legend-row" id="ctTrendLegend"></div>
+        <svg id="ctTrendSvg" width="100%" viewBox="0 0 900 320" style="overflow:visible;"></svg>
+      </div>
+      <div class="panel">
+        <h2>Medido x Meta por Ciclo</h2>
+        <div class="sub">Quanto foi medido (aprovado) em cada ciclo, comparado à meta mensal de R$ 350.000</div>
+        <div id="ctCashByCycle"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Previsto x Executado Acumulado por Item (QQP)</h2>
+      <div class="sub">Barra cheia = valor da linha no QQP · preenchimento = executado acumulado · ordenado dos itens mais esperados aos menos esperados</div>
+      <div id="ctItemBars"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Realizado do Mês por Item (Meta Geral)</h2>
+      <div class="sub" id="ctMonthlyGoalSub">Meta mensal geral: R$ 350.000</div>
+      <div id="ctItemBarsMonthly"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Resumo por Item — detalhes e filtros</h2>
+      <div class="sub">"No Período" = realizado dentro da seleção (ciclo, semestre ou contrato inteiro) · "Medição" = status de aprovação pela fiscalização (Parcial = parte medida, parte pendente)</div>
+      <div class="control-toolbar">
+        <input type="text" id="ctSearchInput" placeholder="Buscar por descrição do item...">
+        <select id="ctMedicaoFilter">
+          <option value="">Status de medição</option>
+          <option value="Medido">Medido</option>
+          <option value="Não medido">Não medido</option>
+        </select>
+        <select id="ctCycleFilterTable" title="Filtrar por ciclo"></select>
+        <span class="row-count" id="ctRowCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Item</th><th>Unid</th><th style="text-align:right;">Valor Previsto (QQP)</th>
+            <th style="text-align:right;">Executado Acum.</th><th style="text-align:right;">% Acum.</th>
+            <th style="text-align:right;">No Período</th><th>Medição</th>
+          </tr></thead>
+          <tbody id="ctItemTableBody"></tbody>
+        </table>
+      </div>
+      <div class="ct-contract-note">Fonte: Planejamento Orçamentário.xlsx (aba VALORES - CONTRATO) · Critérios conforme Especificação Técnica "Estratégia de Ativos" (Vale, rev. mai/2025), itens 4, 6, 11 e 12. Ao carregar uma planilha mais nova, ciclos existentes são atualizados e novos são adicionados ao histórico salvo neste navegador.<br><strong>Hospedagem (Hostinger):</strong> suba o arquivo "Planejamento Orçamentário.xlsx" na mesma pasta do index.html — o painel o carrega automaticamente ao abrir a página (sem precisar do botão de upload). Para atualizar os dados do mês, basta substituir o .xlsx no servidor.</div>
+    </div>
+
+  </div>
+
+  <div id="ctViewSim" class="ct-view">
+
+    <div class="panel">
+      <h2>Planejamento Mensal por Entregável (quantidade de linhas)</h2>
+      <div class="sub">Para cada entregável: linhas totais do QQP, quantas já foram executadas e um ritmo mensal (linhas/mês) que você pode ajustar — pré-preenchido com a média histórica de cada item. Mostra em quantos meses o saldo de linhas desse entregável se esgota, no ritmo informado.</div>
+      <div id="ctQtyPlanner"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Projeção de Conclusão do Saldo (faixa otimista / média / pessimista)</h2>
+      <div class="sub" id="ctScenarioSub">Extrapolação simples do ritmo mensal já observado — não é compromisso contratual: as quantidades do QQP são estimadas e a Vale pode alterá-las (ET, item 11).</div>
+      <div class="ct-scenario-grid" id="ctScenarioCards"></div>
+      <div class="ct-contract-note" id="ctPrazoNote"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Onde focar — concentração do saldo por item (Pareto)</h2>
+      <div class="sub">Curva 80/20 completa: barras = saldo restante por item (eixo esquerdo); linha = % acumulado (eixo direito), com a marca dos 80%. Como a medição depende de entrega e aprovação por pilar (ET, item 6), priorizar os itens destacados é o caminho mais curto para acelerar faturamento.</div>
+      <div class="legend-row" id="ctParetoLegend" style="margin-bottom:8px;"></div>
+      <svg id="ctParetoSvg" width="100%" viewBox="0 0 900 380" style="overflow:visible;"></svg>
+      <div class="ct-pareto-detail-title">Detalhe por item</div>
+      <div id="ctParetoList"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Calculadora "E se" — teste seus próprios cenários</h2>
+      <div class="sub">Ajuste as premissas e veja o efeito no prazo — a conta é refeita ao vivo, sem modelo estatístico.</div>
+      <div class="ct-whatif-grid">
+        <div>
+          <div class="ct-wi-field">
+            <label for="ctWiRitmo">Ritmo mensal hipotético (R$)</label>
+            <input type="number" id="ctWiRitmo" step="1000">
+            <div class="hint">Quanto pretende executar/medir por mês daqui pra frente. Vem preenchido com o ritmo médio atual.</div>
+          </div>
+          <div class="ct-wi-field">
+            <label for="ctWiReajuste">Reajuste esperado no saldo remanescente (%)</label>
+            <input type="number" id="ctWiReajuste" step="0.5" value="0">
+            <div class="hint">Use se espera repactuação/reajuste de preços sobre o que falta executar.</div>
+          </div>
+          <div class="ct-wi-field">
+            <label for="ctWiPrazo">Prazo alvo desejado (meses) — opcional</label>
+            <input type="number" id="ctWiPrazo" step="1" placeholder="ex: 12">
+            <div class="hint">Se preenchido, calculamos o ritmo mensal necessário para terminar nesse prazo.</div>
+          </div>
+        </div>
+        <div class="ct-wi-results" id="ctWiResults"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
 </div>
 </div>
 
@@ -4008,5 +4311,951 @@ PlanningGantt.init();
 </div>
 
 
+
+<script>
+// ===================== Indicadores de Contrato (page-contrato) =====================
+// Módulo isolado (IIFE) — não compartilha estado com o AssetDash/Gantt.
+const ContratoIndicadores = (function(){
+
+const STATUS_COLORS = {
+  'Concluído': '#16A34A', 'Avançado': '#2563EB', 'Em Andamento': '#D97706',
+  'Inicial': '#B45309', 'Não Iniciado': '#98A2B3', 'Acima do Previsto': '#DC2626',
+};
+const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const HISTORY_KEY = 'indicadoresContratoHistoryV2';
+const MEDIDO_COLOR = '#16A34A';
+const NAOMEDIDO_COLOR = '#D97706';
+const PRAZO_CONTRATO_DIAS = 1095; // ET item 4: vigência 1095 dias (incl. 60 de mobilização)
+const META_MENSAL = 350000; // meta de execução financeira por mês, combinada entre todos os itens
+
+// Classificação de prioridade dos itens (do mais ao menos esperado). Itens fora
+// desta lista caem no grupo "demais linhas menos esperadas", ordenados por valor previsto.
+const PRIORITY_ORDER_RAW = [
+  'ESTRATEGIA DE ATIVOS',
+  'Estratégia de Ativos (RCM)',
+  'LISTA BOM',
+  'TAXONOMIA',
+  'Mobilização individual de equipe (Não contempla reposição de efetivo)',
+  'Despesas reembolsáveis',
+];
+function _normDesc(s){
+  return String(s||'').normalize('NFD').replace(new RegExp('[̀-ͯ]','g'),'').toLowerCase().trim();
+}
+const PRIORITY_ORDER = PRIORITY_ORDER_RAW.map(_normDesc);
+function priorityRank(desc){
+  const idx = PRIORITY_ORDER.indexOf(_normDesc(desc));
+  return idx === -1 ? PRIORITY_ORDER.length : idx;
+}
+function sortByPriority(arr){
+  return arr.slice().sort((a,b)=> priorityRank(a.desc)-priorityRank(b.desc) || b.vp-a.vp);
+}
+
+let itemMeta = {};
+let cycles = [];
+let cycleRowsByKey = {};
+// selection: 'all' | 'sem:ANO:1|2' | 'cyc:<monthKey>'
+let selection = null;
+// ritmo mensal (linhas/mês) digitado pelo usuário no planejador, por item — mantém o
+// valor ao trocar de ciclo/aba na mesma sessão (não é salvo entre sessões).
+let qtyPlannerInputs = {};
+
+const fmtCur = v => (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL', minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtPct = v => ((v||0)*100).toFixed(1).replace('.', ',') + '%';
+const $ = id => document.getElementById(id);
+
+function computeStatus(valorPrevisto, totalExecutado){
+  if (totalExecutado > valorPrevisto && valorPrevisto > 0) return 'Acima do Previsto';
+  if (totalExecutado <= 0) return 'Não Iniciado';
+  const pct = valorPrevisto > 0 ? totalExecutado / valorPrevisto : 0;
+  if (pct >= 1) return 'Concluído';
+  if (pct >= 0.7) return 'Avançado';
+  if (pct >= 0.3) return 'Em Andamento';
+  return 'Inicial';
+}
+function monthKey(date){ return date.getFullYear()*12 + date.getMonth(); }
+function formatCicloLabel(date){ return MESES_PT[date.getMonth()] + '/' + date.getFullYear(); }
+// ciclo (chave + rótulo) em que a data de hoje cai, seguindo a mesma regra dos
+// ciclos de medição (21 do mês anterior a 20 do mês corrente — ET, item 11).
+function currentCycleInfo(){
+  const hoje = new Date();
+  let y = hoje.getFullYear(), m = hoje.getMonth();
+  if (hoje.getDate() >= 21){ m += 1; if (m>11){ m=0; y+=1; } }
+  const ref = new Date(y, m, 20);
+  return { key: monthKey(ref), label: formatCicloLabel(ref) };
+}
+function normStatusMedicao(raw){
+  const s = String(raw||'').trim().toLowerCase();
+  return (s.includes('não') || s.includes('nao')) ? 'Não medido' : (s ? 'Medido' : 'Não medido');
+}
+
+function parseValoresContrato(wb){
+  const sheetName = wb.SheetNames.find(n => n.trim().toUpperCase().includes('VALORES')) || wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+  if (data.length < 3) return null;
+  const meta = {};
+  const cyclesMap = new Map();
+  for (let i=2; i<data.length; i++){
+    const r = data[i];
+    if (!r) continue;
+    const desc = r[2];
+    if (desc===null || desc==='') continue;
+    const descKey = String(desc).trim();
+    const qtd = Number(r[4]) || 0;
+    const preco = Number(r[5]) || 0;
+    if (!meta[descKey]) meta[descKey] = {unid: r[3]||'', valorPrevisto: qtd*preco, qtdTotal: qtd, preco};
+    const realMesQtd = Number(r[8]) || 0;
+    const realizadoFin = realMesQtd * preco;
+    const statusMedicao = normStatusMedicao(r[17]);
+    const periodoFim = r[15] instanceof Date ? r[15] : null;
+    const dataEmissao = r[16] instanceof Date ? r[16] : null;
+    const refDate = periodoFim || dataEmissao || new Date();
+    const cicloKey = monthKey(refDate);
+    if (!cyclesMap.has(cicloKey)) cyclesMap.set(cicloKey, {ciclo: formatCicloLabel(refDate), rows:[]});
+    cyclesMap.get(cicloKey).rows.push({desc: descKey, realizadoFin, realMesQtd, statusMedicao});
+  }
+  if (!Object.keys(meta).length) return null;
+  return {itemMeta: meta, cycles: cyclesMap};
+}
+
+function loadHistory(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    return raw || {itemMeta:{}, cycles:{}};
+  } catch(e){ return {itemMeta:{}, cycles:{}}; }
+}
+function saveHistory(hist){ localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); }
+function rebuildFromHistory(hist){
+  itemMeta = hist.itemMeta || {};
+  const keys = Object.keys(hist.cycles||{}).map(Number).sort((a,b)=>a-b);
+  cycles = keys.map(k => ({key:k, ciclo: hist.cycles[k].ciclo}));
+  cycleRowsByKey = {};
+  keys.forEach(k => { cycleRowsByKey[k] = hist.cycles[k].rows; });
+}
+
+function cumulativeExecutedByItem(uptoKey){
+  const result = {};
+  Object.keys(itemMeta).forEach(d=>{ result[d]=0; });
+  cycles.filter(c=>c.key<=uptoKey).forEach(c=>{
+    (cycleRowsByKey[c.key]||[]).forEach(row=>{
+      result[row.desc] = (result[row.desc]||0) + row.realizadoFin;
+    });
+  });
+  return result;
+}
+// quantidade (linhas/unidades) executada por item, não em R$ — usada no
+// planejador mensal de quantidade (aba Simulação).
+function cumulativeQtdByItem(uptoKey){
+  const result = {};
+  Object.keys(itemMeta).forEach(d=>{ result[d]=0; });
+  cycles.filter(c=>c.key<=uptoKey).forEach(c=>{
+    (cycleRowsByKey[c.key]||[]).forEach(row=>{
+      result[row.desc] = (result[row.desc]||0) + (row.realMesQtd||0);
+    });
+  });
+  return result;
+}
+function avgMonthlyQtdForItem(desc){
+  if (!cycles.length) return 0;
+  let total = 0;
+  cycles.forEach(c=>{
+    const row = (cycleRowsByKey[c.key]||[]).find(r=>r.desc===desc);
+    if (row) total += (row.realMesQtd||0);
+  });
+  return total / cycles.length;
+}
+function thisCycleRowsByDesc(key){
+  const out = {};
+  (cycleRowsByKey[key]||[]).forEach(r=>{ out[r.desc] = r; });
+  return out;
+}
+function cashSplitForCycle(key){
+  let medido=0, naoMedido=0;
+  (cycleRowsByKey[key]||[]).forEach(r=>{
+    if (r.statusMedicao==='Medido') medido += r.realizadoFin; else naoMedido += r.realizadoFin;
+  });
+  return {medido, naoMedido};
+}
+function cashSplitCumulative(uptoKey){
+  let medido=0, naoMedido=0;
+  cycles.filter(c=>c.key<=uptoKey).forEach(c=>{
+    const s = cashSplitForCycle(c.key);
+    medido += s.medido; naoMedido += s.naoMedido;
+  });
+  return {medido, naoMedido};
+}
+function cicloLabel(key){
+  const c = cycles.find(x=>x.key===key);
+  return c ? c.ciclo : '';
+}
+// ---- seleção agregada (todos / semestre / ciclo único) ----
+function selKeys(){
+  // "Todos os ciclos (contrato inteiro)" = todo o histórico até hoje — não
+  // conta ciclos futuros (mesma regra de horizonte usada nos gráficos).
+  if (selection==='all') return cycles.filter(c=>c.key<=currentCycleInfo().key).map(c=>c.key);
+  const s = String(selection||'');
+  if (s.startsWith('sem:')){
+    const parts = s.split(':');
+    const y = Number(parts[1]), h = Number(parts[2]);
+    return cycles.filter(c=>{
+      const cy = Math.floor(c.key/12), half = (c.key%12) < 6 ? 1 : 2;
+      return cy===y && half===h;
+    }).map(c=>c.key);
+  }
+  if (s.startsWith('cyc:')){
+    const k = Number(s.slice(4));
+    return cycles.some(c=>c.key===k) ? [k] : [];
+  }
+  return [];
+}
+function selUptoKey(){
+  const ks = selKeys();
+  if (ks.length) return Math.max(...ks);
+  return cycles.length ? cycles[cycles.length-1].key : null;
+}
+function selLabel(){
+  if (selection==='all') return 'todo o contrato';
+  const s = String(selection||'');
+  if (s.startsWith('sem:')){
+    const parts = s.split(':');
+    return `${parts[2]}º semestre/${parts[1]}`;
+  }
+  if (s.startsWith('cyc:')) return cicloLabel(Number(s.slice(4)));
+  return '';
+}
+function isValidSelection(){
+  if (selection==='all') return cycles.length>0;
+  return selKeys().length>0;
+}
+function cashSplitForSelection(){
+  let medido=0, naoMedido=0;
+  selKeys().forEach(k=>{
+    const s = cashSplitForCycle(k);
+    medido += s.medido; naoMedido += s.naoMedido;
+  });
+  return {medido, naoMedido};
+}
+function selectionRowsByDesc(){
+  const out = {};
+  selKeys().forEach(k=>{
+    (cycleRowsByKey[k]||[]).forEach(r=>{
+      if (!out[r.desc]) out[r.desc] = {realizadoFin:0, medVal:0, naoVal:0, hasMed:false, hasNao:false};
+      const o = out[r.desc];
+      o.realizadoFin += r.realizadoFin;
+      if (r.statusMedicao==='Medido'){ o.medVal += r.realizadoFin; o.hasMed = true; }
+      else { o.naoVal += r.realizadoFin; o.hasNao = true; }
+    });
+  });
+  return out;
+}
+// ET item 11: 1ª medição conta da assinatura até o dia 20 do mesmo mês →
+// início do contrato ≈ dia 21 do mês anterior ao 1º ciclo carregado.
+function contractDates(){
+  if (!cycles.length) return null;
+  const firstKey = cycles[0].key;
+  const y = Math.floor(firstKey/12), m = firstKey%12;
+  const start = new Date(y, m-1, 21);
+  const end = new Date(start);
+  end.setDate(end.getDate() + PRAZO_CONTRATO_DIAS);
+  return {start, end};
+}
+function globalTotalsAtLatest(){
+  const descs = Object.keys(itemMeta);
+  const latestKey = cycles.length ? cycles[cycles.length-1].key : null;
+  const valorPrevistoTotal = descs.reduce((s,d)=>s+itemMeta[d].valorPrevisto,0);
+  const cum = latestKey!==null ? cumulativeExecutedByItem(latestKey) : {};
+  const executadoTotal = descs.reduce((s,d)=>s+(cum[d]||0),0);
+  return {valorPrevistoTotal, executadoTotal, saldo: valorPrevistoTotal-executadoTotal, cum};
+}
+function ritmoStats(){
+  const perCycle = cycles.map(c=>{
+    const s = cashSplitForCycle(c.key);
+    return s.medido + s.naoMedido;
+  });
+  if (!perCycle.length) return {avg:0, min:0, max:0};
+  const avg = perCycle.reduce((a,b)=>a+b,0)/perCycle.length;
+  return {avg, min:Math.min(...perCycle), max:Math.max(...perCycle)};
+}
+function addMonths(date, months){
+  const d = new Date(date);
+  const whole = Math.floor(months);
+  d.setMonth(d.getMonth()+whole);
+  d.setDate(d.getDate()+Math.round((months-whole)*30));
+  return d;
+}
+function fmtDateBR(d){ return d.toLocaleDateString('pt-BR', {month:'short', year:'numeric'}); }
+function fmtDateFullBR(d){ return d.toLocaleDateString('pt-BR'); }
+
+function renderKPIs(){
+  const descs = Object.keys(itemMeta);
+  const hasData = descs.length>0;
+  let valorPrevistoTotal=0, executadoTotal=0;
+  if (hasData){
+    const cum = cumulativeExecutedByItem(selUptoKey());
+    descs.forEach(d=>{
+      valorPrevistoTotal += itemMeta[d].valorPrevisto;
+      executadoTotal += (cum[d]||0);
+    });
+  }
+  const saldo = valorPrevistoTotal - executadoTotal;
+  const pct = valorPrevistoTotal>0 ? executadoTotal/valorPrevistoTotal : 0;
+
+  const cards = !hasData ? [
+    {label:'Valor Total do Contrato', value:'—', sub:'aguardando planilha'},
+    {label:'Executado Acumulado', value:'—', sub:'aguardando planilha'},
+    {label:'% Execução Acumulada', value:'—', sub:'aguardando planilha'},
+    {label:'Saldo a Executar', value:'—', sub:'aguardando planilha'},
+  ] : [
+    {label:'Valor Total do Contrato', value:fmtCur(valorPrevistoTotal), sub:descs.length+' itens · vigência total'},
+    {label:'Executado Acumulado', value:fmtCur(executadoTotal), sub:'até '+selLabel()},
+    {label:'% Execução Acumulada', value:fmtPct(pct), sub:'sobre o previsto total'},
+    {label:'Saldo a Executar', value:fmtCur(saldo), sub:'restante do contrato'},
+  ];
+  $('ctKpiRow').innerHTML = cards.map(c=>`
+    <div class="kpi-card" title="${c.label}">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+function renderCycleSelect(){
+  const sel = $('ctCycleSelect');
+  const selTable = $('ctCycleFilterTable');
+  if (!cycles.length){
+    sel.innerHTML=''; $('ctRitmoInfo').textContent='';
+    if (selTable) selTable.innerHTML='';
+    return;
+  }
+
+  // semestres presentes nos dados (pelo mês de fim do período de medição)
+  const semSet = new Map();
+  cycles.forEach(c=>{
+    const y = Math.floor(c.key/12), h = (c.key%12) < 6 ? 1 : 2;
+    semSet.set(`sem:${y}:${h}`, `${h}º Semestre/${y}`);
+  });
+
+  const cur = currentCycleInfo();
+  let html = `<optgroup label="Visões agregadas">`;
+  html += `<option value="all" ${selection==='all'?'selected':''}>Todos os ciclos (contrato inteiro)</option>`;
+  html += `<option value="cyc:${cur.key}" ${selection===('cyc:'+cur.key)?'selected':''}>Ciclo atual (${cur.label})</option>`;
+  semSet.forEach((label, val)=>{
+    html += `<option value="${val}" ${selection===val?'selected':''}>${label}</option>`;
+  });
+  html += `</optgroup><optgroup label="Ciclos mensais (21 a 20)">`;
+  html += cycles.map(c=>{
+    const val = 'cyc:'+c.key;
+    return `<option value="${val}" ${selection===val?'selected':''}>${c.ciclo} (21/${String(((c.key%12)||12)).padStart(2,'0')} a 20/${String((c.key%12)+1).padStart(2,'0')})</option>`;
+  }).join('');
+  html += `</optgroup>`;
+  sel.innerHTML = html;
+  // filtro de ciclo dentro do "Resumo por Item" — mesmas opções, mantido em
+  // sincronia com o seletor principal (os dois controlam a mesma seleção).
+  if (selTable) selTable.innerHTML = html;
+
+  const {avg} = ritmoStats();
+  const {saldo} = (function(){
+    const descs = Object.keys(itemMeta);
+    const cum = cumulativeExecutedByItem(selUptoKey());
+    const vp = descs.reduce((s,d)=>s+itemMeta[d].valorPrevisto,0);
+    const ex = descs.reduce((s,d)=>s+(cum[d]||0),0);
+    return {saldo: vp-ex};
+  })();
+  const meses = avg>0 ? (saldo/avg).toFixed(1) : '-';
+  $('ctRitmoInfo').textContent = `Ritmo médio mensal: ${fmtCur(avg)} · Estimativa p/ esgotar saldo: ${meses} ${meses==='-'?'':'meses'}`;
+}
+
+function renderCashCycle(){
+  if (!cycles.length){
+    $('ctCashMedVal').textContent='—'; $('ctCashMetaVal').textContent='—';
+    $('ctCashBar').innerHTML=''; $('ctCashSub').textContent='Carregue a planilha para ver a situação de caixa.';
+    return;
+  }
+  const {medido} = cashSplitForSelection();
+  // a meta é sempre R$350 mil POR CICLO — quando a seleção cobre vários ciclos
+  // (ex.: "Todos os ciclos", um semestre), a meta do período é a soma de todos eles.
+  const numCiclos = Math.max(1, selKeys().length);
+  const metaEfetiva = META_MENSAL * numCiclos;
+
+  $('ctCashMedVal').textContent = fmtCur(medido);
+  $('ctCashMedSub').textContent = metaEfetiva>0 ? fmtPct(medido/metaEfetiva)+' da meta do período' : 'sem lançamentos';
+
+  const restanteMeta = Math.max(0, metaEfetiva - medido);
+  $('ctCashMetaLbl').textContent = numCiclos>1
+    ? `Restante para a meta do período (${numCiclos} ciclos × ${fmtCur(META_MENSAL)})`
+    : 'Restante para a meta mensal (R$ 350.000)';
+  $('ctCashMetaVal').textContent = restanteMeta>0 ? fmtCur(restanteMeta) : 'meta batida';
+  $('ctCashMetaSub').textContent = restanteMeta>0
+    ? `faltam ${fmtPct(restanteMeta/metaEfetiva)} da meta de ${fmtCur(metaEfetiva)}`
+    : `medido superou a meta em ${fmtCur(medido-metaEfetiva)}`;
+
+  $('ctCashSub').textContent = `Período: ${selLabel()} · medido: ${fmtCur(medido)} de ${fmtCur(metaEfetiva)} (meta do período)`;
+  const pctBar = metaEfetiva>0 ? Math.min(100, medido/metaEfetiva*100) : 0;
+  $('ctCashBar').innerHTML = metaEfetiva>0
+    ? `<div class="ct-seg" style="width:${pctBar}%;background:${MEDIDO_COLOR};"></div><div class="ct-seg" style="width:${100-pctBar}%;background:#98A2B3;"></div>`
+    : '';
+}
+
+// Cada ciclo comparado à MESMA meta mensal (R$350 mil) — não mais medido x não
+// medido, para ficar consistente com a métrica mensal usada no resto da aba.
+function renderCashByCycle(){
+  const el = $('ctCashByCycle');
+  if (!cycles.length){ el.innerHTML = '<div class="ct-empty">📭 Carregue a planilha para ver o histórico.</div>'; return; }
+  // mesma regra de horizonte do gráfico de evolução: só mostra até o ciclo atual.
+  const curKey = currentCycleInfo().key;
+  const cyclesShown = cycles.filter(c=>c.key<=curKey);
+  if (!cyclesShown.length){
+    el.innerHTML = '<div class="ct-empty">Nenhum ciclo até a data de hoje ainda — os ciclos carregados são todos futuros.</div>';
+    return;
+  }
+  el.innerHTML = cyclesShown.map(c=>{
+    const {medido} = cashSplitForCycle(c.key);
+    // verde = entregue (medido, até 100% da meta) · laranja = o que faltou para a meta
+    const pctEntregue = META_MENSAL>0 ? Math.min(100, medido/META_MENSAL*100) : 0;
+    const pctRestante = 100 - pctEntregue;
+    return `<div class="ct-cash-row">
+      <div class="ct-cash-label">${c.ciclo}</div>
+      <div class="ct-cash-track ct-bar-bg ct-stacked" style="height:10px;">
+        <div class="ct-seg" style="width:${pctEntregue}%;background:${MEDIDO_COLOR};"></div><div class="ct-seg" style="width:${pctRestante}%;background:${NAOMEDIDO_COLOR};"></div>
+      </div>
+      <div class="ct-cash-val">${fmtCur(medido)} / ${fmtCur(META_MENSAL)} (${fmtPct(META_MENSAL>0 ? medido/META_MENSAL : 0)})</div>
+    </div>`;
+  }).join('') + `<div class="legend-row" style="margin-top:10px;">
+      <span style="color:${MEDIDO_COLOR};"><span class="dot" style="background:${MEDIDO_COLOR};"></span>Entregue</span>
+      <span style="color:${NAOMEDIDO_COLOR};"><span class="dot" style="background:${NAOMEDIDO_COLOR};"></span>Restante para a meta</span>
+    </div>`;
+}
+
+function renderTrend(){
+  const svg = $('ctTrendSvg'), legend = $('ctTrendLegend'), sub = $('ctTrendSub');
+  if (!cycles.length){ svg.innerHTML=''; legend.innerHTML=''; return; }
+  const theme = (typeof CHART_THEME!=='undefined') ? CHART_THEME : {axisLine:'#D7DEE6',gridLine:'#EEF1F5',axisText:'#8A95A3'};
+  // horizonte do gráfico vai só até o ciclo atual (data de hoje) — não mostra
+  // ciclos futuros que ainda não deveriam ter sido medidos.
+  const curKey = currentCycleInfo().key;
+  const cyclesShown = cycles.filter(c=>c.key<=curKey);
+  if (!cyclesShown.length){
+    svg.innerHTML=''; legend.innerHTML='';
+    sub.textContent = 'Nenhum ciclo até a data de hoje ainda — os ciclos carregados são todos futuros.';
+    return;
+  }
+  const descs = Object.keys(itemMeta);
+  const vpTotal = descs.reduce((s,d)=>s+itemMeta[d].valorPrevisto,0);
+  const pts = cyclesShown.map(c=>{
+    const cum = cumulativeExecutedByItem(c.key);
+    const ex = descs.reduce((s,d)=>s+(cum[d]||0),0);
+    return {ciclo:c.ciclo, pct: vpTotal>0 ? ex/vpTotal : 0};
+  });
+  sub.textContent = cyclesShown.length>1
+    ? `${cyclesShown.length} ciclos registrados até o ciclo atual · último: ${cyclesShown[cyclesShown.length-1].ciclo}`
+    : `1 ciclo registrado (${cyclesShown[0].ciclo}) · carregue planilhas de outros meses para ver a curva`;
+  legend.innerHTML = `<span style="color:#007E7A;"><span class="dot" style="background:#007E7A;"></span>% Execução Acumulada</span>`;
+  const W=900,H=320,padL=50,padR=30,padT=24,padB=50;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const n = pts.length;
+  const xPos = i => n<=1 ? padL+plotW/2 : padL + (i/(n-1))*plotW;
+  const maxPct = Math.max(0.2, ...pts.map(p=>p.pct)) * 1.15;
+  const yPos = v => padT + plotH - (v/maxPct)*plotH;
+  let s = '';
+  s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
+  s += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
+  for(let i=0;i<=5;i++){
+    const v = maxPct*i/5, y = yPos(v);
+    s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${theme.gridLine}"/>`;
+    s += `<text x="${padL-8}" y="${y+4}" font-size="10" fill="${theme.axisText}" text-anchor="end">${(v*100).toFixed(0)}%</text>`;
+  }
+  pts.forEach((p,i)=>{
+    s += `<text x="${xPos(i)}" y="${H-padB+18}" font-size="10" fill="${theme.axisText}" text-anchor="middle">${p.ciclo}</text>`;
+  });
+  let d=''; pts.forEach((p,i)=>{ d += (i===0?'M':'L') + xPos(i) + ',' + yPos(p.pct) + ' '; });
+  s += `<path d="${d}" fill="none" stroke="#007E7A" stroke-width="2.5"/>`;
+  pts.forEach((p,i)=>{
+    const x=xPos(i), y=yPos(p.pct);
+    s += `<circle cx="${x}" cy="${y}" r="4" fill="#007E7A" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${x}" y="${y-10}" font-size="11" fill="#007E7A" text-anchor="middle" font-weight="700">${(p.pct*100).toFixed(1)}%</text>`;
+  });
+  svg.innerHTML = s;
+}
+
+function renderItemBars(){
+  const el = $('ctItemBars');
+  const descs = Object.keys(itemMeta);
+  if (!descs.length){ el.innerHTML = '<div class="ct-empty">📭 Carregue a planilha para ver os itens.</div>'; return; }
+  const cum = cumulativeExecutedByItem(selUptoKey());
+  const arr = sortByPriority(descs.map(d=>({desc:d, vp:itemMeta[d].valorPrevisto, ex:cum[d]||0})));
+  // mesmo azul do painel "Realizado do Mês por Item (Meta Geral)", para os dois
+  // ficarem visualmente consistentes.
+  const corBarra = STATUS_COLORS['Avançado'];
+  el.innerHTML = arr.map(r=>{
+    const pct = r.vp>0 ? Math.min(100, r.ex/r.vp*100) : 0;
+    return `<div class="ct-item-row">
+      <div class="ct-item-top">
+        <span class="ct-item-name" title="${r.desc}">${r.desc}</span>
+        <span class="ct-item-val">${fmtCur(r.ex)} / ${fmtCur(r.vp)}</span>
+      </div>
+      <div class="ct-bar-bg"><div class="ct-bar-fill" style="width:${pct}%;background:${corBarra};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// Sem metas individuais por item — só existe UMA meta, geral, de META_MENSAL.
+// A barra de cada item mostra sua participação no realizado do mês contra essa
+// mesma meta geral (mesmo denominador para todos os itens).
+function renderMonthlyGoalBars(){
+  const el = $('ctItemBarsMonthly');
+  const sub = $('ctMonthlyGoalSub');
+  const descs = Object.keys(itemMeta);
+  if (!descs.length){
+    el.innerHTML = '<div class="ct-empty">📭 Carregue a planilha para ver os itens.</div>';
+    if (sub) sub.textContent = `Meta mensal geral: ${fmtCur(META_MENSAL)}`;
+    return;
+  }
+  const key = selUptoKey();
+  const rowsCiclo = key!==null ? thisCycleRowsByDesc(key) : {};
+  const arr = sortByPriority(descs.map(d=>{
+    const realizado = (rowsCiclo[d] && rowsCiclo[d].realizadoFin) || 0;
+    return {desc:d, vp:itemMeta[d].valorPrevisto, realizado};
+  }));
+  const totalRealizado = arr.reduce((s,r)=>s+r.realizado,0);
+  const pctTotal = META_MENSAL>0 ? totalRealizado/META_MENSAL : 0;
+  if (sub){
+    sub.textContent = `Meta mensal geral (sem metas por item): ${fmtCur(META_MENSAL)} · realizado em ${cicloLabel(key)||selLabel()}: ${fmtCur(totalRealizado)} (${fmtPct(pctTotal)} da meta)`;
+  }
+  const corTotal = totalRealizado > META_MENSAL ? STATUS_COLORS['Acima do Previsto'] : STATUS_COLORS['Avançado'];
+  el.innerHTML = arr.map(r=>{
+    const pct = META_MENSAL>0 ? Math.min(100, r.realizado/META_MENSAL*100) : 0;
+    return `<div class="ct-item-row">
+      <div class="ct-item-top">
+        <span class="ct-item-name" title="${r.desc}">${r.desc}</span>
+        <span class="ct-item-val">${fmtCur(r.realizado)}</span>
+      </div>
+      <div class="ct-bar-bg"><div class="ct-bar-fill" style="width:${pct}%;background:${corTotal};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderItemTable(){
+  const search = $('ctSearchInput').value.trim().toLowerCase();
+  const medicaoF = $('ctMedicaoFilter').value;
+  const descs = Object.keys(itemMeta);
+  const cum = cumulativeExecutedByItem(selUptoKey());
+  const selRows = selectionRowsByDesc();
+  const cur = descs.map(d=>{
+    const vp = itemMeta[d].valorPrevisto;
+    const ex = cum[d]||0;
+    const tc = selRows[d];
+    let medicao = null;
+    if (tc){
+      if (tc.medVal>0 && tc.naoVal>0) medicao = 'Parcial';
+      else if (tc.medVal>0) medicao = 'Medido';
+      else if (tc.naoVal>0) medicao = 'Não medido';
+      else if (tc.hasMed && tc.hasNao) medicao = 'Parcial';
+      else if (tc.hasMed) medicao = 'Medido';
+      else medicao = 'Não medido';
+    }
+    return {
+      desc:d, unid:itemMeta[d].unid, vp, ex,
+      pct: vp>0 ? ex/vp : 0, status: computeStatus(vp, ex),
+      esteCiclo: tc ? tc.realizadoFin : null,
+      medicao,
+    };
+  }).filter(r=>{
+    if (search && !r.desc.toLowerCase().includes(search)) return false;
+    if (medicaoF && r.medicao !== medicaoF) return false;
+    return true;
+  });
+  $('ctRowCount').textContent = cur.length + ' item(ns)';
+  const tbody = $('ctItemTableBody');
+  if (!cur.length){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="ct-empty">Nenhum item encontrado para os filtros atuais.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = cur.map(r=>{
+    const medClass = r.medicao==='Medido' ? 'ct-tag-medido' : (r.medicao==='Parcial' ? 'ct-tag-parcial' : 'ct-tag-naomedido');
+    const medTag = r.medicao===null
+      ? `<span class="ct-tag ct-tag-semlanc">Sem lançamento</span>`
+      : `<span class="ct-tag ${medClass}">${r.medicao}</span>`;
+    return `<tr>
+      <td>${r.desc}</td><td>${r.unid||''}</td>
+      <td style="text-align:right;">${fmtCur(r.vp)}</td>
+      <td style="text-align:right;">${fmtCur(r.ex)}</td>
+      <td style="text-align:right;">${fmtPct(r.pct)}</td>
+      <td style="text-align:right;">${r.esteCiclo===null ? '—' : fmtCur(r.esteCiclo)}</td>
+      <td>${medTag}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderScenarios(){
+  const el = $('ctScenarioCards');
+  if (!cycles.length){ el.innerHTML = '<div class="ct-empty">📭 Carregue a planilha para ver as projeções.</div>'; $('ctPrazoNote').textContent=''; return; }
+  const {saldo} = globalTotalsAtLatest();
+  const {avg, min, max} = ritmoStats();
+  $('ctScenarioSub').textContent = cycles.length > 1
+    ? `Baseado em ${cycles.length} ciclos: ritmo entre ${fmtCur(min)} e ${fmtCur(max)}/mês (média ${fmtCur(avg)}). Saldo restante: ${fmtCur(saldo)}. Lembrete: quantidades do QQP são estimadas (ET, item 11).`
+    : `Só há 1 ciclo carregado — a faixa fica igual à média. Saldo restante: ${fmtCur(saldo)}.`;
+  const scenarios = [
+    {cls:'otimista', label:'Otimista (ritmo mais rápido já visto)', ritmo:max},
+    {cls:'medio', label:'Médio (ritmo médio histórico)', ritmo:avg},
+    {cls:'pessimista', label:'Pessimista (ritmo mais lento já visto)', ritmo:min},
+  ];
+  const cd = contractDates();
+  el.innerHTML = scenarios.map(sc=>{
+    if (sc.ritmo<=0 || saldo<=0){
+      return `<div class="ct-scenario ${sc.cls}"><div class="lbl">${sc.label}</div>
+        <div class="ritmo">Ritmo: ${fmtCur(sc.ritmo)}/mês</div>
+        <div class="meses">${saldo<=0?'Concluído':'Indefinido'}</div>
+        <div class="data">${saldo<=0?'saldo já esgotado':'ritmo insuficiente p/ estimar'}</div></div>`;
+    }
+    const meses = saldo/sc.ritmo;
+    const dataEst = addMonths(new Date(), meses);
+    const alemPrazo = cd && dataEst > cd.end;
+    return `<div class="ct-scenario ${sc.cls}"><div class="lbl">${sc.label}</div>
+      <div class="ritmo">Ritmo: ${fmtCur(sc.ritmo)}/mês</div>
+      <div class="meses">${meses.toFixed(1)} meses</div>
+      <div class="data">conclusão estimada: ${fmtDateBR(dataEst)}${alemPrazo?' ⚠ além da vigência':''}</div></div>`;
+  }).join('');
+  if (cd){
+    $('ctPrazoNote').textContent = `Vigência contratual (ET, item 4): 1095 dias — término em ${fmtDateFullBR(cd.end)}. Cenários que ultrapassam essa data indicam risco de o contrato vencer antes de consumir o valor previsto (exigiria aditivo de prazo ou aceleração do ritmo).`;
+  }
+}
+
+// dados compartilhados pelo gráfico e pela lista de detalhe: saldo restante por
+// item, ordenado do maior para o menor, com % acumulado (curva 80/20).
+function paretoData(){
+  const descs = Object.keys(itemMeta);
+  const {cum} = globalTotalsAtLatest();
+  const items = descs.map(d=>({desc:d, saldo: Math.max(0, itemMeta[d].valorPrevisto - (cum[d]||0))}))
+    .sort((a,b)=>b.saldo-a.saldo);
+  const totalSaldo = items.reduce((s,i)=>s+i.saldo,0);
+  let acc = 0;
+  return items.map(it=>{
+    const prevPct = totalSaldo>0 ? (acc/totalSaldo) : 0;
+    acc += it.saldo;
+    const pctItem = totalSaldo>0 ? (it.saldo/totalSaldo) : 0;
+    const pctAcc = totalSaldo>0 ? (acc/totalSaldo) : 0;
+    return {...it, pctItem, pctAcc, vital: prevPct < 0.8};
+  });
+}
+
+function renderPareto(){
+  const descs = Object.keys(itemMeta);
+  if (!descs.length){
+    $('ctParetoSvg').innerHTML=''; $('ctParetoLegend').innerHTML='';
+    $('ctParetoList').innerHTML = '<div class="ct-empty">📭 Carregue a planilha para ver a concentração.</div>';
+    return;
+  }
+  const pts = paretoData();
+  renderParetoChart(pts);
+  renderParetoList(pts);
+}
+
+function renderParetoChart(pts){
+  const svg = $('ctParetoSvg'), legend = $('ctParetoLegend');
+  const theme = (typeof CHART_THEME!=='undefined') ? CHART_THEME : {axisLine:'#D7DEE6',gridLine:'#EEF1F5',axisText:'#8A95A3'};
+  const n = pts.length;
+  const W=900, H=380, padL=76, padR=54, padT=20, padB=120;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const barW = Math.min(46, plotW/n*0.6);
+  const xCenter = i => n<=1 ? padL+plotW/2 : padL + (i+0.5)/n*plotW;
+  const maxSaldo = Math.max(1, ...pts.map(p=>p.saldo)) * 1.15;
+  const yBar = v => padT + plotH - (v/maxSaldo)*plotH;
+  const yPct = v => padT + plotH - v*plotH; // v de 0 a 1 (100%)
+
+  let s = '';
+  s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
+  s += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
+  for(let i=0;i<=5;i++){
+    const v = maxSaldo*i/5, y = yBar(v);
+    s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${theme.gridLine}"/>`;
+    s += `<text x="${padL-8}" y="${y+4}" font-size="9" fill="${theme.axisText}" text-anchor="end">${fmtCur(v)}</text>`;
+  }
+  s += `<line x1="${W-padR}" y1="${padT}" x2="${W-padR}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
+  for(let i=0;i<=5;i++){
+    const v = i/5, y = yPct(v);
+    s += `<text x="${W-padR+8}" y="${y+4}" font-size="9" fill="${theme.axisText}" text-anchor="start">${(v*100).toFixed(0)}%</text>`;
+  }
+  const y80 = yPct(0.8);
+  s += `<line x1="${padL}" y1="${y80}" x2="${W-padR}" y2="${y80}" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,4"/>`;
+  s += `<text x="${padL+4}" y="${y80-5}" font-size="9" fill="#DC2626" text-anchor="start" font-weight="700">meta 80%</text>`;
+
+  pts.forEach((p,i)=>{
+    const x = xCenter(i) - barW/2;
+    const y = yBar(p.saldo);
+    const h = (H-padB) - y;
+    s += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(0,h)}" rx="3" fill="${p.vital?'#2563EB':'#98A2B3'}"><title>${p.desc}: ${fmtCur(p.saldo)}</title></rect>`;
+  });
+
+  pts.forEach((p,i)=>{
+    const x = xCenter(i);
+    const short = p.desc.length>16 ? p.desc.slice(0,14)+'…' : p.desc;
+    s += `<text x="${x}" y="${H-padB+14}" font-size="9" fill="${theme.axisText}" text-anchor="end" transform="rotate(-40 ${x} ${H-padB+14})">${short}<title>${p.desc}</title></text>`;
+  });
+
+  let d=''; pts.forEach((p,i)=>{ d += (i===0?'M':'L') + xCenter(i) + ',' + yPct(p.pctAcc) + ' '; });
+  s += `<path d="${d}" fill="none" stroke="#DC2626" stroke-width="2.5"/>`;
+  pts.forEach((p,i)=>{
+    const x=xCenter(i), y=yPct(p.pctAcc);
+    s += `<circle cx="${x}" cy="${y}" r="4" fill="#DC2626" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${x}" y="${y-10}" font-size="10" fill="#DC2626" text-anchor="middle" font-weight="700">${(p.pctAcc*100).toFixed(0)}%</text>`;
+  });
+
+  svg.innerHTML = s;
+  legend.innerHTML = `<span style="color:#2563EB;"><span class="dot" style="background:#2563EB;"></span>Saldo restante — itens vitais (~80%)</span>`
+    + `<span style="color:#98A2B3;"><span class="dot" style="background:#98A2B3;"></span>Demais itens</span>`
+    + `<span style="color:#DC2626;"><span class="dot" style="background:#DC2626;"></span>% acumulado</span>`;
+}
+
+function renderParetoList(pts){
+  const el = $('ctParetoList');
+  el.innerHTML = pts.map(it=>{
+    return `<div class="ct-pareto-row ${it.vital?'vital':''}">
+      <div class="ct-pareto-label" title="${it.desc}">${it.desc}</div>
+      <div class="ct-pareto-track ct-bar-bg"><div class="ct-bar-fill" style="width:${(it.pctItem*100)}%;background:${it.vital?'#DC2626':'#98A2B3'};"></div></div>
+      <div class="ct-pareto-val">${fmtCur(it.saldo)} · acum. ${(it.pctAcc*100).toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderWhatIf(){
+  const results = $('ctWiResults');
+  if (!cycles.length){ results.innerHTML = '<div class="ct-empty">Carregue a planilha para simular.</div>'; return; }
+  const {saldo} = globalTotalsAtLatest();
+  const {avg} = ritmoStats();
+  const ritmoInput = $('ctWiRitmo');
+  if (!ritmoInput.dataset.touched && !ritmoInput.value){ ritmoInput.value = Math.round(avg); }
+  const ritmo = Number(ritmoInput.value) || 0;
+  const reajuste = Number($('ctWiReajuste').value) || 0;
+  const prazoAlvo = Number($('ctWiPrazo').value) || 0;
+  const saldoAjustado = saldo * (1 + reajuste/100);
+  let rows = [];
+  rows.push(['Saldo restante (atual)', fmtCur(saldo), '']);
+  rows.push(['Saldo ajustado (com reajuste)', fmtCur(saldoAjustado), '']);
+  if (ritmo>0){
+    const meses = saldoAjustado/ritmo;
+    const dataEst = addMonths(new Date(), meses);
+    rows.push(['Meses estimados nesse ritmo', meses.toFixed(1)+' meses', '']);
+    const cd = contractDates();
+    const dentro = cd ? dataEst <= cd.end : null;
+    rows.push(['Data estimada de conclusão', fmtDateBR(dataEst), dentro===null?'':(dentro?'ok':'warn')]);
+    if (cd && !dentro) rows.push(['Vigência contratual', 'termina '+fmtDateFullBR(cd.end)+' — cenário ultrapassa o prazo', 'warn']);
+  } else {
+    rows.push(['Meses estimados nesse ritmo', 'informe um ritmo > 0', 'warn']);
+  }
+  if (prazoAlvo>0){
+    const ritmoNec = saldoAjustado/prazoAlvo;
+    rows.push(['Ritmo necessário p/ '+prazoAlvo+' meses', fmtCur(ritmoNec)+'/mês', '']);
+    if (avg>0){
+      const diffPct = (ritmoNec-avg)/avg*100;
+      const cls = diffPct>0 ? 'warn' : 'ok';
+      const txt = diffPct>0
+        ? `acelerar ${diffPct.toFixed(0)}% sobre o ritmo médio`
+        : `ritmo atual suficiente (${Math.abs(diffPct).toFixed(0)}% de folga)`;
+      rows.push(['Comparado ao ritmo médio atual', txt, cls]);
+    }
+  }
+  results.innerHTML = rows.map(([label,val,cls])=>`
+    <div class="row"><span>${label}</span><span class="v ${cls||''}">${val}</span></div>`).join('');
+}
+
+// Planejamento mensal por entregável, em QUANTIDADE DE LINHAS (não em R$).
+// Cada item tem seu próprio ritmo mensal hipotético (linhas/mês, editável),
+// pré-preenchido com a média histórica desse item — dá a noção de quanto
+// falta e quando cada entrega deve terminar, item a item.
+function renderQtyPlanner(){
+  const el = $('ctQtyPlanner');
+  if (!el) return;
+  const descs = Object.keys(itemMeta);
+  if (!descs.length){ el.innerHTML = '<div class="ct-empty">📭 Carregue a planilha para simular.</div>'; return; }
+  const key = selUptoKey();
+  const cumQtd = key!==null ? cumulativeQtdByItem(key) : {};
+  const arr = sortByPriority(descs.map(d=>({
+    desc:d, qtdTotal: itemMeta[d].qtdTotal||0, executado: cumQtd[d]||0, preco: itemMeta[d].preco||0
+  })));
+  el.innerHTML = arr.map(r=>{
+    const saldo = Math.max(0, r.qtdTotal - r.executado);
+    const saved = qtyPlannerInputs[r.desc];
+    const ritmoBase = saved!=null ? saved : Math.round(avgMonthlyQtdForItem(r.desc)*10)/10;
+    const ritmoPadrao = Math.min(ritmoBase, saldo);
+    return `<div class="ct-qty-row" data-desc="${encodeURIComponent(r.desc)}">
+      <div class="ct-qty-name" title="${r.desc}">${r.desc}</div>
+      <div class="ct-qty-stats">
+        <span>valor unitário: ${fmtCur(r.preco)}</span>
+        <span>${r.qtdTotal.toLocaleString('pt-BR')} linhas no total</span>
+        <span>${r.executado.toLocaleString('pt-BR')} já executadas</span>
+        <span>${saldo.toLocaleString('pt-BR')} restantes</span>
+      </div>
+      <div class="ct-qty-input-wrap">
+        <label>Ritmo planejado (linhas/mês, máx. ${saldo.toLocaleString('pt-BR')})</label>
+        <input type="number" min="0" max="${saldo}" step="0.1" class="ct-qty-input" value="${ritmoPadrao}">
+      </div>
+      <div class="ct-qty-result"></div>
+    </div>`;
+  }).join('') + `
+    <div class="ct-qty-row ct-qty-total">
+      <div class="ct-qty-name">Total da simulação (soma de todos os itens)</div>
+      <div class="ct-qty-stats"></div>
+      <div class="ct-qty-input-wrap"></div>
+      <div class="ct-qty-result" id="ctQtyPlannerTotal">${fmtCur(0)}/mês</div>
+    </div>`;
+
+  // valor esperado (R$/mês) por item, dado o ritmo planejado — somados no total
+  // da simulação, para comparar com a meta geral de R$350 mil/mês.
+  const valoresEsperados = {};
+  function updateTotal(){
+    const total = Object.values(valoresEsperados).reduce((s,v)=>s+v, 0);
+    const totalEl = $('ctQtyPlannerTotal');
+    if (totalEl) totalEl.textContent = `${fmtCur(total)}/mês`;
+  }
+
+  el.querySelectorAll('.ct-qty-row[data-desc]').forEach(row=>{
+    const desc = decodeURIComponent(row.dataset.desc);
+    const item = arr.find(x=>x.desc===desc);
+    const saldo = Math.max(0, item.qtdTotal - item.executado);
+    const input = row.querySelector('.ct-qty-input');
+    const resultEl = row.querySelector('.ct-qty-result');
+    function update(){
+      let ritmo = Number(input.value) || 0;
+      // regra: não dá para planejar mais linhas por mês do que o que ainda resta do item.
+      if (ritmo > saldo){ ritmo = saldo; input.value = saldo; }
+      if (ritmo < 0){ ritmo = 0; input.value = 0; }
+      qtyPlannerInputs[desc] = ritmo;
+      let valorEsperado = 0;
+      if (saldo<=0){
+        resultEl.textContent = '✅ concluído';
+        resultEl.className = 'ct-qty-result ok';
+      } else if (ritmo<=0){
+        resultEl.textContent = 'informe um ritmo > 0';
+        resultEl.className = 'ct-qty-result warn';
+      } else {
+        valorEsperado = ritmo * item.preco;
+        resultEl.textContent = `${fmtCur(valorEsperado)}/mês esperado`;
+        resultEl.className = 'ct-qty-result';
+      }
+      valoresEsperados[desc] = valorEsperado;
+      updateTotal();
+    }
+    input.addEventListener('input', update);
+    update();
+  });
+}
+
+function renderAll(){
+  renderKPIs();
+  renderCycleSelect();
+  renderCashCycle();
+  renderCashByCycle();
+  renderTrend();
+  renderItemBars();
+  renderMonthlyGoalBars();
+  renderItemTable();
+  renderScenarios();
+  renderPareto();
+  renderWhatIf();
+  renderQtyPlanner();
+}
+
+function loadFile(file){
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try{
+      const wb = XLSX.read(new Uint8Array(evt.target.result), {type:'array', cellDates:true});
+      const parsed = parseValoresContrato(wb);
+      if (!parsed){
+        $('ctFileStatus').textContent = 'não encontrei itens reconhecíveis nesta planilha';
+        return;
+      }
+      const hist = loadHistory();
+      Object.assign(hist.itemMeta, parsed.itemMeta);
+      parsed.cycles.forEach((val, key) => { hist.cycles[key] = val; });
+      saveHistory(hist);
+      rebuildFromHistory(hist);
+      selection = 'cyc:' + cycles[cycles.length-1].key;
+      $('ctFileStatus').textContent = `${file.name} · ${new Date().toLocaleString('pt-BR')}`;
+      renderAll();
+    } catch(err){
+      console.error(err);
+      $('ctFileStatus').textContent = 'erro ao ler o arquivo: ' + err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function switchView(view){
+  $('ctViewInd').classList.toggle('active', view==='ind');
+  $('ctViewSim').classList.toggle('active', view==='sim');
+  $('ctTabInd').classList.toggle('active', view==='ind');
+  $('ctTabSim').classList.toggle('active', view==='sim');
+}
+
+// ---- wiring ----
+$('ctFileInput').addEventListener('change', e=>{ if (e.target.files[0]) loadFile(e.target.files[0]); });
+$('ctCycleSelect').addEventListener('change', e=>{ selection = e.target.value; renderAll(); });
+$('ctCycleFilterTable').addEventListener('change', e=>{ selection = e.target.value; renderAll(); });
+$('ctSearchInput').addEventListener('input', renderItemTable);
+$('ctMedicaoFilter').addEventListener('change', renderItemTable);
+$('ctTabInd').addEventListener('click', ()=>switchView('ind'));
+$('ctTabSim').addEventListener('click', ()=>switchView('sim'));
+$('ctWiRitmo').addEventListener('focus', function(){ this.dataset.touched='1'; });
+['ctWiRitmo','ctWiReajuste','ctWiPrazo'].forEach(id=>{ $(id).addEventListener('input', renderWhatIf); });
+
+document.getElementById('treeContrato').addEventListener('click', function(){
+  document.querySelectorAll('#treePlanejamentosChildren .tree-row').forEach(r=>r.classList.remove('active'));
+  showPage('page-contrato');
+  refresh();
+});
+
+function refresh(){
+  const hist = loadHistory();
+  if (Object.keys(hist.cycles||{}).length){
+    rebuildFromHistory(hist);
+    if (!isValidSelection()){
+      selection = 'cyc:' + cycles[cycles.length-1].key;
+    }
+    if ($('ctFileStatus').textContent==='nenhuma planilha carregada'){
+      $('ctFileStatus').textContent = 'dados restaurados da última sessão';
+    }
+  }
+  renderAll();
+}
+
+// ---- carregamento automático da planilha hospedada na mesma pasta do site ----
+// No Hostinger: suba o arquivo .xlsx junto com o index.html (mesma pasta).
+// O painel busca automaticamente; o upload manual continua disponível.
+const SERVER_XLSX_CANDIDATES = [
+  'Planejamento Orçamentário.xlsx',
+  'planejamento orçamentário.xlsx',
+  'planejamento-orcamentario.xlsx',
+  'planejamento_orcamentario.xlsx',
+];
+async function tryAutoLoad(){
+  if (location.protocol === 'file:') return; // aberto localmente — só upload manual
+  for (const name of SERVER_XLSX_CANDIDATES){
+    try{
+      const resp = await fetch(encodeURI(name) + '?t=' + Date.now(), {cache:'no-store'});
+      if (!resp.ok) continue;
+      const buf = await resp.arrayBuffer();
+      const wb = XLSX.read(new Uint8Array(buf), {type:'array', cellDates:true});
+      const parsed = parseValoresContrato(wb);
+      if (!parsed) continue;
+      const hist = loadHistory();
+      Object.assign(hist.itemMeta, parsed.itemMeta);
+      parsed.cycles.forEach((val, key) => { hist.cycles[key] = val; });
+      saveHistory(hist);
+      rebuildFromHistory(hist);
+      if (!isValidSelection()) selection = 'cyc:' + cycles[cycles.length-1].key;
+      $('ctFileStatus').textContent = `${name} — carregado automaticamente do servidor · ${new Date().toLocaleString('pt-BR')}`;
+      renderAll();
+      return;
+    } catch(e){ /* tenta o próximo candidato */ }
+  }
+}
+
+refresh();
+tryAutoLoad();
+
+return { refresh };
+})();
+</script>
 
 </body></html>
