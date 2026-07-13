@@ -2589,6 +2589,20 @@ function renderCurvaConsolidada(){
     if(showLabel) svg+=`<text x="${xPos(w)}" y="${yPos(planned.cum[w]||0)-9}" font-size="9.5" fill="${planColor}" text-anchor="middle">${Math.round(planned.cum[w]||0)}%</text>`;
   }
 
+  // Ponto de interseção entre a linha "Hoje" e a curva Planejado — valor quantitativo real
+  const todayWeekFrac = (todayTs - startTs) / (7*24*3600*1000);
+  if(todayWeekFrac >= consStartWeek && todayWeekFrac <= weeksTotal){
+    const wFloor = Math.max(consStartWeek, Math.min(weeksTotal, Math.floor(todayWeekFrac)));
+    const wCeil = Math.min(weeksTotal, wFloor+1);
+    const frac = wCeil>wFloor ? Math.min(1, Math.max(0, todayWeekFrac-wFloor)) : 0;
+    const pctFloor = planned.cum[wFloor]||0, pctCeil = planned.cum[wCeil]||0;
+    const plannedPctToday = pctFloor + (pctCeil-pctFloor)*frac;
+    const plannedCountToday = Math.round(plannedPctToday/100*planned.total);
+    const ix = todayX, iy = yPos(plannedPctToday);
+    svg+=`<circle cx="${ix}" cy="${iy}" r="4.5" fill="${planColor}" stroke="#fff" stroke-width="1.5"/>`;
+    svg+=`<text x="${ix}" y="${iy-11}" font-size="12" fill="${planColor}" text-anchor="middle" font-weight="700">${plannedCountToday}</text>`;
+  }
+
   // Linha Realizado PASSADO (até hoje) — exato por data, label apenas no ponto final
   if(pastPoints.length){
     const firstRealX = xPosDate(pastPoints[0].ts);
