@@ -685,19 +685,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .download-btn:disabled{opacity:.5;cursor:wait;}
   .panel-divider{height:1px;background:var(--border);margin:24px 0 18px;}
 
-  .pdf-export-bar{
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-    margin:14px 0 18px; padding:12px 16px; background:var(--card2);
-    border:1px solid var(--border); border-radius:10px;
-  }
-  .pdf-export-btn{
-    display:inline-flex; align-items:center; gap:6px; background:var(--teal);
-    color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700;
-    cursor:pointer; transition:opacity .15s ease, transform .12s ease;
-  }
-  .pdf-export-btn:hover{ opacity:.92; transform:translateY(-1px); }
-  .pdf-export-btn:disabled{ opacity:.6; cursor:wait; transform:none; }
-  .pdf-export-hint{ font-size:11.5px; color:var(--muted); }
   .svg-zoom-wrap{overflow:hidden;border-radius:8px;position:relative;touch-action:none;}
   .svg-zoom-wrap svg{display:block;transform-origin:0 0;user-select:none;}
   .zoom-hint{font-size:10px;color:var(--muted2);text-align:right;margin-top:4px;}
@@ -1340,6 +1327,17 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
           <div id="updateConfirmation" class="update-confirmation"><span id="fileStatus" style="color: rgb(92, 116, 114);">⏳ nenhuma planilha carregada - selecione um arquivo acima</span></div>
         </div>
       </div>
+      <div class="data-update-wrap">
+        <button class="data-update-btn icon-only" id="pdfExportToggle" type="button" title="Exportar relatório (PDF)">📑</button>
+        <div class="data-update-pop" id="pdfExportPop">
+          <div class="pop-title">Exportar relatório (PDF)</div>
+          <div class="pop-desc">Escolha o processo do relatório. Inclui: cards iniciais, fluxograma de blocos (separado por pilar), curva S consolidada (geral e por pilar), mapa de entregas por equipe (mês) e o fluxo do processo de validação do processo escolhido.</div>
+          <div class="update-inputs">
+            <button class="update-file-btn" id="pdfExportBritagem" type="button">🪨 Britagem III</button>
+            <button class="update-file-btn secondary" id="pdfExportEnergia" type="button">⚡ Energia</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1379,11 +1377,6 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     </div></div>
 
 <div id="a_lastUpdate" class="last-update-tag"></div>
-
-<div class="pdf-export-bar">
-  <button class="pdf-export-btn" id="pdfReportBtn" type="button">📑 Exportar relatório (PDF)</button>
-  <span class="pdf-export-hint">Inclui: fluxograma de blocos (resumo geral), curva S consolidada (geral e por pilar) e mapa de entregas por semana</span>
-</div>
 
   <div class="panel chart-panel" id="panelFluxo">
     <div class="chart-panel-header">
@@ -1584,6 +1577,11 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     <h2>Fluxo do processo de validação — em que etapa está e de quem é a ação</h2>
     <div class="sub">O planejamento semanal (Status D0) alimenta o Ag. Envio; Inventário passa pela pré-aprovação no Assets, as demais equipes vão direto para a análise da Vale (retorno em 7 dias corridos); comentários voltam para a Tenax e a validação encerra em Validado (positivo) ou Não validado (negativo).</div>
     <div class="control-toolbar" style="margin-top:10px;">
+      <select id="valProcessFilter" title="Filtro por processo (igual ao usado em Cronogramas)">
+        <option value="all">Todos os processos</option>
+        <option value="britagem">🪨 Britagem III</option>
+        <option value="energia">⚡ Energia</option>
+      </select>
       <select id="valTeamFilter" title="Filtro de itens por equipe">
         <option value="all">Todas as equipes</option>
         <option value="Inventário">Inventário</option>
@@ -1598,9 +1596,11 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <span><span class="dot" style="background:#DC2626"></span> Não validado</span>
       </div>
     </div>
-    <div class="val-flow" id="valFlow"></div>
-    <div class="vf2-totais" id="valPendTotais"></div>
-    <div class="val-split" id="valFlowSummary"></div>
+    <div id="valFlowCapture">
+      <div class="val-flow" id="valFlow"></div>
+      <div class="vf2-totais" id="valPendTotais"></div>
+      <div class="val-split" id="valFlowSummary"></div>
+    </div>
     <div id="valLastUpdate" class="last-update-tag"></div>
     <details class="val-explain">
       <summary>📖 O que significa cada indicador</summary>
@@ -2185,10 +2185,18 @@ function parsePriorizacaoVale(workbook, area){
     const planEnd = toISO(r['Data de conclusão planejada']);
     const realStart = toISO(r['Data real de início']);
     const realEnd = toISO(r['Data real de conclusão']);
-    const status = normalizeStatus(r['Status'], !!(planStart || planEnd));
+    let status = normalizeStatus(r['Status'], !!(planStart || planEnd));
 
     const validadoRaw = (r['Validação']!==null && r['Validação']!==undefined) ? r['Validação'] : r['Validado'];
     const validado = (validadoRaw && validadoRaw!=='-') ? String(validadoRaw).trim() : (status!=='Concluído' ? 'Ag. Envio' : null);
+
+    // Para o pilar Inventário, a conclusão da atividade não é o Status da planilha —
+    // é o envio para a Vale, ou seja, a coluna Validação = "Validado".
+    if(pilar==='Inventário'){
+      const vStrip = _strip(validado);
+      const isValidado = vStrip.includes('validado') && !vStrip.includes('nao validado');
+      status = isValidado ? 'Concluído' : (status==='Concluído' ? 'Em andamento' : status);
+    }
 
     // aba de Retorno de Validação: acompanha o ciclo de envio/resposta de
     // documentos com a Vale (fora do fluxo de medição financeira do QQP).
@@ -3071,7 +3079,13 @@ VAL_STAGES.forEach(s=>{ VAL_STAGE_BY_KEY[s.key]=s; });
 function valStageOf(i){
   const v = _strip(i.validado);
   if(v.includes('nao validado')) return 'nok';
-  if(v.includes('validado')) return 'ok';
+  if(v.includes('validado')){
+    // Para o Inventário, "Validado" na planilha marca apenas o envio para a Vale
+    // (pós pré-aprovação no Assets) — não é uma validação de fato pela Vale, então
+    // não entra no indicador positivo; a pendência segue com a Vale a partir daqui.
+    if(i.pilar==='Inventário') return 'analise_vale';
+    return 'ok';
+  }
   if(!v) return 'envio';
   // Em análise — Tenax: retorno recebido e comentários ainda não atendidos
   if(i.retorno_real && !i.data_atendimento) return 'analise_tenax';
@@ -3155,14 +3169,19 @@ function renderValValeTable(){ renderValTable(valPendValeList, 'valSearchVale', 
   document.getElementById(id).addEventListener('change', renderValTenaxTable);
 });
 document.getElementById('valSearchVale').addEventListener('input', renderValValeTable);
-// Filtro de itens por equipe: reprocessa a aba inteira
+// Filtro de processo e de equipe: reprocessam a aba inteira
 document.getElementById('valTeamFilter').addEventListener('change', ()=>{ safe('renderValidacao', renderValidacao); });
+document.getElementById('valProcessFilter').addEventListener('change', ()=>{ safe('renderValidacao', renderValidacao); });
 
 function renderValidacao(){
-  // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) —
-  // usa a fonte combinada das duas áreas, e não apenas a área selecionada no momento.
+  // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) por
+  // padrão — o filtro de processo (igual ao de Cronogramas) permite isolar um deles.
   const team = document.getElementById('valTeamFilter').value;
-  const allItemsFull = areaItems.britagem.concat(areaItems.energia);
+  const proc = document.getElementById('valProcessFilter').value;
+  let allItemsFull;
+  if(proc==='britagem') allItemsFull = areaItems.britagem.slice();
+  else if(proc==='energia') allItemsFull = areaItems.energia.slice();
+  else allItemsFull = areaItems.britagem.concat(areaItems.energia);
   const allItems = team==='all' ? allItemsFull : allItemsFull.filter(i=>i.pilar===team);
   const todayISO = localISO(new Date());
 
@@ -3264,7 +3283,8 @@ function renderValidacao(){
       {n:nOk, color:'#16A34A', label:'Validado'},
       {n:nNok, color:'#DC2626', label:'Não validado'}
     ].filter(s=>s.n>0);
-    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas' + (team==='all' ? ' do plano' : ' da equipe ' + team) + '</div>';
+    const procLabel = proc==='britagem' ? ' — Britagem III' : (proc==='energia' ? ' — Energia' : '');
+    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas' + (team==='all' ? ' do plano' : ' da equipe ' + team) + procLabel + '</div>';
     summaryHtml += '<div class="val-split-bar">' + segs.map(s=>{
       const pct = s.n/total*100;
       const txt = pct >= 8 ? `${s.label}: ${fmtN(s.n)} (${Math.round(pct)}%)` : '';
@@ -3373,23 +3393,32 @@ function renderAll(){
 });
 
 // ===== Geração do relatório PDF =====
-async function generatePdfReport(btnEl){
+async function generatePdfReport(area, btnEl){
   if(typeof window.jspdf === 'undefined'){
     alert('Biblioteca de PDF não carregada.');
     return;
   }
-  if(items.length===0){
-    alert('Carregue a planilha de ' + AREA_LABEL[currentArea] + ' antes de gerar o relatório.');
+  if(!areaItems[area] || areaItems[area].length===0){
+    alert('Carregue a planilha de ' + AREA_LABEL[area] + ' antes de gerar o relatório.');
     return;
   }
   if(btnEl){ btnEl.disabled = true; btnEl.dataset.origText = btnEl.textContent; btnEl.textContent = '⏳ Gerando relatório...'; }
 
   // ----- salvar estado atual para restaurar depois -----
   const savedState = {
+    currentArea, items, SISTEMA_META,
     fluxoViewMode, fluxoPilar,
     selectedConsolidada: new Set(selectedConsolidada),
-    mapaGranularidade
+    mapaGranularidade,
+    valProcess: document.getElementById('valProcessFilter') ? document.getElementById('valProcessFilter').value : null,
+    valTeam: document.getElementById('valTeamFilter') ? document.getElementById('valTeamFilter').value : null
   };
+
+  // ----- força os dados/gráficos para a área escolhida no relatório,
+  //       independentemente de qual aba (Britagem/Energia) está aberta na tela -----
+  currentArea = area;
+  items = areaItems[area];
+  SISTEMA_META = (area==='energia') ? SISTEMA_META_ENERGIA : SISTEMA_META_BRITAGEM;
 
   try{
     const { jsPDF } = window.jspdf;
@@ -3399,7 +3428,8 @@ async function generatePdfReport(btnEl){
     const margin = 36;
     let firstPage = true;
 
-    function addImagePage(title, sub, imgData){
+    // Cabeçalho de página compartilhado por todas as páginas do relatório (imagem ou vetor).
+    function pageHeader(title, sub){
       if(!firstPage) doc.addPage();
       firstPage = false;
       doc.setFillColor(244,245,247);
@@ -3414,13 +3444,222 @@ async function generatePdfReport(btnEl){
         doc.setTextColor(100,112,133);
         doc.text(sub, margin, margin+24);
       }
-      const availW = pageW - margin*2;
-      const availH = pageH - margin*2 - 46;
-      const ratio = Math.min(availW/imgData.width, availH/imgData.height);
+      return { x: margin, y: margin+46, w: pageW - margin*2, h: pageH - margin*2 - 46 };
+    }
+
+    // Páginas desenhadas em vetor (texto/formas do jsPDF), sem rasterizar DOM em canvas —
+    // o Chromium marca como "tainted" qualquer canvas alimentado por uma imagem SVG que
+    // contenha <foreignObject> (usado pela captura de elementos HTML), então cards,
+    // tabela de entregas e o fluxo de validação são redesenhados aqui a partir do texto
+    // e das cores já calculadas no DOM (sem imagem/canvas).
+    // jsPDF (fonte helvetica padrão) não tem glyphs de emoji — remove para não
+    // desenhar caracteres quebrados/espaçamento estranho nas páginas em vetor.
+    function stripEmoji(s){
+      return String(s==null?'':s)
+        .replace(/[\u{1F1E6}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '')
+        .replace(/\s+/g,' ').trim();
+    }
+    function hexColor(cssColor){
+      const m = String(cssColor).match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
+      if(!m) return [255,255,255,1];
+      return [+m[1], +m[2], +m[3], m[4]!==undefined ? +m[4] : 1];
+    }
+    function blendOverWhite(rgba){
+      const [r,g,b,a] = rgba;
+      return [Math.round(r*a+255*(1-a)), Math.round(g*a+255*(1-a)), Math.round(b*a+255*(1-a))];
+    }
+
+    function addKpiCardsPage(title, sub, rowSelector){
+      const box = pageHeader(title, sub);
+      const cards = Array.from(document.querySelectorAll(rowSelector+' .kpi-card'));
+      if(!cards.length) return;
+      const perRow = 3, gap = 14;
+      const cw = (box.w - gap*(perRow-1)) / perRow, ch = 92;
+      cards.forEach((c,i)=>{
+        const col = i % perRow, row = Math.floor(i/perRow);
+        const x = box.x + col*(cw+gap), y = box.y + row*(ch+gap);
+        const label = stripEmoji((c.querySelector('.kpi-label')||{}).textContent || '');
+        const value = stripEmoji((c.querySelector('.kpi-value')||{}).textContent || '');
+        const subTxt = stripEmoji((c.querySelector('.kpi-sub')||{}).textContent || '');
+        doc.setDrawColor(212,216,222); doc.setLineWidth(1); doc.setFillColor(255,255,255);
+        doc.roundedRect(x, y, cw, ch, 6, 6, 'FD');
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(110,120,133);
+        doc.text(label, x+12, y+20, {maxWidth: cw-24});
+        doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(20,30,40);
+        doc.text(String(value), x+12, y+48);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(130,140,150);
+        doc.text(subTxt, x+12, y+68, {maxWidth: cw-24});
+      });
+    }
+
+    function addHeatmapTablePage(title, sub, tableId){
+      const box = pageHeader(title, sub);
+      const table = document.getElementById(tableId);
+      if(!table) return;
+      const headCells = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
+      const bodyRows = Array.from(table.querySelectorAll('tbody tr')).map(tr=>
+        Array.from(tr.children).map(td=>({
+          text: td.textContent.trim(),
+          bg: getComputedStyle(td).backgroundColor,
+          isZero: td.classList.contains('zero')
+        }))
+      );
+      if(!headCells.length || !bodyRows.length) return;
+      const cols = headCells.length;
+      const rowHeadW = Math.min(140, box.w*0.22);
+      const otherW = (box.w - rowHeadW) / (cols-1);
+      const rowH = 20;
+      let y = box.y;
+      doc.setFillColor(230,232,236);
+      doc.rect(box.x, y, box.w, rowH, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(60,70,80);
+      headCells.forEach((t,i)=>{
+        const cw = i===0 ? rowHeadW : otherW;
+        const x = box.x + (i===0 ? 0 : rowHeadW+(i-1)*otherW);
+        doc.text(t, x+4, y+13, {maxWidth: cw-8});
+      });
+      y += rowH;
+      bodyRows.forEach(row=>{
+        if(y+rowH > box.y+box.h){ return; } // evita transbordar a página
+        row.forEach((cell,i)=>{
+          const cw = i===0 ? rowHeadW : otherW;
+          const x = box.x + (i===0 ? 0 : rowHeadW+(i-1)*otherW);
+          if(i>0){
+            const rgb = blendOverWhite(hexColor(cell.bg));
+            doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+            doc.rect(x, y, cw, rowH, 'F');
+          }
+          doc.setDrawColor(225,228,232);
+          doc.rect(x, y, cw, rowH);
+          doc.setFont(i===0?'helvetica':'helvetica', i===0?'bold':'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(i===0 ? 30 : (cell.isZero?170:40), i===0?40:(cell.isZero?175:50), i===0?50:(cell.isZero?180:60));
+          doc.text(cell.text, x+4, y+13, {maxWidth: cw-8});
+        });
+        y += rowH;
+      });
+    }
+
+    function addValFlowPage(title, sub){
+      const box = pageHeader(title, sub);
+      const RESP_COLOR = { tenax:[217,119,6], vale:[37,99,235], done:[22,163,74], nok:[220,38,38] };
+      const stages = Array.from(document.querySelectorAll('#valFlow .val-stage')).map(el=>{
+        let resp = 'tenax';
+        if(el.classList.contains('resp-vale')) resp = 'vale';
+        else if(el.classList.contains('resp-done')) resp = 'done';
+        else if(el.classList.contains('resp-nok')) resp = 'nok';
+        return {
+          resp,
+          chip: stripEmoji((el.querySelector('.st-chip')||{}).textContent || ''),
+          num: stripEmoji((el.querySelector('.st-num')||{}).textContent || ''),
+          name: stripEmoji((el.querySelector('.st-name')||{}).textContent || ''),
+          desc: stripEmoji((el.querySelector('.st-desc')||{}).textContent || ''),
+          atraso: stripEmoji((el.querySelector('.st-atraso')||{}).textContent || '')
+        };
+      });
+      let y = box.y;
+      if(stages.length){
+        const perRow = 3, gap = 12;
+        const cw = (box.w - gap*(perRow-1)) / perRow, ch = 96;
+        stages.forEach((s,i)=>{
+          const col = i % perRow, row = Math.floor(i/perRow);
+          const x = box.x + col*(cw+gap), sy = y + row*(ch+gap);
+          const c = RESP_COLOR[s.resp];
+          doc.setDrawColor(212,216,222); doc.setLineWidth(1); doc.setFillColor(255,255,255);
+          doc.roundedRect(x, sy, cw, ch, 6, 6, 'FD');
+          doc.setFillColor(c[0],c[1],c[2]);
+          doc.rect(x+2, sy+2, cw-4, 3, 'F');
+          doc.setFillColor(c[0],c[1],c[2]);
+          doc.roundedRect(x+10, sy+12, 60, 13, 4, 4, 'F');
+          doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(255,255,255);
+          doc.text(s.chip, x+14, sy+21);
+          doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(20,30,40);
+          doc.text(s.num, x+10, sy+40);
+          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(30,40,50);
+          doc.text(s.name, x+10, sy+54, {maxWidth: cw-20});
+          doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(120,130,140);
+          doc.text(s.desc, x+10, sy+68, {maxWidth: cw-20});
+          if(s.atraso){
+            doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(220,38,38);
+            doc.text(s.atraso, x+10, sy+82, {maxWidth: cw-20});
+          }
+        });
+        y += Math.ceil(stages.length/perRow)*(ch+gap) + 6;
+      }
+
+      // totalizadores por empresa
+      const totals = Array.from(document.querySelectorAll('#valPendTotais .vf2-total')).map(el=>({
+        label: stripEmoji((el.querySelector('.tot-label')||{}).textContent || ''),
+        num: stripEmoji((el.querySelector('.tot-num')||{}).textContent || ''),
+        detail: stripEmoji((el.querySelector('.tot-detail')||{}).textContent || ''),
+        tenax: el.classList.contains('tenax')
+      }));
+      if(totals.length){
+        const gap = 14, tw = (box.w-gap)/2, th = 56;
+        totals.forEach((t,i)=>{
+          const x = box.x + i*(tw+gap);
+          const bg = t.tenax ? [254,247,236] : [238,244,255];
+          const fg = t.tenax ? [180,83,9] : [29,78,216];
+          doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(230,220,200);
+          doc.roundedRect(x, y, tw, th, 6, 6, 'FD');
+          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(fg[0],fg[1],fg[2]);
+          doc.text(t.label, x+12, y+18);
+          doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(fg[0],fg[1],fg[2]);
+          doc.text(t.num, x+12, y+38);
+          doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(110,120,133);
+          doc.text(t.detail, x+12, y+50, {maxWidth: tw-24});
+        });
+        y += th + 14;
+      }
+
+      // barra de responsabilidade
+      const splitTitle = stripEmoji((document.querySelector('#valFlowSummary .val-split-title')||{}).textContent || '');
+      const segs = Array.from(document.querySelectorAll('#valFlowSummary .seg')).map(el=>({
+        title: el.getAttribute('title') || '',
+        bg: getComputedStyle(el).backgroundColor,
+        widthPct: parseFloat(el.style.width) || 0
+      }));
+      if(splitTitle){
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,90,100);
+        doc.text(splitTitle, box.x, y+10);
+        y += 16;
+      }
+      if(segs.length){
+        const barH = 18;
+        let sx = box.x;
+        segs.forEach(s=>{
+          const sw = box.w * (s.widthPct/100);
+          const rgb = blendOverWhite(hexColor(s.bg));
+          doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+          doc.rect(sx, y, sw, barH, 'F');
+          sx += sw;
+        });
+        doc.setDrawColor(200,205,212);
+        doc.rect(box.x, y, box.w, barH);
+        y += barH + 14;
+      }
+
+      // alerta
+      const alertEl = document.querySelector('#valFlowSummary .val-alert');
+      if(alertEl){
+        const isOk = alertEl.classList.contains('ok');
+        const lines = (alertEl.innerText||'').split('\n').filter(Boolean).map(stripEmoji).filter(Boolean);
+        const bg = isOk ? [236,253,243] : [254,242,242];
+        const fg = isOk ? [21,128,61] : [185,28,28];
+        const boxH = 14 + lines.length*13;
+        doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(220,225,230);
+        doc.roundedRect(box.x, y, box.w, boxH, 5, 5, 'FD');
+        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(fg[0],fg[1],fg[2]);
+        lines.forEach((l,i)=>{ doc.text(l, box.x+10, y+16+i*13, {maxWidth: box.w-20}); });
+      }
+    }
+
+    function addImagePage(title, sub, imgData){
+      const box = pageHeader(title, sub);
+      const ratio = Math.min(box.w/imgData.width, box.h/imgData.height);
       const w = imgData.width*ratio, h = imgData.height*ratio;
-      const x = margin + (availW-w)/2;
-      const y = margin + 46;
-      doc.addImage(imgData.dataUrl, 'PNG', x, y, w, h);
+      const x = box.x + (box.w-w)/2;
+      doc.addImage(imgData.dataUrl, 'PNG', x, box.y, w, h);
     }
 
     // ----- capa -----
@@ -3432,20 +3671,28 @@ async function generatePdfReport(btnEl){
     doc.text('Relatório de Acompanhamento', pageW/2, pageH/2-30, {align:'center'});
     doc.setFont('helvetica','normal');
     doc.setFontSize(13);
-    doc.text('Cronogramas de Acompanhamento — '+AREA_LABEL[currentArea], pageW/2, pageH/2+2, {align:'center'});
+    doc.text('Cronogramas de Acompanhamento — '+AREA_LABEL[area], pageW/2, pageH/2+2, {align:'center'});
     const dateLabel = new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
     doc.setFontSize(11);
     doc.text('Gerado em '+dateLabel, pageW/2, pageH/2+26, {align:'center'});
     firstPage = false;
 
-    // ----- 1) Fluxograma de blocos (resumo geral) -----
-    fluxoViewMode = 'geral'; fluxoPilar = null;
+    // ----- 1) Cards iniciais (indicadores gerais) -----
     renderAll();
     await waitFrame();
-    const fluxoImg = await svgToImageData('a_fluxoSvg');
-    addImagePage(AREA_FLUXO_TITLE[currentArea], 'Resumo geral (todos os pilares combinados)', fluxoImg);
+    addKpiCardsPage('Indicadores gerais', AREA_LABEL[area], '#a_kpiRow');
 
-    // ----- 2) Curva S consolidada — geral (Todos os pilares) -----
+    // ----- 2) Fluxograma de blocos — sempre separado por pilar -----
+    const pilaresComItens = CHART_PILARES.filter(p=>items.some(i=>i.pilar===p));
+    for(const p of pilaresComItens){
+      fluxoViewMode = 'pilar'; fluxoPilar = p;
+      renderAll();
+      await waitFrame();
+      const fluxoImg = await svgToImageData('a_fluxoSvg');
+      addImagePage(AREA_FLUXO_TITLE[area], 'Pilar: '+p, fluxoImg);
+    }
+
+    // ----- 3) Curva S consolidada — geral (Todos os pilares) -----
     selectedConsolidada.clear();
     CHART_PILARES.forEach(p=>selectedConsolidada.add(p));
     renderAll();
@@ -3453,7 +3700,7 @@ async function generatePdfReport(btnEl){
     const curvaGeralImg = await svgToImageData('a_curvaConsSvg');
     addImagePage('Curva S consolidada do projeto', 'Visão geral — todos os pilares combinados', curvaGeralImg);
 
-    // ----- 3) Curva S consolidada — por pilar -----
+    // ----- 4) Curva S consolidada — por pilar -----
     for(const p of CHART_PILARES){
       selectedConsolidada.clear();
       selectedConsolidada.add(p);
@@ -3463,25 +3710,41 @@ async function generatePdfReport(btnEl){
       addImagePage('Curva S consolidada do projeto', 'Pilar: '+p, curvaPilarImg);
     }
 
-    // ----- 4) Mapa de entregas por equipe (por semana) -----
-    mapaGranularidade = 'semana';
+    // ----- 5) Mapa de entregas por equipe (por mês) -----
+    mapaGranularidade = 'mes';
     renderAll();
     await waitFrame();
-    const mapaImg = await elementToImageData('a_heatmapWrap');
-    addImagePage('Mapa de entregas por equipe', 'Quantidade de itens com entrega planejada — granularidade semanal', mapaImg);
+    addHeatmapTablePage('Mapa de entregas por equipe', 'Quantidade de itens com entrega planejada — granularidade mensal', 'a_heatmapTable');
+
+    // ----- 6) Fluxo do processo de validação — área escolhida -----
+    const valProcessEl = document.getElementById('valProcessFilter');
+    const valTeamEl = document.getElementById('valTeamFilter');
+    if(valProcessEl && valTeamEl && typeof renderValidacao==='function'){
+      valProcessEl.value = area;
+      valTeamEl.value = 'all';
+      renderValidacao();
+      await waitFrame();
+      addValFlowPage('Fluxo do processo de validação — em que etapa está e de quem é a ação', AREA_LABEL[area]);
+    }
 
     const fileDate = new Date().toISOString().slice(0,10);
-    doc.save(`relatorio-acompanhamento-${fileDate}.pdf`);
+    doc.save(`relatorio-acompanhamento-${area}-${fileDate}.pdf`);
 
   } catch(err){
     alert('Não foi possível gerar o relatório: ' + err.message);
   } finally {
     // ----- restaurar estado original -----
+    currentArea = savedState.currentArea;
+    items = savedState.items;
+    SISTEMA_META = savedState.SISTEMA_META;
     fluxoViewMode = savedState.fluxoViewMode;
     fluxoPilar = savedState.fluxoPilar;
     selectedConsolidada.clear();
     savedState.selectedConsolidada.forEach(p=>selectedConsolidada.add(p));
     mapaGranularidade = savedState.mapaGranularidade;
+    if(document.getElementById('valProcessFilter') && savedState.valProcess!==null) document.getElementById('valProcessFilter').value = savedState.valProcess;
+    if(document.getElementById('valTeamFilter') && savedState.valTeam!==null) document.getElementById('valTeamFilter').value = savedState.valTeam;
+    if(typeof renderValidacao==='function') safe('renderValidacao', renderValidacao);
     renderAll();
 
     const selEl = document.getElementById('a_fluxoPilarSelect');
@@ -3489,7 +3752,7 @@ async function generatePdfReport(btnEl){
     document.querySelectorAll('#a_fluxoToggle button').forEach(b=>b.classList.toggle('active', b.dataset.mode===fluxoViewMode));
     document.querySelectorAll('#a_mapaToggle button').forEach(b=>b.classList.toggle('active', b.dataset.gran===mapaGranularidade));
 
-    if(btnEl){ btnEl.disabled=false; btnEl.textContent = btnEl.dataset.origText || '📑 Exportar relatório (PDF)'; }
+    if(btnEl){ btnEl.disabled=false; btnEl.textContent = btnEl.dataset.origText || btnEl.textContent; }
   }
 }
 
@@ -3896,11 +4159,20 @@ document.getElementById('dataUpdateToggle').addEventListener('click', function(e
   e.stopPropagation();
   document.getElementById('dataUpdatePop').classList.toggle('open');
 });
+document.getElementById('pdfExportToggle').addEventListener('click', function(e){
+  e.stopPropagation();
+  document.getElementById('pdfExportPop').classList.toggle('open');
+});
 document.addEventListener('click', function(e){
   const pop = document.getElementById('dataUpdatePop');
   const btn = document.getElementById('dataUpdateToggle');
   if(pop.classList.contains('open') && !pop.contains(e.target) && e.target!==btn){
     pop.classList.remove('open');
+  }
+  const pdfPop = document.getElementById('pdfExportPop');
+  const pdfBtn = document.getElementById('pdfExportToggle');
+  if(pdfPop.classList.contains('open') && !pdfPop.contains(e.target) && e.target!==pdfBtn){
+    pdfPop.classList.remove('open');
   }
 });
 
@@ -4088,8 +4360,13 @@ function carregarPlanilhaDoServidor(){
 function iniciarControlesDashboard(){
   initExpand();
   initDownloadButtons();
-  document.getElementById('pdfReportBtn').addEventListener('click', function(){
-    AssetDash.generatePdfReport(this);
+  document.getElementById('pdfExportBritagem').addEventListener('click', function(){
+    document.getElementById('pdfExportPop').classList.remove('open');
+    AssetDash.generatePdfReport('britagem', this);
+  });
+  document.getElementById('pdfExportEnergia').addEventListener('click', function(){
+    document.getElementById('pdfExportPop').classList.remove('open');
+    AssetDash.generatePdfReport('energia', this);
   });
   initZoom('zoomFluxo','a_fluxoSvg');
   initZoom('zoomIndividual','a_curvaIndividualSvg');
