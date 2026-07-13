@@ -1028,39 +1028,6 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-planejamento .gnt-hint{padding:6px 16px;font-size:10px;color:var(--gnt-muted);border-top:1px solid var(--gnt-line);background:var(--gnt-panel)}
 #page-planejamento .gnt-empty{padding:40px 20px;text-align:center;color:var(--gnt-muted);font-size:13px}
 
-/* ===================== Login (acesso restrito) ===================== */
-.login-gate{
-  position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(160deg,#045552 0%,#03413F 60%,#022826 100%);
-  padding:20px;
-}
-.login-gate.hidden{ display:none; }
-.login-box{
-  background:#fff; border-radius:14px; padding:32px 30px; width:100%; max-width:360px;
-  box-shadow:0 20px 60px rgba(0,0,0,.35);
-}
-.login-logo{ font-size:26px; margin-bottom:6px; }
-.login-box h2{ margin:0 0 4px; font-size:19px; color:#045552; }
-.login-sub{ margin:0 0 20px; font-size:12.5px; color:#5e6c84; line-height:1.5; }
-.login-field{ display:block; margin-bottom:14px; font-size:12px; color:#334; font-weight:600; }
-.login-field span{ display:block; margin-bottom:5px; }
-.login-field input{
-  width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #dfe1e6; border-radius:8px;
-  font-size:13.5px; font-family:inherit;
-}
-.login-field input:focus{ outline:none; border-color:#00B0CA; box-shadow:0 0 0 3px rgba(0,176,202,.15); }
-.login-error{ min-height:18px; color:#DC2626; font-size:12px; margin-bottom:8px; font-weight:600; }
-.login-btn{
-  width:100%; background:#045552; color:#fff; border:none; border-radius:8px; padding:11px;
-  font-size:14px; font-weight:700; cursor:pointer; transition:opacity .15s;
-}
-.login-btn:hover{ opacity:.9; }
-body.dark-mode .login-box{ background:#16202B; }
-body.dark-mode .login-box h2{ color:#3FCBE8; }
-body.dark-mode .login-sub{ color:#9AABB8; }
-body.dark-mode .login-field{ color:#E6EDF3; }
-body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; color:#E6EDF3; }
-.auth-user-tag{ font-size:11px; color:var(--muted); margin-right:4px; white-space:nowrap; }
 
 /* ===== Aba Validação: fluxo do processo, cards e manual recolhível ===== */
 #page-validacao .val-flow{ display:flex; align-items:stretch; flex-wrap:wrap; gap:0; margin:16px 0 4px; }
@@ -1231,71 +1198,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
 </style>
 </head>
 <body>
-<div id="loginGate" class="login-gate">
-  <form id="loginForm" class="login-box" autocomplete="on">
-    <div class="login-logo">🔒</div>
-    <h2>Acesso restrito</h2>
-    <p class="login-sub">Entre com seu e-mail e senha para acessar o painel de acompanhamento.</p>
-    <label class="login-field">
-      <span>E-mail</span>
-      <input type="email" id="loginEmail" autocomplete="username" required>
-    </label>
-    <label class="login-field">
-      <span>Senha</span>
-      <input type="password" id="loginPassword" autocomplete="current-password" required>
-    </label>
-    <div class="login-error" id="loginError"></div>
-    <button type="submit" class="login-btn">Entrar</button>
-  </form>
-</div>
-<script>
-(function(){
-  var ALLOWED = {
-    'rithely.falqueto@k2mais.com.br': 'e172d9e2',
-    'joao.pereira@k2mais.com.br': 'e172d9e2'
-  };
-  var SESSION_KEY = 'k2mais_dashboard_auth_email';
 
-  function simpleHash(str){
-    var h = 5381;
-    for(var i=0;i<str.length;i++){
-      h = ((h*33) ^ str.charCodeAt(i)) >>> 0;
-    }
-    return h.toString(16);
-  }
-
-  function unlock(email){
-    document.getElementById('loginGate').classList.add('hidden');
-    window.__authEmail = email;
-    var tag = document.getElementById('authUserTag');
-    if(tag) tag.textContent = '👤 ' + email;
-  }
-
-  var savedEmail = sessionStorage.getItem(SESSION_KEY);
-  if(savedEmail && ALLOWED[savedEmail]){
-    unlock(savedEmail);
-  }
-
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    var pass = document.getElementById('loginPassword').value;
-    var errEl = document.getElementById('loginError');
-    if(ALLOWED[email] && ALLOWED[email] === simpleHash(pass)){
-      sessionStorage.setItem(SESSION_KEY, email);
-      errEl.textContent = '';
-      unlock(email);
-    } else {
-      errEl.textContent = 'E-mail ou senha inválidos.';
-    }
-  });
-
-  window.__k2mLogout = function(){
-    sessionStorage.removeItem(SESSION_KEY);
-    location.reload();
-  };
-})();
-</script>
 
 
 <div class="app-sidebar" id="appSidebar">
@@ -1364,8 +1267,6 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
       <h1>Cronogramas de Acompanhamento</h1>
     </div>
     <div class="app-controls">
-      <span class="auth-user-tag" id="authUserTag"></span>
-      <button class="theme-toggle" id="logoutBtn" type="button" title="Sair">🔒</button>
       <button class="theme-toggle" id="themeToggle" type="button" title="Alternar tema claro/escuro">🌙</button>
       <div class="data-update-wrap">
         <button class="data-update-btn icon-only" id="dataUpdateToggle" type="button" title="Atualizar planilhas">🔄</button>
@@ -1588,6 +1489,12 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
        <option value="Taxonomia">Taxonomia</option>
        <option value="Lista BOM">Lista BOM</option>
        <option value="Estratégia de Manutenção">Estratégia de Manutenção</option>
+     </select>
+     <select class="gnt-select" id="gntD0Filter" title="Filtrar por Status D0">
+       <option value="all">Status D0 — todos</option>
+       <option value="atraso">D0 em atraso</option>
+       <option value="prazo">D0 no prazo</option>
+       <option value="sem">Sem D0 definido</option>
      </select>
      <span class="gnt-sep"></span>
      <button class="gnt-btn" id="gntTodayBtn" type="button">Hoje</button>
@@ -3901,14 +3808,6 @@ document.getElementById('fileInputCombinado').addEventListener('change', functio
   handleCombinedUpload(e);
 });
 
-if(window.__authEmail){
-  const authTag = document.getElementById('authUserTag');
-  if(authTag) authTag.textContent = '👤 ' + window.__authEmail;
-}
-document.getElementById('logoutBtn').addEventListener('click', function(){
-  if(window.__k2mLogout) window.__k2mLogout();
-});
-
 document.getElementById('themeToggle').addEventListener('click', function(){
   const isDark = document.body.classList.toggle('dark-mode');
   this.textContent = isDark ? '☀️' : '🌙';
@@ -4239,6 +4138,7 @@ const PlanningGantt = (function(){
   let bound = false;
   let filterStatus = 'all'; // 'all' | 'doing' | 'done' | 'plan'
   let filterTeam = 'all';   // 'all' | nome do pilar/equipe
+  let filterD0 = 'all';     // 'all' | 'atraso' (D0 vencido) | 'prazo' | 'sem' (sem data D0)
   let dataAvailable = false; // true se há itens carregados, mesmo que os filtros zerem o resultado
 
   function statusToSt(status){
@@ -4256,6 +4156,7 @@ const PlanningGantt = (function(){
       {label:'Energia', items: areas.energia || []}
     ];
     dataAvailable = groups.some(g=>g.items.some(it=>it.pilar));
+    const todayISO = new Date().toISOString().slice(0,10);
     const tree = [];
     groups.forEach(({label, items})=>{
       if(!items.length) return;
@@ -4265,6 +4166,10 @@ const PlanningGantt = (function(){
         if(filterTeam!=='all' && it.pilar!==filterTeam) return;
         const st = statusToSt(it.status);
         if(filterStatus!=='all' && st!==filterStatus) return;
+        if(filterD0!=='all'){
+          const d0state = !it.status_d0 ? 'sem' : (it.status_d0 < todayISO ? 'atraso' : 'prazo');
+          if(d0state!==filterD0) return;
+        }
         const s = it.real_start || it.plan_start;
         const e = (it.status==='Concluído') ? (it.real_end || it.plan_end || s) : (it.plan_end || s);
         if(!s || !e) return;
@@ -4535,6 +4440,10 @@ const PlanningGantt = (function(){
     });
     document.getElementById('gntTeamFilter').addEventListener('change', e=>{
       filterTeam = e.target.value;
+      refresh();
+    });
+    document.getElementById('gntD0Filter').addEventListener('change', e=>{
+      filterD0 = e.target.value;
       refresh();
     });
     rB.addEventListener('scroll', ()=>{ root.querySelector('.gnt-rhead').scrollLeft = rB.scrollLeft; lB.scrollTop = rB.scrollTop; });
