@@ -1055,6 +1055,19 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
 @media (max-width:700px){ #valKpiWeekRow{ grid-template-columns:1fr !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
+#page-validacao .vf-branch{ display:flex; flex-direction:column; gap:10px; justify-content:center; flex:1 1 240px; min-width:240px; }
+#page-validacao .vf-lane{ display:flex; align-items:stretch; }
+#page-validacao .vf-lane .val-stage{ flex:1 1 auto; min-width:120px; }
+#page-validacao .vf-route{
+  flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--bg); border:1px dashed var(--border); border-radius:10px;
+  padding:10px 10px; font-size:11px; font-weight:700; color:var(--text); text-align:center; line-height:1.45;
+}
+#page-validacao .vf-route .vf-route-sub{ font-size:10px; font-weight:600; color:var(--muted); margin-top:4px; }
+#page-validacao .vf-lane .vf-route:not(:only-child){ flex:0 0 auto; max-width:96px; padding:8px 8px; }
+#page-validacao .vf-lane .vf-route:only-child{ min-height:100%; }
+#page-validacao .vf-outcomes{ display:flex; flex-direction:column; gap:10px; justify-content:center; flex:1 1 150px; min-width:150px; }
+#page-validacao .vf-outcomes .val-stage{ flex:0 0 auto; }
 #page-validacao .val-split{ margin-top:16px; }
 #page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
 #page-validacao .val-split-bar{ display:flex; height:24px; border-radius:7px; overflow:hidden; border:1px solid var(--border); }
@@ -2998,8 +3011,8 @@ function renderTable(){
 // [comentários: Em análise-Tenax] -> Validação -> Validado | Não validado.
 const VAL_STAGES = [
   {key:'envio',         resp:'tenax', label:'Ag. Envio',          desc:'aguardando envio à Vale (plano semanal via Status D0)'},
-  {key:'assets',        resp:'tenax', label:'Pendente — Assets',  desc:'Inventário: pré-aprovação interna no Assets'},
-  {key:'analise_vale',  resp:'vale',  label:'Em análise — Vale',  desc:'demais equipes entram direto · retorno em 7 dias corridos'},
+  {key:'assets',        resp:'tenax', label:'Pendente — Assets',  desc:'pré-aprovação interna no Assets'},
+  {key:'analise_vale',  resp:'vale',  label:'Em análise — Vale',  desc:'retorno da Vale em 7 dias corridos'},
   {key:'analise_tenax', resp:'tenax', label:'Em análise — Tenax', desc:'retorno com comentários para serem atendidos'},
   {key:'ok',            resp:'done',  label:'Validado',           desc:'linhas validadas — indicador positivo'},
   {key:'nok',           resp:'nok',   label:'Não validado',       desc:'linhas não validadas — indicador negativo'}
@@ -3133,15 +3146,19 @@ function renderValidacao(){
     : 'precisam ser enviados dentro da semana';
 
   // ---- fluxo visual do processo ----
+  // Espelha o fluxograma: Ag. Envio bifurca — Inventário passa pelo Assets,
+  // as demais equipes entram direto na análise da Vale — e a validação
+  // termina em dois desfechos empilhados (Validado / Não validado).
   const total = allItems.length;
   const RESP_LABEL = { tenax:'Tenax', vale:'Vale', done:'Positivo', nok:'Negativo' };
-  document.getElementById('valFlow').innerHTML = VAL_STAGES.map((s, ix)=>{
-    const n = stageCount[s.key];
+  function stageBox(key){
+    const s = VAL_STAGE_BY_KEY[key];
+    const n = stageCount[key];
     const pct = total ? (n/total*100) : 0;
     const pctTxt = total ? (pct < 1 && n > 0 ? '<1%' : Math.round(pct) + '%') : '—';
-    const atrasoTxt = (s.key==='analise_tenax' || s.key==='ok' || s.key==='nok') ? ''
-      : `<div class="st-atraso${stageAtraso[s.key]?'':' zero'}">🔴 ${fmtN(stageAtraso[s.key])} em atraso</div>`;
-    const box = `
+    const atrasoTxt = (key==='analise_tenax' || key==='ok' || key==='nok') ? ''
+      : `<div class="st-atraso${stageAtraso[key]?'':' zero'}">🔴 ${fmtN(stageAtraso[key])} em atraso</div>`;
+    return `
       <div class="val-stage resp-${s.resp}">
         <span class="st-chip">${RESP_LABEL[s.resp]}</span>
         <div class="st-num">${fmtN(n)}</div>
@@ -3150,8 +3167,24 @@ function renderValidacao(){
         <div class="st-pct">${pctTxt} das linhas</div>
         ${atrasoTxt}
       </div>`;
-    return ix < VAL_STAGES.length-1 ? box + '<div class="val-arrow">➜</div>' : box;
-  }).join('');
+  }
+  const arrow = '<div class="val-arrow">➜</div>';
+  document.getElementById('valFlow').innerHTML =
+    stageBox('envio') + arrow +
+    `<div class="vf-branch">
+      <div class="vf-lane">
+        <div class="vf-route">Inventário</div>${arrow}${stageBox('assets')}
+      </div>
+      <div class="vf-lane">
+        <div class="vf-route">RCM · Estratégia de Ativos<br>Lista BOM · Taxonomia<div class="vf-route-sub">entram direto na análise</div></div>
+      </div>
+    </div>` + arrow +
+    stageBox('analise_vale') + arrow +
+    stageBox('analise_tenax') + arrow +
+    `<div class="vf-outcomes">
+      ${stageBox('ok')}
+      ${stageBox('nok')}
+    </div>`;
 
   // ---- barra de responsabilidade + alertas ----
   const nT = stageCount.envio + stageCount.assets + stageCount.analise_tenax;
