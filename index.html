@@ -1062,6 +1062,18 @@ body.dark-mode .login-field{ color:#E6EDF3; }
 body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; color:#E6EDF3; }
 .auth-user-tag{ font-size:11px; color:var(--muted); margin-right:4px; white-space:nowrap; }
 
+/* Manual explicativo dos cards da aba Validação */
+.val-manual{
+  background:var(--bg); border:1px dashed var(--border); border-radius:8px;
+  padding:12px 16px; margin-bottom:18px; font-size:12px; color:var(--muted); line-height:1.55;
+}
+.val-manual b{ color:var(--text); }
+.val-manual ul{ margin:8px 0 0; padding-left:18px; }
+.val-manual li{ margin-bottom:6px; }
+.val-manual li:last-child{ margin-bottom:0; }
+@media (max-width:1300px){ #valPendKpiRow{ grid-template-columns:repeat(3,1fr) !important; } }
+@media (max-width:700px){ #valPendKpiRow{ grid-template-columns:repeat(2,1fr) !important; } }
+
 /* ===================== Indicadores de Contrato (page-contrato) — prefixo ct- ===================== */
 #page-contrato .ct-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
 @media (max-width:1100px){ #page-contrato .ct-kpi-row{grid-template-columns:repeat(2,1fr);} }
@@ -1584,11 +1596,16 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
   <div class="panel">
     <h2>Pendência atual — de quem é a próxima ação?</h2>
     <div class="sub">A partir da coluna "Validação" (pré-aprovação Assets), refinada por "Retorno real" / "Data atendimento comentários" quando a Vale já respondeu. Cobre todas as linhas, inclusive Inventário.</div>
-    <div class="kpi-row" id="valPendKpiRow" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+    <div class="kpi-row" id="valPendKpiRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px;">
       <div class="kpi-card">
-        <div class="kpi-label">🟠 Pendente — Tenax</div>
-        <div class="kpi-value" id="valPendTenaxCount">—</div>
-        <div class="kpi-sub">precisa agir para destravar</div>
+        <div class="kpi-label">🟠 Ag. Envio</div>
+        <div class="kpi-value" id="valPendAgEnvioCount">—</div>
+        <div class="kpi-sub">pendente Tenax — envio para a Vale</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Ag. Envio — Assets</div>
+        <div class="kpi-value" id="valPendAssetsCount">—</div>
+        <div class="kpi-sub">pendente Tenax — pré-aprovação Assets</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">🔵 Pendente — Vale</div>
@@ -1596,10 +1613,26 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <div class="kpi-sub">aguardando retorno/validação da Vale</div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-label">🔴 Em atraso (D0)</div>
+        <div class="kpi-value" id="valPendAtrasoCount">—</div>
+        <div class="kpi-sub">prazo D0 vencido sem validação</div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-label">✅ Validado</div>
         <div class="kpi-value" id="valPendValidadoCount">—</div>
         <div class="kpi-sub">sem pendência</div>
       </div>
+    </div>
+
+    <div class="val-manual">
+      <b>📖 Como cada card é calculado</b>
+      <ul>
+        <li><b>🟠 Ag. Envio</b> — linhas com a coluna <i>Validação</i> = "Ag. Envio": o documento ainda não foi enviado para a Vale. A ação é da <b>Tenax</b>.</li>
+        <li><b>🟠 Ag. Envio — Assets</b> — linhas com <i>Validação</i> = "Ag. Envio - Assets" (só existe no pilar Inventário): o item aguarda a pré-aprovação interna na plataforma <b>Assets</b> antes de seguir para a Vale. A ação é da <b>Tenax</b>.</li>
+        <li><b>🔵 Pendente — Vale</b> — linhas em análise na Vale ("Em análise - Vale" ou "Não validado"). Inclui os documentos em que a Vale retornou comentários e a Tenax já atendeu (<i>Retorno real</i> e <i>Data atendimento comentários</i> preenchidos) — nesses, falta apenas a Vale validar. Atenção: se a Vale retornou e a Tenax ainda <u>não</u> atendeu os comentários (<i>Retorno real</i> preenchido e <i>Data atendimento comentários</i> vazia), a linha volta a contar como pendência da Tenax nas tabelas abaixo.</li>
+        <li><b>🔴 Em atraso (D0)</b> — linhas cuja data da coluna <i>Status D0</i> já venceu (anterior a hoje) e que ainda não foram validadas. É um recorte de prazo: essas linhas também aparecem em um dos cards de pendência acima.</li>
+        <li><b>✅ Validado</b> — linhas com <i>Validação</i> = "Validado": ciclo concluído, sem dependência de ninguém.</li>
+      </ul>
     </div>
     <div class="grid2" id="valAnaliseGrid">
       <div>
@@ -2160,6 +2193,7 @@ function parsePriorizacaoVale(workbook, area){
       plan_start: planStart || planEnd, plan_end: planEnd,
       real_start: realStart, real_end: realEnd, status,
       validado, pendencia,
+      status_d0: toISO(r['Status D0']),
       retorno_previsto: toISO(r['Retorno previsto']), retorno_real,
       emissao_real: toISO(r['Data de emissão real']),
       data_atendimento,
@@ -3020,12 +3054,20 @@ function renderValidacao(){
   document.getElementById('valKpiAtrasados').textContent = atrasados.length;
 
   // Pendência (coluna Validação + Retorno real/Data atendimento) considera todas as
-  // linhas, inclusive Inventário — a regra "Pendente - Assets" só existe nesse pilar.
+  // linhas, inclusive Inventário — a regra "Ag. Envio - Assets" só existe nesse pilar.
   const pendTenax = allItems.filter(i=>i.pendencia==='tenax');
   const pendVale = allItems.filter(i=>i.pendencia==='vale');
   const validados = allItems.filter(i=>i.pendencia===null);
 
-  document.getElementById('valPendTenaxCount').textContent = pendTenax.length;
+  // Cards por tipo: contagem direta do valor da coluna Validação.
+  const agAssets = allItems.filter(i=>{ const v=_strip(i.validado); return v.includes('envio') && v.includes('assets'); });
+  const agEnvio = allItems.filter(i=>{ const v=_strip(i.validado); return v.includes('envio') && !v.includes('assets'); });
+  // Em atraso: prazo D0 vencido e a linha ainda não validada.
+  const atrasoD0 = allItems.filter(i=>i.status_d0 && i.status_d0 < todayISO && i.pendencia!==null);
+
+  document.getElementById('valPendAgEnvioCount').textContent = agEnvio.length;
+  document.getElementById('valPendAssetsCount').textContent = agAssets.length;
+  document.getElementById('valPendAtrasoCount').textContent = atrasoD0.length;
   document.getElementById('valPendTenaxCount2').textContent = pendTenax.length;
   document.getElementById('valPendValeCount').textContent = pendVale.length;
   document.getElementById('valPendValeCount2').textContent = pendVale.length;
