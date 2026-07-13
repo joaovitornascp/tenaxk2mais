@@ -1551,11 +1551,11 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
        <option value="Lista BOM">Lista BOM</option>
        <option value="Estratégia de Manutenção">Estratégia de Manutenção</option>
      </select>
-     <select class="gnt-select" id="gntD0Filter" title="Filtrar por Status D0">
+     <select class="gnt-select" id="gntD0Filter" title="Filtrar por Status D0 (semanas em relação à data atual)">
        <option value="all">Status D0 — todos</option>
-       <option value="atraso">D0 em atraso</option>
-       <option value="prazo">D0 no prazo</option>
-       <option value="sem">Sem D0 definido</option>
+       <option value="prev">D0 — semana anterior</option>
+       <option value="cur">D0 — semana atual</option>
+       <option value="next">D0 — semana seguinte</option>
      </select>
      <span class="gnt-sep"></span>
      <button class="gnt-btn" id="gntTodayBtn" type="button">Hoje</button>
@@ -4211,7 +4211,7 @@ const PlanningGantt = (function(){
   let bound = false;
   let filterStatus = 'all'; // 'all' | 'doing' | 'done' | 'plan'
   let filterTeam = 'all';   // 'all' | nome do pilar/equipe
-  let filterD0 = 'all';     // 'all' | 'atraso' (D0 vencido) | 'prazo' | 'sem' (sem data D0)
+  let filterD0 = 'all';     // 'all' | 'prev' | 'cur' | 'next' (semana do Status D0 em relação a hoje)
   let dataAvailable = false; // true se há itens carregados, mesmo que os filtros zerem o resultado
 
   function statusToSt(status){
@@ -4229,7 +4229,18 @@ const PlanningGantt = (function(){
       {label:'Energia', items: areas.energia || []}
     ];
     dataAvailable = groups.some(g=>g.items.some(it=>it.pilar));
-    const todayISO = new Date().toISOString().slice(0,10);
+    // Janela semanal do filtro de Status D0 (seg-dom), sempre relativa à data atual:
+    // 'prev' = semana anterior, 'cur' = semana atual, 'next' = semana seguinte.
+    let d0Start=null, d0End=null;
+    if(filterD0!=='all'){
+      const t = new Date(); t.setHours(0,0,0,0);
+      const monday = new Date(t); monday.setDate(t.getDate() - ((t.getDay()+6)%7));
+      const offset = filterD0==='prev' ? -7 : (filterD0==='next' ? 7 : 0);
+      const s = new Date(monday); s.setDate(monday.getDate()+offset);
+      const e = new Date(s); e.setDate(s.getDate()+6);
+      const iso = dt => dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      d0Start = iso(s); d0End = iso(e);
+    }
     const tree = [];
     groups.forEach(({label, items})=>{
       if(!items.length) return;
@@ -4239,9 +4250,8 @@ const PlanningGantt = (function(){
         if(filterTeam!=='all' && it.pilar!==filterTeam) return;
         const st = statusToSt(it.status);
         if(filterStatus!=='all' && st!==filterStatus) return;
-        if(filterD0!=='all'){
-          const d0state = !it.status_d0 ? 'sem' : (it.status_d0 < todayISO ? 'atraso' : 'prazo');
-          if(d0state!==filterD0) return;
+        if(d0Start){
+          if(!it.status_d0 || it.status_d0 < d0Start || it.status_d0 > d0End) return;
         }
         const s = it.real_start || it.plan_start;
         const e = (it.status==='Concluído') ? (it.real_end || it.plan_end || s) : (it.plan_end || s);
