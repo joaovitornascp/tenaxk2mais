@@ -1534,12 +1534,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
   <div class="panel">
     <h2>Etapas do processo — prazo × atraso</h2>
     <div class="sub">Cada card mostra o total da etapa e quantos itens estão dentro do prazo ou em atraso, conforme a regra da etapa</div>
-    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:12px;">
-      <div class="kpi-card">
-        <div class="kpi-label">🟠 Ag. Envio</div>
-        <div class="kpi-value" id="valStEnvio">—</div>
-        <div class="kpi-sub" id="valStEnvioSub">prazo pela coluna Status D0</div>
-      </div>
+    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
       <div class="kpi-card">
         <div class="kpi-label">🟠 Pendente — Assets</div>
         <div class="kpi-value" id="valStAssets">—</div>
@@ -1605,7 +1600,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
   <div class="grid2">
     <div class="panel">
       <h2>🟠 Pendente — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h2>
-      <div class="sub">Documentos cuja próxima ação é da Tenax</div>
+      <div class="sub">Documentos cuja próxima ação é da Tenax — apenas itens com data definida em Status D0</div>
       <div class="control-toolbar">
         <input type="text" id="valSearchTenax" placeholder="Buscar FLOC, sistema, pilar...">
         <select id="valEtapaTenax">
@@ -3155,8 +3150,6 @@ function renderValidacao(){
   function prazoSub(key){
     return `🟢 ${fmtN(stagePrazo[key])} no prazo · 🔴 ${fmtN(stageAtraso[key])} em atraso`;
   }
-  document.getElementById('valStEnvio').textContent = fmtN(stageCount.envio);
-  document.getElementById('valStEnvioSub').textContent = prazoSub('envio') + ' (Status D0)';
   document.getElementById('valStAssets').textContent = fmtN(stageCount.assets);
   document.getElementById('valStAssetsSub').textContent = prazoSub('assets') + ' (Status D0)';
   document.getElementById('valStAnaliseVale').textContent = fmtN(stageCount.analise_vale);
@@ -3165,7 +3158,7 @@ function renderValidacao(){
   document.getElementById('valStValidado').textContent = fmtN(stageCount.ok);
   document.getElementById('valPendAtrasoCount').textContent = fmtN(atrasoD0);
   document.getElementById('valKpiAtraso7d').textContent = fmtN(atraso7d);
-  document.getElementById('valPendTenaxCount2').textContent = fmtN(pendTenax.length);
+  document.getElementById('valPendTenaxCount2').textContent = fmtN(pendTenax.filter(i=>i.status_d0).length);
   document.getElementById('valPendValeCount2').textContent = fmtN(pendVale.length);
 
   // ---- fluxo visual do processo ----
@@ -3214,7 +3207,9 @@ function renderValidacao(){
   document.getElementById('valFlowSummary').innerHTML = summaryHtml;
 
   // ---- painéis de pesquisa ----
-  valPendTenaxList = pendTenax;
+  // Pendente — Tenax lista apenas itens com data definida em Status D0 (itens já
+  // programados); o restante do backlog sem D0 segue contando nos cards e no fluxo.
+  valPendTenaxList = pendTenax.filter(i=>i.status_d0);
   valPendValeList = pendVale;
   renderValTenaxTable();
   renderValValeTable();
