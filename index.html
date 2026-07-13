@@ -1062,17 +1062,51 @@ body.dark-mode .login-field{ color:#E6EDF3; }
 body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; color:#E6EDF3; }
 .auth-user-tag{ font-size:11px; color:var(--muted); margin-right:4px; white-space:nowrap; }
 
-/* Manual explicativo dos cards da aba Validação */
-.val-manual{
-  background:var(--bg); border:1px dashed var(--border); border-radius:8px;
-  padding:12px 16px; margin-bottom:18px; font-size:12px; color:var(--muted); line-height:1.55;
+/* ===== Aba Validação: fluxo do processo, cards e manual recolhível ===== */
+#page-validacao .val-flow{ display:flex; align-items:stretch; flex-wrap:wrap; gap:0; margin:16px 0 4px; }
+#page-validacao .val-stage{
+  flex:1 1 138px; min-width:138px; background:var(--bg); border:1px solid var(--border);
+  border-top:4px solid var(--border); border-radius:10px; padding:12px 12px 10px;
 }
-.val-manual b{ color:var(--text); }
-.val-manual ul{ margin:8px 0 0; padding-left:18px; }
-.val-manual li{ margin-bottom:6px; }
-.val-manual li:last-child{ margin-bottom:0; }
-@media (max-width:1300px){ #valPendKpiRow{ grid-template-columns:repeat(3,1fr) !important; } }
-@media (max-width:700px){ #valPendKpiRow{ grid-template-columns:repeat(2,1fr) !important; } }
+#page-validacao .val-stage.resp-tenax{ border-top-color:#D97706; }
+#page-validacao .val-stage.resp-vale{ border-top-color:#2563EB; }
+#page-validacao .val-stage.resp-done{ border-top-color:#16A34A; }
+#page-validacao .val-stage .st-chip{
+  display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.05em;
+  padding:2px 8px; border-radius:10px; color:#fff; margin-bottom:8px; text-transform:uppercase;
+}
+#page-validacao .resp-tenax .st-chip{ background:#D97706; }
+#page-validacao .resp-vale .st-chip{ background:#2563EB; }
+#page-validacao .resp-done .st-chip{ background:#16A34A; }
+#page-validacao .val-stage .st-num{ font-size:26px; font-weight:800; color:var(--text); line-height:1; }
+#page-validacao .val-stage .st-name{ font-size:12px; font-weight:700; color:var(--text); margin-top:6px; }
+#page-validacao .val-stage .st-desc{ font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
+#page-validacao .val-stage .st-pct{ font-size:10.5px; color:var(--muted); margin-top:7px; font-weight:600; }
+#page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
+#page-validacao .val-split{ margin-top:16px; }
+#page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+#page-validacao .val-split-bar{ display:flex; height:24px; border-radius:7px; overflow:hidden; border:1px solid var(--border); }
+#page-validacao .val-split-bar .seg{ display:flex; align-items:center; justify-content:center; color:#fff; font-size:10.5px; font-weight:700; white-space:nowrap; overflow:hidden; }
+#page-validacao .val-alert{
+  margin-top:12px; border-radius:8px; padding:9px 13px; font-size:12px; font-weight:600;
+  background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C;
+}
+#page-validacao .val-alert.ok{ background:#ECFDF3; border-color:#C9F2DA; color:#15803D; }
+body.dark-mode #page-validacao .val-alert{ background:#2B1416; border-color:#5A1E22; }
+body.dark-mode #page-validacao .val-alert.ok{ background:#12281C; border-color:#1E4D33; }
+#page-validacao .val-explain{
+  background:var(--bg); border:1px dashed var(--border); border-radius:8px;
+  padding:10px 16px; margin-top:14px; font-size:12px; color:var(--muted); line-height:1.55;
+}
+#page-validacao .val-explain summary{ cursor:pointer; font-weight:700; color:var(--text); font-size:12.5px; list-style:none; }
+#page-validacao .val-explain summary::-webkit-details-marker{ display:none; }
+#page-validacao .val-explain summary::before{ content:'▸ '; color:#2563EB; }
+#page-validacao .val-explain[open] summary::before{ content:'▾ '; }
+#page-validacao .val-explain b{ color:var(--text); }
+#page-validacao .val-explain ul{ margin:10px 0 4px; padding-left:18px; }
+#page-validacao .val-explain li{ margin-bottom:6px; }
+@media (max-width:1300px){ #valKpiRow{ grid-template-columns:repeat(2,1fr) !important; } }
+@media (max-width:1100px){ #page-validacao .val-arrow{ display:none; } #page-validacao .val-flow{ gap:10px; } }
 
 /* ===================== Indicadores de Contrato (page-contrato) — prefixo ct- ===================== */
 #page-contrato .ct-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
@@ -1573,37 +1607,50 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
 
 <div id="page-validacao" class="page-content">
 <div class="container">
-  <div class="kpi-row" id="valKpiRow" style="grid-template-columns:repeat(3,1fr);">
-    <div class="kpi-card">
-      <div class="kpi-label">Documentos enviados para Vale</div>
-      <div class="kpi-value" id="valKpiEnviados">—</div>
-      <div class="kpi-sub">"Data de emissão real" preenchida (exceto Inventário)</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Documentos respondidos</div>
-      <div class="kpi-value" id="valKpiRespondidos">—</div>
-      <div class="kpi-sub" id="valKpiRespondidosSub">"Retorno real" preenchido</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Com resposta atrasada</div>
-      <div class="kpi-value" id="valKpiAtrasados">—</div>
-      <div class="kpi-sub">"Retorno previsto" já vencido, sem retorno real</div>
-    </div>
-  </div>
-
-  <div id="valLastUpdate" class="last-update-tag"></div>
 
   <div class="panel">
-    <h2>Pendência atual — de quem é a próxima ação?</h2>
-    <div class="sub">A partir da coluna "Validação" (pré-aprovação Assets), refinada por "Retorno real" / "Data atendimento comentários" quando a Vale já respondeu. Cobre todas as linhas, inclusive Inventário.</div>
-    <div class="kpi-row" id="valPendKpiRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px;">
+    <h2>Fluxo do processo de validação — em que etapa está e de quem é a ação</h2>
+    <div class="sub">Cada documento percorre este caminho até ser validado pela Vale. O número mostra quantas linhas estão paradas em cada etapa; a cor indica de quem é a próxima ação.</div>
+    <div class="legend-row" style="margin-top:8px;">
+      <span><span class="dot" style="background:#D97706"></span> Ação da Tenax</span>
+      <span><span class="dot" style="background:#2563EB"></span> Ação da Vale</span>
+      <span><span class="dot" style="background:#16A34A"></span> Concluído</span>
+    </div>
+    <div class="val-flow" id="valFlow"></div>
+    <div class="val-split" id="valFlowSummary"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Indicadores de validação</h2>
+    <div class="sub">Documentos com a Vale (os três primeiros cards excluem Inventário) e pendências por etapa (todas as linhas, inclusive Inventário)</div>
+    <div class="kpi-row" id="valKpiRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+      <div class="kpi-card">
+        <div class="kpi-label">Documentos enviados para Vale</div>
+        <div class="kpi-value" id="valKpiEnviados">—</div>
+        <div class="kpi-sub">"Data de emissão real" preenchida (exceto Inventário)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Documentos respondidos</div>
+        <div class="kpi-value" id="valKpiRespondidos">—</div>
+        <div class="kpi-sub" id="valKpiRespondidosSub">"Retorno real" preenchido</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Com resposta atrasada</div>
+        <div class="kpi-value" id="valKpiAtrasados">—</div>
+        <div class="kpi-sub">"Retorno previsto" já vencido, sem retorno real</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🔴 Em atraso (D0)</div>
+        <div class="kpi-value" id="valPendAtrasoCount">—</div>
+        <div class="kpi-sub">prazo D0 vencido sem validação</div>
+      </div>
       <div class="kpi-card">
         <div class="kpi-label">🟠 Ag. Envio</div>
         <div class="kpi-value" id="valPendAgEnvioCount">—</div>
         <div class="kpi-sub">pendente Tenax — envio para a Vale</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">🟠 Ag. Envio — Assets</div>
+        <div class="kpi-label">🟠 Pendente — Assets</div>
         <div class="kpi-value" id="valPendAssetsCount">—</div>
         <div class="kpi-sub">pendente Tenax — pré-aprovação Assets</div>
       </div>
@@ -1613,49 +1660,71 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <div class="kpi-sub">aguardando retorno/validação da Vale</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">🔴 Em atraso (D0)</div>
-        <div class="kpi-value" id="valPendAtrasoCount">—</div>
-        <div class="kpi-sub">prazo D0 vencido sem validação</div>
-      </div>
-      <div class="kpi-card">
         <div class="kpi-label">✅ Validado</div>
         <div class="kpi-value" id="valPendValidadoCount">—</div>
         <div class="kpi-sub">sem pendência</div>
       </div>
     </div>
 
-    <div class="val-manual">
-      <b>📖 Como cada card é calculado</b>
+    <div id="valLastUpdate" class="last-update-tag"></div>
+
+    <details class="val-explain">
+      <summary>📖 O que significa cada indicador</summary>
       <ul>
+        <li><b>Documentos enviados para Vale</b> — linhas com <i>Data de emissão real</i> preenchida (exceto Inventário): o documento já foi formalmente emitido para a Vale.</li>
+        <li><b>Documentos respondidos</b> — dentre os enviados, linhas com <i>Retorno real</i> preenchido: a Vale já deu retorno.</li>
+        <li><b>Com resposta atrasada</b> — enviados cujo <i>Retorno previsto</i> já venceu e ainda não têm retorno real da Vale.</li>
+        <li><b>🔴 Em atraso (D0)</b> — linhas cuja data da coluna <i>Status D0</i> já venceu (anterior a hoje) e que ainda não foram validadas. É um recorte de prazo: essas linhas também aparecem em uma das etapas de pendência.</li>
         <li><b>🟠 Ag. Envio</b> — linhas com a coluna <i>Validação</i> = "Ag. Envio": o documento ainda não foi enviado para a Vale. A ação é da <b>Tenax</b>.</li>
-        <li><b>🟠 Ag. Envio — Assets</b> — linhas com <i>Validação</i> = "Ag. Envio - Assets" (só existe no pilar Inventário): o item aguarda a pré-aprovação interna na plataforma <b>Assets</b> antes de seguir para a Vale. A ação é da <b>Tenax</b>.</li>
-        <li><b>🔵 Pendente — Vale</b> — linhas em análise na Vale ("Em análise - Vale" ou "Não validado"). Inclui os documentos em que a Vale retornou comentários e a Tenax já atendeu (<i>Retorno real</i> e <i>Data atendimento comentários</i> preenchidos) — nesses, falta apenas a Vale validar. Atenção: se a Vale retornou e a Tenax ainda <u>não</u> atendeu os comentários (<i>Retorno real</i> preenchido e <i>Data atendimento comentários</i> vazia), a linha volta a contar como pendência da Tenax nas tabelas abaixo.</li>
-        <li><b>🔴 Em atraso (D0)</b> — linhas cuja data da coluna <i>Status D0</i> já venceu (anterior a hoje) e que ainda não foram validadas. É um recorte de prazo: essas linhas também aparecem em um dos cards de pendência acima.</li>
+        <li><b>🟠 Pendente — Assets</b> — linhas aguardando a pré-aprovação interna na plataforma <b>Assets</b> (só existe no pilar Inventário) antes de seguir para a Vale. A ação é da <b>Tenax</b>.</li>
+        <li><b>🔵 Pendente — Vale</b> — linhas em análise na Vale ("Em análise - Vale" ou "Não validado"). Inclui os documentos em que a Vale retornou comentários e a Tenax já atendeu (<i>Retorno real</i> e <i>Data atendimento comentários</i> preenchidos) — nesses, falta apenas a Vale validar. Atenção: se a Vale retornou e a Tenax ainda <u>não</u> atendeu os comentários (<i>Retorno real</i> preenchido e <i>Data atendimento comentários</i> vazia), a linha conta como pendência da Tenax, na etapa "Comentários a atender".</li>
         <li><b>✅ Validado</b> — linhas com <i>Validação</i> = "Validado": ciclo concluído, sem dependência de ninguém.</li>
       </ul>
-    </div>
-    <div class="grid2" id="valAnaliseGrid">
-      <div>
-        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🟠 Pendente — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h3>
-        <div class="table-wrap" style="max-height:340px;">
-          <table>
-            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:130px;">Situação</th></tr></thead>
-            <tbody id="valPendTenaxBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <div>
-        <h3 style="margin:0 0 8px;font-size:13px;color:var(--text);">🔵 Pendente — Vale <span class="badge-ok" id="valPendValeCount2">0</span></h3>
-        <div class="table-wrap" style="max-height:340px;">
-          <table>
-            <thead><tr><th style="width:120px;">Pilar</th><th style="width:90px;">Sistema</th><th>FLOC / EGP</th><th style="width:130px;">Situação</th></tr></thead>
-            <tbody id="valPendValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="footer-note">Fonte: coluna "Validação" + "Retorno real" / "Data atendimento comentários" da aba "Priorização Vale".</div>
+    </details>
   </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>🟠 Pendente — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h2>
+      <div class="sub">Documentos cuja próxima ação é da Tenax</div>
+      <div class="control-toolbar">
+        <input type="text" id="valSearchTenax" placeholder="Buscar FLOC, sistema, pilar...">
+        <select id="valEtapaTenax">
+          <option value="">Todas as etapas</option>
+          <option value="assets">Pré-aprovação Assets</option>
+          <option value="envio">Aguardando envio</option>
+          <option value="coment">Comentários a atender</option>
+        </select>
+        <span class="row-count" id="valCountTenax">0 de 0 linhas</span>
+      </div>
+      <div class="table-wrap" style="max-height:360px;">
+        <table>
+          <thead><tr><th style="width:115px;">Pilar</th><th style="width:75px;">Sistema</th><th>FLOC / EGP</th><th style="width:150px;">Etapa</th></tr></thead>
+          <tbody id="valPendTenaxBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>🔵 Pendente — Vale <span class="badge-ok" id="valPendValeCount2">0</span></h2>
+      <div class="sub">Documentos cuja próxima ação é da Vale</div>
+      <div class="control-toolbar">
+        <input type="text" id="valSearchVale" placeholder="Buscar FLOC, sistema, pilar...">
+        <select id="valEtapaVale">
+          <option value="">Todas as etapas</option>
+          <option value="analise">Em análise — Vale</option>
+          <option value="reanalise">Validação final — Vale</option>
+        </select>
+        <span class="row-count" id="valCountVale">0 de 0 linhas</span>
+      </div>
+      <div class="table-wrap" style="max-height:360px;">
+        <table>
+          <thead><tr><th style="width:115px;">Pilar</th><th style="width:75px;">Sistema</th><th>FLOC / EGP</th><th style="width:150px;">Etapa</th></tr></thead>
+          <tbody id="valPendValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note">Fonte: coluna "Validação" + "Retorno real" / "Data atendimento comentários" / "Status D0" da aba "Priorização Vale".</div>
 </div>
 </div>
 
@@ -3037,6 +3106,72 @@ function renderTable(){
 }
 
 // ---------- aba Validação: retorno de documentos enviados à Vale ----------
+// Etapa do fluxo de validação em que o documento está (disjuntas — todo item cai em uma).
+const VAL_STAGES = [
+  {key:'assets',   resp:'tenax', label:'Pré-aprovação Assets',   desc:'aguardando aprovação interna no Assets (Inventário)'},
+  {key:'envio',    resp:'tenax', label:'Aguardando envio',       desc:'pronto para a Tenax enviar à Vale'},
+  {key:'analise',  resp:'vale',  label:'Em análise — Vale',      desc:'enviado; aguardando primeiro retorno da Vale'},
+  {key:'coment',   resp:'tenax', label:'Comentários a atender',  desc:'a Vale retornou; falta a Tenax responder'},
+  {key:'reanalise',resp:'vale',  label:'Validação final — Vale', desc:'comentários atendidos; falta a Vale validar'},
+  {key:'ok',       resp:'done',  label:'Validado',               desc:'ciclo concluído, sem pendência'}
+];
+const VAL_STAGE_BY_KEY = {};
+VAL_STAGES.forEach(s=>{ VAL_STAGE_BY_KEY[s.key]=s; });
+
+function valStageOf(i){
+  if(i.pendencia===null) return 'ok';
+  if(i.retorno_real && !i.data_atendimento) return 'coment';
+  if(i.retorno_real && i.data_atendimento) return 'reanalise';
+  const v = _strip(i.validado);
+  if(v.includes('assets')) return 'assets';
+  if(v.includes('envio')) return 'envio';
+  return 'analise';
+}
+
+// listas correntes para os painéis de pesquisa da aba Validação
+let valPendTenaxList = [];
+let valPendValeList = [];
+
+function renderValTable(list, searchId, etapaId, countId, bodyId){
+  const search = (document.getElementById(searchId).value || '').toLowerCase();
+  const etapa = document.getElementById(etapaId).value;
+  const filtered = list.filter(i=>{
+    if(etapa && i._stage!==etapa) return false;
+    if(search){
+      const hay = [i.ativo, i.floc, i.sistema, i.denom, i.pilar, VAL_STAGE_BY_KEY[i._stage].label].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  document.getElementById(countId).textContent = `${filtered.length} de ${list.length} linhas`;
+  if(filtered.length===0){
+    document.getElementById(bodyId).innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">' +
+      (list.length===0 ? 'Nenhum documento nesta situação.' : 'Nenhum documento encontrado para os filtros atuais.') + '</td></tr>';
+    return;
+  }
+  document.getElementById(bodyId).innerHTML = filtered.map(i=>`
+    <tr>
+      <td><span class="pilar-chip" style="background:${PILAR_COLOR_HEX[i.pilar]}22;color:${PILAR_COLOR_HEX[i.pilar]};">${i.pilar}</span></td>
+      <td>${i.sistema}</td>
+      <td>
+        <div class="floc-main">${i.ativo}</div>
+        <div class="floc-sub">${i.floc}${i.denom?' · '+i.denom:''}</div>
+      </td>
+      <td>${VAL_STAGE_BY_KEY[i._stage].label}</td>
+    </tr>`).join('');
+}
+function renderValTenaxTable(){ renderValTable(valPendTenaxList, 'valSearchTenax', 'valEtapaTenax', 'valCountTenax', 'valPendTenaxBody'); }
+function renderValValeTable(){ renderValTable(valPendValeList, 'valSearchVale', 'valEtapaVale', 'valCountVale', 'valPendValeBody'); }
+
+['valSearchTenax','valEtapaTenax'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderValTenaxTable);
+  document.getElementById(id).addEventListener('change', renderValTenaxTable);
+});
+['valSearchVale','valEtapaVale'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderValValeTable);
+  document.getElementById(id).addEventListener('change', renderValValeTable);
+});
+
 function renderValidacao(){
   // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) —
   // usa a fonte combinada das duas áreas, e não apenas a área selecionada no momento.
@@ -3054,40 +3189,69 @@ function renderValidacao(){
   document.getElementById('valKpiAtrasados').textContent = atrasados.length;
 
   // Pendência (coluna Validação + Retorno real/Data atendimento) considera todas as
-  // linhas, inclusive Inventário — a regra "Ag. Envio - Assets" só existe nesse pilar.
+  // linhas, inclusive Inventário — a etapa "Pendente - Assets" só existe nesse pilar.
+  allItems.forEach(i=>{ i._stage = valStageOf(i); });
   const pendTenax = allItems.filter(i=>i.pendencia==='tenax');
   const pendVale = allItems.filter(i=>i.pendencia==='vale');
   const validados = allItems.filter(i=>i.pendencia===null);
-
-  // Cards por tipo: contagem direta do valor da coluna Validação.
-  const agAssets = allItems.filter(i=>{ const v=_strip(i.validado); return v.includes('envio') && v.includes('assets'); });
-  const agEnvio = allItems.filter(i=>{ const v=_strip(i.validado); return v.includes('envio') && !v.includes('assets'); });
-  // Em atraso: prazo D0 vencido e a linha ainda não validada.
   const atrasoD0 = allItems.filter(i=>i.status_d0 && i.status_d0 < todayISO && i.pendencia!==null);
 
-  document.getElementById('valPendAgEnvioCount').textContent = agEnvio.length;
-  document.getElementById('valPendAssetsCount').textContent = agAssets.length;
+  const stageCount = {};
+  VAL_STAGES.forEach(s=>{ stageCount[s.key]=0; });
+  allItems.forEach(i=>{ stageCount[i._stage]++; });
+
+  document.getElementById('valPendAgEnvioCount').textContent = stageCount.envio;
+  document.getElementById('valPendAssetsCount').textContent = stageCount.assets;
   document.getElementById('valPendAtrasoCount').textContent = atrasoD0.length;
   document.getElementById('valPendTenaxCount2').textContent = pendTenax.length;
   document.getElementById('valPendValeCount').textContent = pendVale.length;
   document.getElementById('valPendValeCount2').textContent = pendVale.length;
   document.getElementById('valPendValidadoCount').textContent = validados.length;
 
-  function rowsHtml(list){
-    if(list.length===0) return '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento nesta situação.</td></tr>';
-    return list.map(i=>`
-      <tr>
-        <td><span class="pilar-chip" style="background:${PILAR_COLOR_HEX[i.pilar]}22;color:${PILAR_COLOR_HEX[i.pilar]};">${i.pilar}</span></td>
-        <td>${i.sistema}</td>
-        <td>
-          <div class="floc-main">${i.ativo}</div>
-          <div class="floc-sub">${i.floc}${i.denom?' · '+i.denom:''}</div>
-        </td>
-        <td>${i.validado || '—'}</td>
-      </tr>`).join('');
+  // ---- fluxo visual do processo ----
+  const total = allItems.length;
+  const RESP_LABEL = { tenax:'Tenax', vale:'Vale', done:'Concluído' };
+  document.getElementById('valFlow').innerHTML = VAL_STAGES.map((s, ix)=>{
+    const n = stageCount[s.key];
+    const pct = total ? (n/total*100) : 0;
+    const pctTxt = total ? (pct < 1 && n > 0 ? '<1%' : Math.round(pct) + '%') : '—';
+    const box = `
+      <div class="val-stage resp-${s.resp}">
+        <span class="st-chip">${RESP_LABEL[s.resp]}</span>
+        <div class="st-num">${n.toLocaleString('pt-BR')}</div>
+        <div class="st-name">${s.label}</div>
+        <div class="st-desc">${s.desc}</div>
+        <div class="st-pct">${pctTxt} das linhas</div>
+      </div>`;
+    return ix < VAL_STAGES.length-1 ? box + '<div class="val-arrow">➜</div>' : box;
+  }).join('');
+
+  // ---- barra de responsabilidade + alerta de atraso ----
+  const nT = pendTenax.length, nV = pendVale.length, nD = validados.length;
+  let summaryHtml = '';
+  if(total){
+    const segs = [
+      {n:nT, color:'#D97706', label:'Tenax'},
+      {n:nV, color:'#2563EB', label:'Vale'},
+      {n:nD, color:'#16A34A', label:'Validado'}
+    ].filter(s=>s.n>0);
+    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + total.toLocaleString('pt-BR') + ' linhas do plano</div>';
+    summaryHtml += '<div class="val-split-bar">' + segs.map(s=>{
+      const pct = s.n/total*100;
+      const txt = pct >= 8 ? `${s.label}: ${s.n.toLocaleString('pt-BR')} (${Math.round(pct)}%)` : '';
+      return `<div class="seg" style="width:${pct}%;background:${s.color};" title="${s.label}: ${s.n.toLocaleString('pt-BR')} (${pct.toFixed(1)}%)">${txt}</div>`;
+    }).join('') + '</div>';
+    summaryHtml += atrasoD0.length
+      ? `<div class="val-alert">🔴 ${atrasoD0.length.toLocaleString('pt-BR')} documento(s) com prazo D0 vencido e ainda sem validação — priorize esses itens.</div>`
+      : '<div class="val-alert ok">✅ Nenhum documento com prazo D0 vencido.</div>';
   }
-  document.getElementById('valPendTenaxBody').innerHTML = rowsHtml(pendTenax);
-  document.getElementById('valPendValeBody').innerHTML = rowsHtml(pendVale);
+  document.getElementById('valFlowSummary').innerHTML = summaryHtml;
+
+  // ---- painéis de pesquisa ----
+  valPendTenaxList = pendTenax;
+  valPendValeList = pendVale;
+  renderValTenaxTable();
+  renderValValeTable();
 
   const lastUpd = document.getElementById('a_lastUpdate');
   const valUpd = document.getElementById('valLastUpdate');
