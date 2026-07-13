@@ -1053,8 +1053,7 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .val-stage .st-pct{ font-size:10.5px; color:var(--muted); margin-top:7px; font-weight:600; }
 #page-validacao .val-stage .st-atraso{ font-size:10.5px; color:#DC2626; margin-top:4px; font-weight:700; }
 #page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
-@media (max-width:1300px){ #valKpiStagesRow{ grid-template-columns:repeat(3,1fr) !important; } }
-@media (max-width:700px){ #valKpiStagesRow{ grid-template-columns:repeat(2,1fr) !important; } }
+@media (max-width:700px){ #valKpiWeekRow{ grid-template-columns:1fr !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
 #page-validacao .val-split{ margin-top:16px; }
 #page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
@@ -1541,6 +1540,20 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     </div>
     <div class="val-flow" id="valFlow"></div>
     <div class="val-split" id="valFlowSummary"></div>
+    <div id="valLastUpdate" class="last-update-tag"></div>
+    <details class="val-explain">
+      <summary>📖 O que significa cada indicador</summary>
+      <ul>
+        <li><b>📅 Itens planejados para a semana</b> — linhas com data na coluna <i>Status D0</i> dentro da semana atual: é o plano de envio da semana.</li>
+        <li><b>🟠 Planejados que ainda estão Ag. Envio</b> — do plano da semana, quantos ainda não foram enviados (coluna <i>Validação</i> = "Ag. Envio").</li>
+        <li><b>🟠 Pendente — Assets</b> — itens do <b>Inventário</b> aguardando a pré-aprovação interna na plataforma Assets antes de seguirem para a Vale. Itens pendentes no Assets = <b>Pendências Tenax</b>.</li>
+        <li><b>🔵 Em análise — Vale</b> — documentos com a Vale (as equipes RCM, Estratégia de Ativos, Lista BOM e Taxonomia entram direto; o Inventário chega aqui após o Assets). Quantidade em análise = <b>Pendência Vale</b>. O retorno deve acontecer em <b>7 dias corridos</b> da <i>Data de emissão real</i>; data de retorno estourada = pendência Vale em atraso.</li>
+        <li><b>🟠 Em análise — Tenax</b> — a Vale retornou com comentários para serem atendidos (<i>Retorno real</i> preenchido, <i>Data atendimento comentários</i> vazia). Em análise — Tenax = <b>Pendências Tenax</b>.</li>
+        <li><b>✅ Validado</b> — linhas validadas: <b>indicador positivo</b>, objetivo do processo.</li>
+        <li><b>❌ Não validado</b> — linhas não validadas: <b>indicador negativo</b>.</li>
+        <li>O <b>filtro de equipe</b> no topo aplica-se a todos os números e tabelas desta aba.</li>
+      </ul>
+    </details>
   </div>
 
   <div class="panel">
@@ -1560,53 +1573,6 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     </div>
   </div>
 
-  <div class="panel">
-    <h2>Pendências e resultado</h2>
-    <div class="sub">Pendências Tenax = itens no Assets + comentários a atender · Pendência Vale = itens em análise na Vale</div>
-    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:12px;">
-      <div class="kpi-card">
-        <div class="kpi-label">🟠 Pendente — Assets</div>
-        <div class="kpi-value" id="valStAssets">—</div>
-        <div class="kpi-sub" id="valStAssetsSub">Inventário aguardando pré-aprovação (Pendência Tenax)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🔵 Em análise — Vale</div>
-        <div class="kpi-value" id="valStAnaliseVale">—</div>
-        <div class="kpi-sub" id="valStAnaliseValeSub">retorno em 7 dias corridos (Pendência Vale)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🟠 Em análise — Tenax</div>
-        <div class="kpi-value" id="valStAnaliseTenax">—</div>
-        <div class="kpi-sub">comentários para serem atendidos (Pendência Tenax)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">✅ Validado</div>
-        <div class="kpi-value" id="valStValidado">—</div>
-        <div class="kpi-sub">linhas validadas — indicador positivo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">❌ Não validado</div>
-        <div class="kpi-value" id="valStNaoValidado">—</div>
-        <div class="kpi-sub">linhas não validadas — indicador negativo</div>
-      </div>
-    </div>
-
-    <div id="valLastUpdate" class="last-update-tag"></div>
-
-    <details class="val-explain">
-      <summary>📖 O que significa cada indicador</summary>
-      <ul>
-        <li><b>📅 Itens planejados para a semana</b> — linhas com data na coluna <i>Status D0</i> dentro da semana atual: é o plano de envio da semana.</li>
-        <li><b>🟠 Planejados que ainda estão Ag. Envio</b> — do plano da semana, quantos ainda não foram enviados (coluna <i>Validação</i> = "Ag. Envio").</li>
-        <li><b>🟠 Pendente — Assets</b> — itens do <b>Inventário</b> aguardando a pré-aprovação interna na plataforma Assets antes de seguirem para a Vale. Itens pendentes no Assets = <b>Pendências Tenax</b>.</li>
-        <li><b>🔵 Em análise — Vale</b> — documentos com a Vale (as equipes RCM, Estratégia de Ativos, Lista BOM e Taxonomia entram direto; o Inventário chega aqui após o Assets). Quantidade em análise = <b>Pendência Vale</b>. O retorno deve acontecer em <b>7 dias corridos</b> da <i>Data de emissão real</i>; data de retorno estourada = pendência Vale em atraso.</li>
-        <li><b>🟠 Em análise — Tenax</b> — a Vale retornou com comentários para serem atendidos (<i>Retorno real</i> preenchido, <i>Data atendimento comentários</i> vazia). Em análise — Tenax = <b>Pendências Tenax</b>.</li>
-        <li><b>✅ Validado</b> — linhas validadas: <b>indicador positivo</b>, objetivo do processo.</li>
-        <li><b>❌ Não validado</b> — linhas não validadas: <b>indicador negativo</b>.</li>
-        <li>O <b>filtro de equipe</b> no topo aplica-se a todos os números e tabelas desta aba.</li>
-      </ul>
-    </details>
-  </div>
 
   <div class="grid2">
     <div class="panel">
@@ -3165,17 +3131,6 @@ function renderValidacao(){
   document.getElementById('valWkEnvioSub').textContent = planWeek.length
     ? `${fmtN(weekEnvio.length)} de ${fmtN(planWeek.length)} planejados ainda não enviados`
     : 'precisam ser enviados dentro da semana';
-
-  // ---- cards de pendências e resultado ----
-  document.getElementById('valStAssets').textContent = fmtN(stageCount.assets);
-  document.getElementById('valStAssetsSub').textContent =
-    `🟢 ${fmtN(stagePrazo.assets)} no prazo · 🔴 ${fmtN(stageAtraso.assets)} em atraso (Status D0) — Pendência Tenax`;
-  document.getElementById('valStAnaliseVale').textContent = fmtN(stageCount.analise_vale);
-  document.getElementById('valStAnaliseValeSub').textContent =
-    `🟢 ${fmtN(stagePrazo.analise_vale)} no prazo · 🔴 ${fmtN(stageAtraso.analise_vale)} em atraso (7 dias corridos) — Pendência Vale`;
-  document.getElementById('valStAnaliseTenax').textContent = fmtN(stageCount.analise_tenax);
-  document.getElementById('valStValidado').textContent = fmtN(stageCount.ok);
-  document.getElementById('valStNaoValidado').textContent = fmtN(stageCount.nok);
 
   // ---- fluxo visual do processo ----
   const total = allItems.length;
