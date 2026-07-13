@@ -1038,6 +1038,8 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .val-stage.resp-tenax{ border-top-color:#D97706; }
 #page-validacao .val-stage.resp-vale{ border-top-color:#2563EB; }
 #page-validacao .val-stage.resp-done{ border-top-color:#16A34A; }
+#page-validacao .val-stage.resp-nok{ border-top-color:#DC2626; }
+#page-validacao .resp-nok .st-chip{ background:#DC2626; }
 #page-validacao .val-stage .st-chip{
   display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.05em;
   padding:2px 8px; border-radius:10px; color:#fff; margin-bottom:8px; text-transform:uppercase;
@@ -1521,62 +1523,71 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
 
   <div class="panel">
     <h2>Fluxo do processo de validação — em que etapa está e de quem é a ação</h2>
-    <div class="sub">Cada documento percorre este caminho até ser validado pela Vale. O número mostra quantas linhas estão em cada etapa; a cor indica de quem é a próxima ação.</div>
-    <div class="legend-row" style="margin-top:8px;">
-      <span><span class="dot" style="background:#D97706"></span> Ação da Tenax</span>
-      <span><span class="dot" style="background:#2563EB"></span> Ação da Vale</span>
-      <span><span class="dot" style="background:#16A34A"></span> Concluído</span>
+    <div class="sub">O planejamento semanal (Status D0) alimenta o Ag. Envio; Inventário passa pela pré-aprovação no Assets, as demais equipes vão direto para a análise da Vale (retorno em 7 dias corridos); comentários voltam para a Tenax e a validação encerra em Validado (positivo) ou Não validado (negativo).</div>
+    <div class="control-toolbar" style="margin-top:10px;">
+      <select id="valTeamFilter" title="Filtro de itens por equipe">
+        <option value="all">Todas as equipes</option>
+        <option value="Inventário">Inventário</option>
+        <option value="Taxonomia">Taxonomia</option>
+        <option value="Lista BOM">Lista BOM</option>
+        <option value="Estratégia de Manutenção">Estratégia de Ativos / Manutenção</option>
+      </select>
+      <div class="legend-row" style="margin:0;">
+        <span><span class="dot" style="background:#D97706"></span> Ação da Tenax</span>
+        <span><span class="dot" style="background:#2563EB"></span> Ação da Vale</span>
+        <span><span class="dot" style="background:#16A34A"></span> Validado</span>
+        <span><span class="dot" style="background:#DC2626"></span> Não validado</span>
+      </div>
     </div>
     <div class="val-flow" id="valFlow"></div>
     <div class="val-split" id="valFlowSummary"></div>
   </div>
 
   <div class="panel">
-    <h2>Etapas do processo — prazo × atraso</h2>
-    <div class="sub">Cada card mostra o total da etapa e quantos itens estão dentro do prazo ou em atraso, conforme a regra da etapa</div>
-    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+    <h2>Planejamento da semana (Status D0)</h2>
+    <div class="sub" id="valWeekSub">Itens com data de Status D0 dentro da semana atual</div>
+    <div class="kpi-row" id="valKpiWeekRow" style="grid-template-columns:repeat(2,1fr);margin-bottom:0;">
+      <div class="kpi-card">
+        <div class="kpi-label">📅 Itens planejados para a semana</div>
+        <div class="kpi-value" id="valWkPlan">—</div>
+        <div class="kpi-sub" id="valWkPlanSub">com Status D0 na semana atual</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Planejados que ainda estão Ag. Envio</div>
+        <div class="kpi-value" id="valWkEnvio">—</div>
+        <div class="kpi-sub" id="valWkEnvioSub">precisam ser enviados dentro da semana</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Pendências e resultado</h2>
+    <div class="sub">Pendências Tenax = itens no Assets + comentários a atender · Pendência Vale = itens em análise na Vale</div>
+    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:12px;">
       <div class="kpi-card">
         <div class="kpi-label">🟠 Pendente — Assets</div>
         <div class="kpi-value" id="valStAssets">—</div>
-        <div class="kpi-sub" id="valStAssetsSub">só Inventário · prazo pela coluna Status D0</div>
+        <div class="kpi-sub" id="valStAssetsSub">Inventário aguardando pré-aprovação (Pendência Tenax)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">🔵 Em análise — Vale</div>
         <div class="kpi-value" id="valStAnaliseVale">—</div>
-        <div class="kpi-sub" id="valStAnaliseValeSub">análise inicial: 7 dias a partir da emissão</div>
+        <div class="kpi-sub" id="valStAnaliseValeSub">retorno em 7 dias corridos (Pendência Vale)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">🟠 Em análise — Tenax</div>
         <div class="kpi-value" id="valStAnaliseTenax">—</div>
-        <div class="kpi-sub">devendo retorno aos comentários da Vale</div>
+        <div class="kpi-sub">comentários para serem atendidos (Pendência Tenax)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">✅ Validado</div>
         <div class="kpi-value" id="valStValidado">—</div>
-        <div class="kpi-sub">objetivo do processo</div>
-      </div>
-    </div>
-
-    <div class="kpi-row" id="valKpiRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
-      <div class="kpi-card">
-        <div class="kpi-label">Documentos enviados para Vale</div>
-        <div class="kpi-value" id="valKpiEnviados">—</div>
-        <div class="kpi-sub">"Data de emissão real" preenchida (exceto Inventário)</div>
+        <div class="kpi-sub">linhas validadas — indicador positivo</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Documentos respondidos</div>
-        <div class="kpi-value" id="valKpiRespondidos">—</div>
-        <div class="kpi-sub" id="valKpiRespondidosSub">"Retorno real" preenchido</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🔴 Em atraso (D0)</div>
-        <div class="kpi-value" id="valPendAtrasoCount">—</div>
-        <div class="kpi-sub">Ag. Envio / Pendente — Assets com Status D0 vencido</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🔴 Atraso de análise inicial (7 dias)</div>
-        <div class="kpi-value" id="valKpiAtraso7d">—</div>
-        <div class="kpi-sub">Em análise — Vale sem retorno em até 7 dias da emissão</div>
+        <div class="kpi-label">❌ Não validado</div>
+        <div class="kpi-value" id="valStNaoValidado">—</div>
+        <div class="kpi-sub">linhas não validadas — indicador negativo</div>
       </div>
     </div>
 
@@ -1585,28 +1596,27 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     <details class="val-explain">
       <summary>📖 O que significa cada indicador</summary>
       <ul>
-        <li><b>🟠 Ag. Envio</b> — o documento ainda não foi enviado para a Vale; a ação é da <b>Tenax</b>. Regra de prazo: o <i>Status D0</i> está em atraso (data anterior a hoje)? Se sim, o item está <b>em atraso</b>; se não, está <b>dentro do prazo</b>.</li>
-        <li><b>🟠 Pendente — Assets</b> — válido apenas para o pilar <b>Inventário</b>: o item aguarda a pré-aprovação interna na plataforma Assets antes de seguir para a Vale; a ação é da <b>Tenax</b>. Regra de prazo: mesma do Ag. Envio — <i>Status D0</i> vencido = em atraso; caso contrário, dentro do prazo.</li>
-        <li><b>🔵 Em análise — Vale</b> — documento com a Vale (aqui entram todos os pilares, inclusive Inventário), seja na análise inicial ou na validação final após a Tenax atender os comentários. Regra de prazo: o <i>Retorno real</i> aconteceu (ou ainda pode acontecer) em até <b>7 dias</b> a partir da <i>Data de emissão real</i>? Se sim, dentro do prazo; se não, é o <b>atraso de análise inicial (7 dias)</b> — um indicador próprio.</li>
-        <li><b>🟠 Em análise — Tenax</b> — pendência da <b>Tenax</b>: só existe quando o <i>Retorno real</i> está preenchido e a <i>Data atendimento comentários</i> está vazia — estamos devendo retorno aos comentários da Vale.</li>
-        <li><b>✅ Validado</b> — a linha foi validada pela Vale: é o objetivo do processo.</li>
-        <li><b>Documentos enviados / respondidos</b> — linhas (exceto Inventário) com <i>Data de emissão real</i> preenchida e, dentre elas, as que já têm <i>Retorno real</i>.</li>
-        <li><b>🔴 Em atraso (D0)</b> — itens das etapas Ag. Envio e Pendente — Assets cujo <i>Status D0</i> já venceu.</li>
-        <li><b>🔴 Atraso de análise inicial (7 dias)</b> — itens Em análise — Vale cujo retorno não veio (nem pode mais vir) dentro de 7 dias contados da emissão.</li>
+        <li><b>📅 Itens planejados para a semana</b> — linhas com data na coluna <i>Status D0</i> dentro da semana atual: é o plano de envio da semana.</li>
+        <li><b>🟠 Planejados que ainda estão Ag. Envio</b> — do plano da semana, quantos ainda não foram enviados (coluna <i>Validação</i> = "Ag. Envio").</li>
+        <li><b>🟠 Pendente — Assets</b> — itens do <b>Inventário</b> aguardando a pré-aprovação interna na plataforma Assets antes de seguirem para a Vale. Itens pendentes no Assets = <b>Pendências Tenax</b>.</li>
+        <li><b>🔵 Em análise — Vale</b> — documentos com a Vale (as equipes RCM, Estratégia de Ativos, Lista BOM e Taxonomia entram direto; o Inventário chega aqui após o Assets). Quantidade em análise = <b>Pendência Vale</b>. O retorno deve acontecer em <b>7 dias corridos</b> da <i>Data de emissão real</i>; data de retorno estourada = pendência Vale em atraso.</li>
+        <li><b>🟠 Em análise — Tenax</b> — a Vale retornou com comentários para serem atendidos (<i>Retorno real</i> preenchido, <i>Data atendimento comentários</i> vazia). Em análise — Tenax = <b>Pendências Tenax</b>.</li>
+        <li><b>✅ Validado</b> — linhas validadas: <b>indicador positivo</b>, objetivo do processo.</li>
+        <li><b>❌ Não validado</b> — linhas não validadas: <b>indicador negativo</b>.</li>
+        <li>O <b>filtro de equipe</b> no topo aplica-se a todos os números e tabelas desta aba.</li>
       </ul>
     </details>
   </div>
 
   <div class="grid2">
     <div class="panel">
-      <h2>🟠 Pendente — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h2>
-      <div class="sub">Documentos cuja próxima ação é da Tenax — apenas itens com data definida em Status D0</div>
+      <h2>🟠 Pendências — Tenax <span class="badge-soft" id="valPendTenaxCount2">0</span></h2>
+      <div class="sub">Itens no Assets + comentários da Vale a atender</div>
       <div class="control-toolbar">
         <input type="text" id="valSearchTenax" placeholder="Buscar FLOC, sistema, pilar...">
         <select id="valEtapaTenax">
           <option value="">Todas as etapas</option>
           <option value="assets">Pendente — Assets</option>
-          <option value="envio">Ag. Envio</option>
           <option value="analise_tenax">Em análise — Tenax</option>
         </select>
         <span class="row-count" id="valCountTenax">0 de 0 linhas</span>
@@ -1619,14 +1629,10 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
       </div>
     </div>
     <div class="panel">
-      <h2>🔵 Pendente — Vale <span class="badge-ok" id="valPendValeCount2">0</span></h2>
-      <div class="sub">Documentos cuja próxima ação é da Vale</div>
+      <h2>🔵 Pendência — Vale <span class="badge-ok" id="valPendValeCount2">0</span></h2>
+      <div class="sub">Documentos em análise na Vale — retorno em 7 dias corridos</div>
       <div class="control-toolbar">
         <input type="text" id="valSearchVale" placeholder="Buscar FLOC, sistema, pilar...">
-        <select id="valEtapaVale">
-          <option value="">Todas as etapas</option>
-          <option value="analise_vale">Em análise — Vale</option>
-        </select>
         <span class="row-count" id="valCountVale">0 de 0 linhas</span>
       </div>
       <div class="table-wrap" style="max-height:360px;">
@@ -3021,21 +3027,27 @@ function renderTable(){
 
 // ---------- aba Validação: retorno de documentos enviados à Vale ----------
 // Etapas do fluxo de validação (disjuntas — todo item cai em exatamente uma).
+// Espelha o fluxograma do processo: Status D0 (plano semanal) -> Ag. Envio ->
+// [Inventário: Pendente-Assets] -> Em análise-Vale (7 dias corridos) ->
+// [comentários: Em análise-Tenax] -> Validação -> Validado | Não validado.
 const VAL_STAGES = [
-  {key:'assets',        resp:'tenax', label:'Pendente — Assets',  desc:'pré-aprovação interna no Assets (só Inventário)'},
-  {key:'envio',         resp:'tenax', label:'Ag. Envio',          desc:'pronto para a Tenax enviar à Vale'},
-  {key:'analise_vale',  resp:'vale',  label:'Em análise — Vale',  desc:'com a Vale — análise inicial ou validação final'},
-  {key:'analise_tenax', resp:'tenax', label:'Em análise — Tenax', desc:'a Vale retornou; devemos resposta aos comentários'},
-  {key:'ok',            resp:'done',  label:'Validado',           desc:'objetivo do processo — linha validada'}
+  {key:'envio',         resp:'tenax', label:'Ag. Envio',          desc:'aguardando envio à Vale (plano semanal via Status D0)'},
+  {key:'assets',        resp:'tenax', label:'Pendente — Assets',  desc:'Inventário: pré-aprovação interna no Assets'},
+  {key:'analise_vale',  resp:'vale',  label:'Em análise — Vale',  desc:'demais equipes entram direto · retorno em 7 dias corridos'},
+  {key:'analise_tenax', resp:'tenax', label:'Em análise — Tenax', desc:'retorno com comentários para serem atendidos'},
+  {key:'ok',            resp:'done',  label:'Validado',           desc:'linhas validadas — indicador positivo'},
+  {key:'nok',           resp:'nok',   label:'Não validado',       desc:'linhas não validadas — indicador negativo'}
 ];
 const VAL_STAGE_BY_KEY = {};
 VAL_STAGES.forEach(s=>{ VAL_STAGE_BY_KEY[s.key]=s; });
 
 function valStageOf(i){
-  if(i.pendencia===null) return 'ok';
-  // Em análise — Tenax: só existe com Retorno real preenchido e atendimento pendente
-  if(i.retorno_real && !i.data_atendimento) return 'analise_tenax';
   const v = _strip(i.validado);
+  if(v.includes('nao validado')) return 'nok';
+  if(v.includes('validado')) return 'ok';
+  if(!v) return 'envio';
+  // Em análise — Tenax: retorno recebido e comentários ainda não atendidos
+  if(i.retorno_real && !i.data_atendimento) return 'analise_tenax';
   if(v.includes('assets')) return 'assets';
   if(v.includes('envio')) return 'envio';
   return 'analise_vale';
@@ -3046,11 +3058,14 @@ function isoAddDays(iso, n){
   const p = iso.split('-').map(Number);
   return new Date(Date.UTC(p[0], p[1]-1, p[2]+n)).toISOString().slice(0,10);
 }
+function localISO(dt){
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+}
 
 // Prazo × atraso conforme a regra de cada etapa:
 //  - Ag. Envio / Pendente-Assets: Status D0 vencido => atraso
 //  - Em análise — Vale: retorno real (ou hoje, se ainda sem retorno) até 7 dias
-//    após a Data de emissão real => no prazo; depois disso => atraso de análise inicial
+//    corridos após a Data de emissão real => no prazo; depois disso => atraso
 //  - demais etapas: sem regra de prazo (null)
 function valPrazoOf(i, todayISO){
   const st = i._stage;
@@ -3073,7 +3088,7 @@ let valPendValeList = [];
 
 function renderValTable(list, searchId, etapaId, countId, bodyId){
   const search = (document.getElementById(searchId).value || '').toLowerCase();
-  const etapa = document.getElementById(etapaId).value;
+  const etapa = etapaId ? document.getElementById(etapaId).value : '';
   const filtered = list.filter(i=>{
     if(etapa && i._stage!==etapa) return false;
     if(search){
@@ -3106,36 +3121,26 @@ function renderValTable(list, searchId, etapaId, countId, bodyId){
     </tr>`).join('');
 }
 function renderValTenaxTable(){ renderValTable(valPendTenaxList, 'valSearchTenax', 'valEtapaTenax', 'valCountTenax', 'valPendTenaxBody'); }
-function renderValValeTable(){ renderValTable(valPendValeList, 'valSearchVale', 'valEtapaVale', 'valCountVale', 'valPendValeBody'); }
+function renderValValeTable(){ renderValTable(valPendValeList, 'valSearchVale', null, 'valCountVale', 'valPendValeBody'); }
 
 ['valSearchTenax','valEtapaTenax'].forEach(id=>{
   document.getElementById(id).addEventListener('input', renderValTenaxTable);
   document.getElementById(id).addEventListener('change', renderValTenaxTable);
 });
-['valSearchVale','valEtapaVale'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', renderValValeTable);
-  document.getElementById(id).addEventListener('change', renderValValeTable);
-});
+document.getElementById('valSearchVale').addEventListener('input', renderValValeTable);
+// Filtro de itens por equipe: reprocessa a aba inteira
+document.getElementById('valTeamFilter').addEventListener('change', ()=>{ safe('renderValidacao', renderValidacao); });
 
 function renderValidacao(){
   // Documento de retorno da Vale abrange os dois processos (Britagem III + Energia) —
   // usa a fonte combinada das duas áreas, e não apenas a área selecionada no momento.
-  const allItems = areaItems.britagem.concat(areaItems.energia);
-  const base = allItems.filter(i=>i.pilar!=='Inventário');
-  const todayISO = new Date().toISOString().slice(0,10);
+  const team = document.getElementById('valTeamFilter').value;
+  const allItemsFull = areaItems.britagem.concat(areaItems.energia);
+  const allItems = team==='all' ? allItemsFull : allItemsFull.filter(i=>i.pilar===team);
+  const todayISO = localISO(new Date());
 
-  const enviados = base.filter(i=>i.emissao_real);
-  const respondidos = enviados.filter(i=>i.retorno_real);
-  document.getElementById('valKpiEnviados').textContent = enviados.length;
-  document.getElementById('valKpiRespondidos').textContent = respondidos.length;
-  document.getElementById('valKpiRespondidosSub').textContent = enviados.length ? `${respondidos.length} de ${enviados.length} enviados` : '"Retorno real" preenchido';
-
-  // Classificação por etapa + prazo (todas as linhas, inclusive Inventário)
+  // Classificação por etapa + prazo
   allItems.forEach(i=>{ i._stage = valStageOf(i); i._prazo = valPrazoOf(i, todayISO); });
-  const pendTenax = allItems.filter(i=>i.pendencia==='tenax');
-  const pendVale = allItems.filter(i=>i.pendencia==='vale');
-  const validados = allItems.filter(i=>i.pendencia===null);
-
   const stageCount = {}, stagePrazo = {}, stageAtraso = {};
   VAL_STAGES.forEach(s=>{ stageCount[s.key]=0; stagePrazo[s.key]=0; stageAtraso[s.key]=0; });
   allItems.forEach(i=>{
@@ -3143,32 +3148,43 @@ function renderValidacao(){
     if(i._prazo==='prazo') stagePrazo[i._stage]++;
     if(i._prazo==='atraso') stageAtraso[i._stage]++;
   });
-  const atrasoD0 = stageAtraso.envio + stageAtraso.assets;
-  const atraso7d = stageAtraso.analise_vale;
-
   const fmtN = n => n.toLocaleString('pt-BR');
-  function prazoSub(key){
-    return `🟢 ${fmtN(stagePrazo[key])} no prazo · 🔴 ${fmtN(stageAtraso[key])} em atraso`;
-  }
+
+  // ---- planejamento da semana (Status D0 dentro da semana atual, seg-dom) ----
+  const t = new Date(); t.setHours(0,0,0,0);
+  const monday = new Date(t); monday.setDate(t.getDate() - ((t.getDay()+6)%7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const mondayISO = localISO(monday), sundayISO = localISO(sunday);
+  const fmtBR = dt => dt.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+  const planWeek = allItems.filter(i=>i.status_d0 && i.status_d0 >= mondayISO && i.status_d0 <= sundayISO);
+  const weekEnvio = planWeek.filter(i=>i._stage==='envio');
+  document.getElementById('valWeekSub').textContent = `Itens com data de Status D0 na semana atual (${fmtBR(monday)} a ${fmtBR(sunday)})`;
+  document.getElementById('valWkPlan').textContent = fmtN(planWeek.length);
+  document.getElementById('valWkPlanSub').textContent = `com Status D0 entre ${fmtBR(monday)} e ${fmtBR(sunday)}`;
+  document.getElementById('valWkEnvio').textContent = fmtN(weekEnvio.length);
+  document.getElementById('valWkEnvioSub').textContent = planWeek.length
+    ? `${fmtN(weekEnvio.length)} de ${fmtN(planWeek.length)} planejados ainda não enviados`
+    : 'precisam ser enviados dentro da semana';
+
+  // ---- cards de pendências e resultado ----
   document.getElementById('valStAssets').textContent = fmtN(stageCount.assets);
-  document.getElementById('valStAssetsSub').textContent = prazoSub('assets') + ' (Status D0)';
+  document.getElementById('valStAssetsSub').textContent =
+    `🟢 ${fmtN(stagePrazo.assets)} no prazo · 🔴 ${fmtN(stageAtraso.assets)} em atraso (Status D0) — Pendência Tenax`;
   document.getElementById('valStAnaliseVale').textContent = fmtN(stageCount.analise_vale);
-  document.getElementById('valStAnaliseValeSub').textContent = prazoSub('analise_vale') + ' (7 dias da emissão)';
+  document.getElementById('valStAnaliseValeSub').textContent =
+    `🟢 ${fmtN(stagePrazo.analise_vale)} no prazo · 🔴 ${fmtN(stageAtraso.analise_vale)} em atraso (7 dias corridos) — Pendência Vale`;
   document.getElementById('valStAnaliseTenax').textContent = fmtN(stageCount.analise_tenax);
   document.getElementById('valStValidado').textContent = fmtN(stageCount.ok);
-  document.getElementById('valPendAtrasoCount').textContent = fmtN(atrasoD0);
-  document.getElementById('valKpiAtraso7d').textContent = fmtN(atraso7d);
-  document.getElementById('valPendTenaxCount2').textContent = fmtN(pendTenax.filter(i=>i.status_d0).length);
-  document.getElementById('valPendValeCount2').textContent = fmtN(pendVale.length);
+  document.getElementById('valStNaoValidado').textContent = fmtN(stageCount.nok);
 
   // ---- fluxo visual do processo ----
   const total = allItems.length;
-  const RESP_LABEL = { tenax:'Tenax', vale:'Vale', done:'Concluído' };
+  const RESP_LABEL = { tenax:'Tenax', vale:'Vale', done:'Positivo', nok:'Negativo' };
   document.getElementById('valFlow').innerHTML = VAL_STAGES.map((s, ix)=>{
     const n = stageCount[s.key];
     const pct = total ? (n/total*100) : 0;
     const pctTxt = total ? (pct < 1 && n > 0 ? '<1%' : Math.round(pct) + '%') : '—';
-    const atrasoTxt = (s.key==='analise_tenax' || s.key==='ok') ? ''
+    const atrasoTxt = (s.key==='analise_tenax' || s.key==='ok' || s.key==='nok') ? ''
       : `<div class="st-atraso${stageAtraso[s.key]?'':' zero'}">🔴 ${fmtN(stageAtraso[s.key])} em atraso</div>`;
     const box = `
       <div class="val-stage resp-${s.resp}">
@@ -3182,35 +3198,43 @@ function renderValidacao(){
     return ix < VAL_STAGES.length-1 ? box + '<div class="val-arrow">➜</div>' : box;
   }).join('');
 
-  // ---- barra de responsabilidade + alertas de atraso ----
-  const nT = pendTenax.length, nV = pendVale.length, nD = validados.length;
+  // ---- barra de responsabilidade + alertas ----
+  const nT = stageCount.envio + stageCount.assets + stageCount.analise_tenax;
+  const nV = stageCount.analise_vale;
+  const nOk = stageCount.ok, nNok = stageCount.nok;
   let summaryHtml = '';
   if(total){
     const segs = [
       {n:nT, color:'#D97706', label:'Tenax'},
       {n:nV, color:'#2563EB', label:'Vale'},
-      {n:nD, color:'#16A34A', label:'Validado'}
+      {n:nOk, color:'#16A34A', label:'Validado'},
+      {n:nNok, color:'#DC2626', label:'Não validado'}
     ].filter(s=>s.n>0);
-    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas do plano</div>';
+    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas' + (team==='all' ? ' do plano' : ' da equipe ' + team) + '</div>';
     summaryHtml += '<div class="val-split-bar">' + segs.map(s=>{
       const pct = s.n/total*100;
       const txt = pct >= 8 ? `${s.label}: ${fmtN(s.n)} (${Math.round(pct)}%)` : '';
       return `<div class="seg" style="width:${pct}%;background:${s.color};" title="${s.label}: ${fmtN(s.n)} (${pct.toFixed(1)}%)">${txt}</div>`;
     }).join('') + '</div>';
+    const atrasoD0 = stageAtraso.envio + stageAtraso.assets;
+    const atraso7d = stageAtraso.analise_vale;
     const alertas = [];
     if(atrasoD0) alertas.push(`🔴 ${fmtN(atrasoD0)} item(ns) em Ag. Envio / Pendente — Assets com prazo D0 vencido`);
-    if(atraso7d) alertas.push(`🔴 ${fmtN(atraso7d)} item(ns) Em análise — Vale estouraram os 7 dias de análise inicial`);
+    if(atraso7d) alertas.push(`🔴 ${fmtN(atraso7d)} item(ns) Em análise — Vale com data de retorno em atraso (7 dias corridos)`);
+    if(nNok) alertas.push(`❌ ${fmtN(nNok)} linha(s) não validada(s) — indicador negativo`);
     summaryHtml += alertas.length
       ? `<div class="val-alert">${alertas.join('<br>')}</div>`
-      : '<div class="val-alert ok">✅ Nenhum item em atraso — prazos D0 e análise inicial (7 dias) em dia.</div>';
+      : '<div class="val-alert ok">✅ Nenhum item em atraso — prazos D0 e retorno da Vale (7 dias corridos) em dia.</div>';
   }
   document.getElementById('valFlowSummary').innerHTML = summaryHtml;
 
   // ---- painéis de pesquisa ----
-  // Pendente — Tenax lista apenas itens com data definida em Status D0 (itens já
-  // programados); o restante do backlog sem D0 segue contando nos cards e no fluxo.
-  valPendTenaxList = pendTenax.filter(i=>i.status_d0);
-  valPendValeList = pendVale;
+  // Pendências Tenax = itens no Assets + comentários a atender (Em análise — Tenax)
+  valPendTenaxList = allItems.filter(i=>i._stage==='assets' || i._stage==='analise_tenax');
+  // Pendência Vale = itens em análise na Vale
+  valPendValeList = allItems.filter(i=>i._stage==='analise_vale');
+  document.getElementById('valPendTenaxCount2').textContent = fmtN(valPendTenaxList.length);
+  document.getElementById('valPendValeCount2').textContent = fmtN(valPendValeList.length);
   renderValTenaxTable();
   renderValValeTable();
 
