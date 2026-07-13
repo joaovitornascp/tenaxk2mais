@@ -3445,7 +3445,9 @@ async function generatePdfReport(area, btnEl){
     let firstPage = true;
 
     // Cabeçalho de página compartilhado por todas as páginas do relatório (imagem ou vetor).
-    function pageHeader(title, sub){
+    // caption: descrição breve (1-2 frases) do que o gráfico mostra + valores
+    // quantitativos, para o relatório ficar autoexplicativo sem precisar do app aberto.
+    function pageHeader(title, sub, caption){
       if(!firstPage) doc.addPage();
       firstPage = false;
       doc.setFillColor(244,245,247);
@@ -3453,14 +3455,23 @@ async function generatePdfReport(area, btnEl){
       doc.setFont('helvetica','bold');
       doc.setFontSize(15);
       doc.setTextColor(4,85,82);
-      doc.text(title, margin, margin+6);
+      doc.text(stripEmoji(title), margin, margin+6);
       if(sub){
         doc.setFont('helvetica','normal');
         doc.setFontSize(10);
         doc.setTextColor(100,112,133);
-        doc.text(sub, margin, margin+24);
+        doc.text(stripEmoji(sub), margin, margin+24);
       }
-      return { x: margin, y: margin+46, w: pageW - margin*2, h: pageH - margin*2 - 46 };
+      let capH = 0;
+      if(caption){
+        doc.setFont('helvetica','italic');
+        doc.setFontSize(9);
+        doc.setTextColor(70,82,94);
+        const lines = doc.splitTextToSize(stripEmoji(caption), pageW - margin*2);
+        doc.text(lines, margin, margin+38);
+        capH = lines.length*12 + 6;
+      }
+      return { x: margin, y: margin+46+capH, w: pageW - margin*2, h: pageH - margin*2 - 46 - capH };
     }
 
     // Páginas desenhadas em vetor (texto/formas do jsPDF), sem rasterizar DOM em canvas —
@@ -3485,8 +3496,8 @@ async function generatePdfReport(area, btnEl){
       return [Math.round(r*a+255*(1-a)), Math.round(g*a+255*(1-a)), Math.round(b*a+255*(1-a))];
     }
 
-    function addKpiCardsPage(title, sub, rowSelector){
-      const box = pageHeader(title, sub);
+    function addKpiCardsPage(title, sub, rowSelector, caption){
+      const box = pageHeader(title, sub, caption);
       const cards = Array.from(document.querySelectorAll(rowSelector+' .kpi-card'));
       if(!cards.length) return;
       const perRow = 3, gap = 14;
@@ -3509,7 +3520,6 @@ async function generatePdfReport(area, btnEl){
     }
 
     function addHeatmapTablePage(title, sub, tableId){
-      const box = pageHeader(title, sub);
       const table = document.getElementById(tableId);
       if(!table) return;
       const headCells = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
@@ -3521,6 +3531,9 @@ async function generatePdfReport(area, btnEl){
         }))
       );
       if(!headCells.length || !bodyRows.length) return;
+      const grandTotal = bodyRows.reduce((acc,row)=>acc + (parseInt(row[row.length-1].text,10)||0), 0);
+      const caption = `Cada célula é o número de itens com entrega prevista naquele período — quanto mais escura, maior a concentração. Total: ${grandTotal.toLocaleString('pt-BR')} itens em ${bodyRows.length} equipe(s).`;
+      const box = pageHeader(title, sub, caption);
       const cols = headCells.length;
       const rowHeadW = Math.min(140, box.w*0.22);
       const otherW = (box.w - rowHeadW) / (cols-1);
@@ -3557,7 +3570,6 @@ async function generatePdfReport(area, btnEl){
     }
 
     function addValFlowPage(title, sub){
-      const box = pageHeader(title, sub);
       const RESP_COLOR = { tenax:[217,119,6], vale:[37,99,235], done:[22,163,74], nok:[220,38,38] };
       const stages = Array.from(document.querySelectorAll('#valFlow .val-stage')).map(el=>{
         let resp = 'tenax';
@@ -3573,6 +3585,11 @@ async function generatePdfReport(area, btnEl){
           atraso: stripEmoji((el.querySelector('.st-atraso')||{}).textContent || '')
         };
       });
+      const numOf = key => { const s = stages.find(x=>x.name===key); return s ? (parseInt(s.num.replace(/\D/g,''),10)||0) : 0; };
+      const totalLinhas = stages.reduce((acc,s)=>acc + (parseInt(s.num.replace(/\D/g,''),10)||0), 0);
+      const caption = `Cada linha do plano passa por estas etapas até ser validada pela Vale — a cor mostra de quem é a próxima ação. `+
+        `De ${totalLinhas.toLocaleString('pt-BR')} linhas: ${numOf('Validado').toLocaleString('pt-BR')} já validadas e ${numOf('Não validado').toLocaleString('pt-BR')} não validadas.`;
+      const box = pageHeader(title, sub, caption);
       let y = box.y;
       if(stages.length){
         const perRow = 3, gap = 12;
@@ -3670,12 +3687,12 @@ async function generatePdfReport(area, btnEl){
       }
     }
 
-    function addImagePage(title, sub, imgData){
-      const box = pageHeader(title, sub);
+    function addImagePage(title, sub, imgData, caption){
+      const box = pageHeader(title, sub, caption);
       const ratio = Math.min(box.w/imgData.width, box.h/imgData.height);
       const w = imgData.width*ratio, h = imgData.height*ratio;
       const x = box.x + (box.w-w)/2;
-      doc.addImage(imgData.dataUrl, 'PNG', x, box.y, w, h);
+      doc.addImage(imgData.dataUrl, 'JPEG', x, box.y, w, h);
     }
 
     // ----- capa -----
@@ -3693,10 +3710,18 @@ async function generatePdfReport(area, btnEl){
     doc.text('Gerado em '+dateLabel, pageW/2, pageH/2+26, {align:'center'});
     firstPage = false;
 
+    const fmtN = n => n.toLocaleString('pt-BR');
+
     // ----- 1) Cards iniciais (indicadores gerais) -----
     renderAll();
     await waitFrame();
-    addKpiCardsPage('Indicadores gerais', AREA_LABEL[area], '#a_kpiRow');
+    {
+      const total = items.length;
+      const concl = items.filter(i=>i.status==='Concluído').length;
+      const pct = total ? (concl/total*100) : 0;
+      const kpiCaption = `Panorama do processo ${AREA_LABEL[area]}: ${fmtN(total)} itens no total, ${fmtN(concl)} já concluídos (${pct.toFixed(1)}%). "Concluído" aqui segue a coluna Validação da planilha (deixou de estar em "Ag. Envio").`;
+      addKpiCardsPage('Indicadores gerais', AREA_LABEL[area], '#a_kpiRow', kpiCaption);
+    }
 
     // ----- 2) Fluxograma de blocos — sempre separado por pilar -----
     const pilaresComItens = CHART_PILARES.filter(p=>items.some(i=>i.pilar===p));
@@ -3705,7 +3730,11 @@ async function generatePdfReport(area, btnEl){
       renderAll();
       await waitFrame();
       const fluxoImg = await svgToImageData('a_fluxoSvg');
-      addImagePage(AREA_FLUXO_TITLE[area], 'Pilar: '+p, fluxoImg);
+      const pTotal = items.filter(i=>i.pilar===p).length;
+      const pConcl = items.filter(i=>i.pilar===p && i.status==='Concluído').length;
+      const pPct = pTotal ? (pConcl/pTotal*100) : 0;
+      const fluxoCaption = `Mostra os sistemas do pilar ${p} na ordem do processo, com o avanço de cada ativo. ${fmtN(pConcl)} de ${fmtN(pTotal)} itens concluídos (${pPct.toFixed(1)}%).`;
+      addImagePage(AREA_FLUXO_TITLE[area], 'Pilar: '+p, fluxoImg, fluxoCaption);
     }
 
     // ----- 3) Curva S consolidada — geral (Todos os pilares) -----
@@ -3713,8 +3742,12 @@ async function generatePdfReport(area, btnEl){
     CHART_PILARES.forEach(p=>selectedConsolidada.add(p));
     renderAll();
     await waitFrame();
-    const curvaGeralImg = await svgToImageData('a_curvaConsSvg');
-    addImagePage('Curva S consolidada do projeto', 'Visão geral — todos os pilares combinados', curvaGeralImg);
+    {
+      const curvaGeralImg = await svgToImageData('a_curvaConsSvg');
+      const curvaSub = (document.getElementById('a_curvaConsSub')||{}).textContent || '';
+      const curvaCaption = 'Compara, ao longo do tempo, quanto já deveria estar pronto (linha tracejada, Planejado) com o que de fato foi entregue (linha cheia, Realizado). '+curvaSub;
+      addImagePage('Curva S consolidada do projeto', 'Visão geral — todos os pilares combinados', curvaGeralImg, curvaCaption);
+    }
 
     // ----- 4) Curva S consolidada — por pilar -----
     for(const p of CHART_PILARES){
@@ -3723,7 +3756,9 @@ async function generatePdfReport(area, btnEl){
       renderAll();
       await waitFrame();
       const curvaPilarImg = await svgToImageData('a_curvaConsSvg');
-      addImagePage('Curva S consolidada do projeto', 'Pilar: '+p, curvaPilarImg);
+      const curvaSubP = (document.getElementById('a_curvaConsSub')||{}).textContent || '';
+      const curvaCaptionP = `Mesma comparação Planejado × Realizado, isolada para o pilar ${p}. `+curvaSubP;
+      addImagePage('Curva S consolidada do projeto', 'Pilar: '+p, curvaPilarImg, curvaCaptionP);
     }
 
     // ----- 5) Mapa de entregas por equipe (por mês) -----
@@ -3953,7 +3988,10 @@ function svgToImageData(svgId){
   return new Promise((resolve, reject)=>{
     const svg = document.getElementById(svgId);
     if(!svg){ reject(new Error('SVG não encontrado: '+svgId)); return; }
-    const SCALE = 3;
+    // Usado só pelo relatório em PDF — escala menor + JPEG (em vez do PNG sem perdas
+    // usado pelo botão "baixar imagem" de cada painel) para o arquivo caber em e-mail:
+    // um PDF com várias dessas imagens em PNG a 3x passava de 130 MB.
+    const SCALE = 2;
     const vb = (svg.getAttribute('viewBox')||'').split(/\s+/).map(Number);
     const baseW = vb.length===4 ? vb[2] : (svg.clientWidth||1180);
     const baseH = vb.length===4 ? vb[3] : (svg.clientHeight||480);
@@ -3980,7 +4018,7 @@ function svgToImageData(svgId){
       ctx.scale(SCALE, SCALE);
       ctx.drawImage(img, 0, 0, baseW, baseH);
       URL.revokeObjectURL(url);
-      resolve({dataUrl: canvas.toDataURL('image/png', 1.0), width: baseW, height: baseH});
+      resolve({dataUrl: canvas.toDataURL('image/jpeg', 0.82), width: baseW, height: baseH});
     };
     img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('Falha ao rasterizar SVG: '+svgId)); };
     img.src = url;
