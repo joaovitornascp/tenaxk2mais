@@ -1055,19 +1055,41 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
 @media (max-width:700px){ #valKpiWeekRow{ grid-template-columns:1fr !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
-#page-validacao .vf-branch{ display:flex; flex-direction:column; gap:10px; justify-content:center; flex:1 1 240px; min-width:240px; }
-#page-validacao .vf-lane{ display:flex; align-items:stretch; }
-#page-validacao .vf-lane .val-stage{ flex:1 1 auto; min-width:120px; }
-#page-validacao .vf-route{
-  flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:var(--bg); border:1px dashed var(--border); border-radius:10px;
-  padding:10px 10px; font-size:11px; font-weight:700; color:var(--text); text-align:center; line-height:1.45;
+/* Fluxo em 2 vias: linha principal reta embaixo (todas as equipes) e desvio
+   elevado do Inventário passando pelo Assets — a geometria conta a história. */
+#page-validacao .val-flow2{
+  display:grid; align-items:center; margin:16px 0 4px; row-gap:6px;
+  grid-template-columns:minmax(148px,1.15fr) 78px minmax(148px,1.15fr) 78px minmax(148px,1.15fr) 24px minmax(148px,1.15fr) 24px minmax(148px,1fr);
 }
-#page-validacao .vf-route .vf-route-sub{ font-size:10px; font-weight:600; color:var(--muted); margin-top:4px; }
-#page-validacao .vf-lane .vf-route:not(:only-child){ flex:0 0 auto; max-width:96px; padding:8px 8px; }
-#page-validacao .vf-lane .vf-route:only-child{ min-height:100%; }
-#page-validacao .vf-outcomes{ display:flex; flex-direction:column; gap:10px; justify-content:center; flex:1 1 150px; min-width:150px; }
-#page-validacao .vf-outcomes .val-stage{ flex:0 0 auto; }
+#page-validacao .vf2-envio{ grid-column:1; grid-row:2; }
+#page-validacao .vf2-assets{ grid-column:3; grid-row:1; }
+#page-validacao .vf2-vale{ grid-column:5; grid-row:2; }
+#page-validacao .vf2-tenax2{ grid-column:7; grid-row:2; }
+#page-validacao .vf2-out{ grid-column:9; grid-row:1/3; display:flex; flex-direction:column; gap:10px; justify-content:center; }
+#page-validacao .vf2-conn{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; text-align:center; padding:0 4px;
+}
+#page-validacao .vf2-conn .glyph{ font-size:24px; line-height:1; color:var(--muted2); font-weight:700; }
+#page-validacao .vf2-conn .vf2-lbl{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1.3; text-transform:uppercase; letter-spacing:.03em; }
+#page-validacao .vf2-up{ grid-column:2; grid-row:1; align-self:end; padding-bottom:6px; }
+#page-validacao .vf2-down{ grid-column:4; grid-row:1; align-self:end; padding-bottom:6px; }
+#page-validacao .vf2-main1{ grid-column:2; grid-row:2; }
+#page-validacao .vf2-main2{ grid-column:4; grid-row:2; }
+#page-validacao .vf2-a1{ grid-column:6; grid-row:2; }
+#page-validacao .vf2-a2{ grid-column:8; grid-row:2; }
+#page-validacao .vf2-track{ grid-column:3; grid-row:2; border-top:2px dashed var(--muted2); opacity:.55; margin:0 -26px; }
+@media (max-width:1100px){ #page-validacao .vf2-track{ display:none; } }
+#page-validacao .vf2-up .glyph, #page-validacao .vf2-down .glyph{ color:#6D28D9; }
+#page-validacao .vf2-up .vf2-lbl, #page-validacao .vf2-down .vf2-lbl{ color:#6D28D9; }
+#page-validacao .st-chip.st-chip-alt{ background:#6D28D9; margin-left:4px; }
+#page-validacao .val-stage.vf2-assets{ border-top-color:#6D28D9; border-style:dashed; border-top-style:solid; }
+@media (max-width:1100px){
+  #page-validacao .val-flow2{ display:flex; flex-direction:column; align-items:stretch; gap:10px; }
+  #page-validacao .vf2-conn{ flex-direction:row; gap:8px; justify-content:flex-start; padding:0; }
+  #page-validacao .vf2-conn .glyph{ font-size:18px; transform:rotate(90deg); }
+  #page-validacao .vf2-out{ flex-direction:column; }
+}
 #page-validacao .val-split{ margin-top:16px; }
 #page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
 #page-validacao .val-split-bar{ display:flex; height:24px; border-radius:7px; overflow:hidden; border:1px solid var(--border); }
@@ -3151,7 +3173,7 @@ function renderValidacao(){
   // termina em dois desfechos empilhados (Validado / Não validado).
   const total = allItems.length;
   const RESP_LABEL = { tenax:'Tenax', vale:'Vale', done:'Positivo', nok:'Negativo' };
-  function stageBox(key){
+  function stageBox(key, extraClass, extraChip){
     const s = VAL_STAGE_BY_KEY[key];
     const n = stageCount[key];
     const pct = total ? (n/total*100) : 0;
@@ -3159,8 +3181,8 @@ function renderValidacao(){
     const atrasoTxt = (key==='analise_tenax' || key==='ok' || key==='nok') ? ''
       : `<div class="st-atraso${stageAtraso[key]?'':' zero'}">🔴 ${fmtN(stageAtraso[key])} em atraso</div>`;
     return `
-      <div class="val-stage resp-${s.resp}">
-        <span class="st-chip">${RESP_LABEL[s.resp]}</span>
+      <div class="val-stage resp-${s.resp}${extraClass ? ' '+extraClass : ''}">
+        <span class="st-chip">${RESP_LABEL[s.resp]}</span>${extraChip || ''}
         <div class="st-num">${fmtN(n)}</div>
         <div class="st-name">${s.label}</div>
         <div class="st-desc">${s.desc}</div>
@@ -3168,20 +3190,23 @@ function renderValidacao(){
         ${atrasoTxt}
       </div>`;
   }
-  const arrow = '<div class="val-arrow">➜</div>';
+  function conn(cls, glyph, label){
+    return `<div class="vf2-conn ${cls}"><span class="glyph">${glyph}</span>${label ? `<span class="vf2-lbl">${label}</span>` : ''}</div>`;
+  }
+  document.getElementById('valFlow').className = 'val-flow2';
   document.getElementById('valFlow').innerHTML =
-    stageBox('envio') + arrow +
-    `<div class="vf-branch">
-      <div class="vf-lane">
-        <div class="vf-route">Inventário</div>${arrow}${stageBox('assets')}
-      </div>
-      <div class="vf-lane">
-        <div class="vf-route">RCM · Estratégia de Ativos<br>Lista BOM · Taxonomia<div class="vf-route-sub">entram direto na análise</div></div>
-      </div>
-    </div>` + arrow +
-    stageBox('analise_vale') + arrow +
-    stageBox('analise_tenax') + arrow +
-    `<div class="vf-outcomes">
+    stageBox('envio', 'vf2-envio') +
+    conn('vf2-up', '⬈', 'só Inventário') +
+    stageBox('assets', 'vf2-assets', '<span class="st-chip st-chip-alt">Só Inventário</span>') +
+    conn('vf2-down', '⬊', 'volta ao fluxo') +
+    conn('vf2-main1', '➜', 'demais equipes<br>direto') +
+    '<div class="vf2-track"></div>' +
+    conn('vf2-main2', '➜', '') +
+    stageBox('analise_vale', 'vf2-vale') +
+    conn('vf2-a1', '➜', '') +
+    stageBox('analise_tenax', 'vf2-tenax2') +
+    conn('vf2-a2', '➜', '') +
+    `<div class="vf2-out">
       ${stageBox('ok')}
       ${stageBox('nok')}
     </div>`;
