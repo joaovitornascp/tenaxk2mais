@@ -1082,6 +1082,10 @@ body.dark-mode .login-field input{ background:#0F1620; border-color:#283543; col
 #page-validacao .val-stage .st-name{ font-size:12px; font-weight:700; color:var(--text); margin-top:6px; }
 #page-validacao .val-stage .st-desc{ font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
 #page-validacao .val-stage .st-pct{ font-size:10.5px; color:var(--muted); margin-top:7px; font-weight:600; }
+#page-validacao .val-stage .st-atraso{ font-size:10.5px; color:#DC2626; margin-top:4px; font-weight:700; }
+#page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
+@media (max-width:1300px){ #valKpiStagesRow{ grid-template-columns:repeat(3,1fr) !important; } }
+@media (max-width:700px){ #valKpiStagesRow{ grid-template-columns:repeat(2,1fr) !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
 #page-validacao .val-split{ margin-top:16px; }
 #page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
@@ -1610,7 +1614,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
 
   <div class="panel">
     <h2>Fluxo do processo de validação — em que etapa está e de quem é a ação</h2>
-    <div class="sub">Cada documento percorre este caminho até ser validado pela Vale. O número mostra quantas linhas estão paradas em cada etapa; a cor indica de quem é a próxima ação.</div>
+    <div class="sub">Cada documento percorre este caminho até ser validado pela Vale. O número mostra quantas linhas estão em cada etapa; a cor indica de quem é a próxima ação.</div>
     <div class="legend-row" style="margin-top:8px;">
       <span><span class="dot" style="background:#D97706"></span> Ação da Tenax</span>
       <span><span class="dot" style="background:#2563EB"></span> Ação da Vale</span>
@@ -1621,8 +1625,36 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
   </div>
 
   <div class="panel">
-    <h2>Indicadores de validação</h2>
-    <div class="sub">Documentos com a Vale (os três primeiros cards excluem Inventário) e pendências por etapa (todas as linhas, inclusive Inventário)</div>
+    <h2>Etapas do processo — prazo × atraso</h2>
+    <div class="sub">Cada card mostra o total da etapa e quantos itens estão dentro do prazo ou em atraso, conforme a regra da etapa</div>
+    <div class="kpi-row" id="valKpiStagesRow" style="grid-template-columns:repeat(5,1fr);margin-bottom:12px;">
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Ag. Envio</div>
+        <div class="kpi-value" id="valStEnvio">—</div>
+        <div class="kpi-sub" id="valStEnvioSub">prazo pela coluna Status D0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Pendente — Assets</div>
+        <div class="kpi-value" id="valStAssets">—</div>
+        <div class="kpi-sub" id="valStAssetsSub">só Inventário · prazo pela coluna Status D0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🔵 Em análise — Vale</div>
+        <div class="kpi-value" id="valStAnaliseVale">—</div>
+        <div class="kpi-sub" id="valStAnaliseValeSub">análise inicial: 7 dias a partir da emissão</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🟠 Em análise — Tenax</div>
+        <div class="kpi-value" id="valStAnaliseTenax">—</div>
+        <div class="kpi-sub">devendo retorno aos comentários da Vale</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">✅ Validado</div>
+        <div class="kpi-value" id="valStValidado">—</div>
+        <div class="kpi-sub">objetivo do processo</div>
+      </div>
+    </div>
+
     <div class="kpi-row" id="valKpiRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
       <div class="kpi-card">
         <div class="kpi-label">Documentos enviados para Vale</div>
@@ -1635,34 +1667,14 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <div class="kpi-sub" id="valKpiRespondidosSub">"Retorno real" preenchido</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Com resposta atrasada</div>
-        <div class="kpi-value" id="valKpiAtrasados">—</div>
-        <div class="kpi-sub">"Retorno previsto" já vencido, sem retorno real</div>
-      </div>
-      <div class="kpi-card">
         <div class="kpi-label">🔴 Em atraso (D0)</div>
         <div class="kpi-value" id="valPendAtrasoCount">—</div>
-        <div class="kpi-sub">prazo D0 vencido sem validação</div>
+        <div class="kpi-sub">Ag. Envio / Pendente — Assets com Status D0 vencido</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">🟠 Ag. Envio</div>
-        <div class="kpi-value" id="valPendAgEnvioCount">—</div>
-        <div class="kpi-sub">pendente Tenax — envio para a Vale</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🟠 Pendente — Assets</div>
-        <div class="kpi-value" id="valPendAssetsCount">—</div>
-        <div class="kpi-sub">pendente Tenax — pré-aprovação Assets</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🔵 Pendente — Vale</div>
-        <div class="kpi-value" id="valPendValeCount">—</div>
-        <div class="kpi-sub">aguardando retorno/validação da Vale</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">✅ Validado</div>
-        <div class="kpi-value" id="valPendValidadoCount">—</div>
-        <div class="kpi-sub">sem pendência</div>
+        <div class="kpi-label">🔴 Atraso de análise inicial (7 dias)</div>
+        <div class="kpi-value" id="valKpiAtraso7d">—</div>
+        <div class="kpi-sub">Em análise — Vale sem retorno em até 7 dias da emissão</div>
       </div>
     </div>
 
@@ -1671,14 +1683,14 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     <details class="val-explain">
       <summary>📖 O que significa cada indicador</summary>
       <ul>
-        <li><b>Documentos enviados para Vale</b> — linhas com <i>Data de emissão real</i> preenchida (exceto Inventário): o documento já foi formalmente emitido para a Vale.</li>
-        <li><b>Documentos respondidos</b> — dentre os enviados, linhas com <i>Retorno real</i> preenchido: a Vale já deu retorno.</li>
-        <li><b>Com resposta atrasada</b> — enviados cujo <i>Retorno previsto</i> já venceu e ainda não têm retorno real da Vale.</li>
-        <li><b>🔴 Em atraso (D0)</b> — linhas cuja data da coluna <i>Status D0</i> já venceu (anterior a hoje) e que ainda não foram validadas. É um recorte de prazo: essas linhas também aparecem em uma das etapas de pendência.</li>
-        <li><b>🟠 Ag. Envio</b> — linhas com a coluna <i>Validação</i> = "Ag. Envio": o documento ainda não foi enviado para a Vale. A ação é da <b>Tenax</b>.</li>
-        <li><b>🟠 Pendente — Assets</b> — linhas aguardando a pré-aprovação interna na plataforma <b>Assets</b> (só existe no pilar Inventário) antes de seguir para a Vale. A ação é da <b>Tenax</b>.</li>
-        <li><b>🔵 Pendente — Vale</b> — linhas em análise na Vale ("Em análise - Vale" ou "Não validado"). Inclui os documentos em que a Vale retornou comentários e a Tenax já atendeu (<i>Retorno real</i> e <i>Data atendimento comentários</i> preenchidos) — nesses, falta apenas a Vale validar. Atenção: se a Vale retornou e a Tenax ainda <u>não</u> atendeu os comentários (<i>Retorno real</i> preenchido e <i>Data atendimento comentários</i> vazia), a linha conta como pendência da Tenax, na etapa "Comentários a atender".</li>
-        <li><b>✅ Validado</b> — linhas com <i>Validação</i> = "Validado": ciclo concluído, sem dependência de ninguém.</li>
+        <li><b>🟠 Ag. Envio</b> — o documento ainda não foi enviado para a Vale; a ação é da <b>Tenax</b>. Regra de prazo: o <i>Status D0</i> está em atraso (data anterior a hoje)? Se sim, o item está <b>em atraso</b>; se não, está <b>dentro do prazo</b>.</li>
+        <li><b>🟠 Pendente — Assets</b> — válido apenas para o pilar <b>Inventário</b>: o item aguarda a pré-aprovação interna na plataforma Assets antes de seguir para a Vale; a ação é da <b>Tenax</b>. Regra de prazo: mesma do Ag. Envio — <i>Status D0</i> vencido = em atraso; caso contrário, dentro do prazo.</li>
+        <li><b>🔵 Em análise — Vale</b> — documento com a Vale (aqui entram todos os pilares, inclusive Inventário), seja na análise inicial ou na validação final após a Tenax atender os comentários. Regra de prazo: o <i>Retorno real</i> aconteceu (ou ainda pode acontecer) em até <b>7 dias</b> a partir da <i>Data de emissão real</i>? Se sim, dentro do prazo; se não, é o <b>atraso de análise inicial (7 dias)</b> — um indicador próprio.</li>
+        <li><b>🟠 Em análise — Tenax</b> — pendência da <b>Tenax</b>: só existe quando o <i>Retorno real</i> está preenchido e a <i>Data atendimento comentários</i> está vazia — estamos devendo retorno aos comentários da Vale.</li>
+        <li><b>✅ Validado</b> — a linha foi validada pela Vale: é o objetivo do processo.</li>
+        <li><b>Documentos enviados / respondidos</b> — linhas (exceto Inventário) com <i>Data de emissão real</i> preenchida e, dentre elas, as que já têm <i>Retorno real</i>.</li>
+        <li><b>🔴 Em atraso (D0)</b> — itens das etapas Ag. Envio e Pendente — Assets cujo <i>Status D0</i> já venceu.</li>
+        <li><b>🔴 Atraso de análise inicial (7 dias)</b> — itens Em análise — Vale cujo retorno não veio (nem pode mais vir) dentro de 7 dias contados da emissão.</li>
       </ul>
     </details>
   </div>
@@ -1691,16 +1703,16 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <input type="text" id="valSearchTenax" placeholder="Buscar FLOC, sistema, pilar...">
         <select id="valEtapaTenax">
           <option value="">Todas as etapas</option>
-          <option value="assets">Pré-aprovação Assets</option>
-          <option value="envio">Aguardando envio</option>
-          <option value="coment">Comentários a atender</option>
+          <option value="assets">Pendente — Assets</option>
+          <option value="envio">Ag. Envio</option>
+          <option value="analise_tenax">Em análise — Tenax</option>
         </select>
         <span class="row-count" id="valCountTenax">0 de 0 linhas</span>
       </div>
       <div class="table-wrap" style="max-height:360px;">
         <table>
-          <thead><tr><th style="width:115px;">Pilar</th><th style="width:75px;">Sistema</th><th>FLOC / EGP</th><th style="width:150px;">Etapa</th></tr></thead>
-          <tbody id="valPendTenaxBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+          <thead><tr><th style="width:110px;">Pilar</th><th style="width:70px;">Sistema</th><th>FLOC / EGP</th><th style="width:135px;">Etapa</th><th style="width:95px;">Prazo</th></tr></thead>
+          <tbody id="valPendTenaxBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1711,20 +1723,19 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <input type="text" id="valSearchVale" placeholder="Buscar FLOC, sistema, pilar...">
         <select id="valEtapaVale">
           <option value="">Todas as etapas</option>
-          <option value="analise">Em análise — Vale</option>
-          <option value="reanalise">Validação final — Vale</option>
+          <option value="analise_vale">Em análise — Vale</option>
         </select>
         <span class="row-count" id="valCountVale">0 de 0 linhas</span>
       </div>
       <div class="table-wrap" style="max-height:360px;">
         <table>
-          <thead><tr><th style="width:115px;">Pilar</th><th style="width:75px;">Sistema</th><th>FLOC / EGP</th><th style="width:150px;">Etapa</th></tr></thead>
-          <tbody id="valPendValeBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
+          <thead><tr><th style="width:110px;">Pilar</th><th style="width:70px;">Sistema</th><th>FLOC / EGP</th><th style="width:135px;">Etapa</th><th style="width:95px;">Prazo</th></tr></thead>
+          <tbody id="valPendValeBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;">Nenhum documento carregado ainda.</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
-  <div class="footer-note">Fonte: coluna "Validação" + "Retorno real" / "Data atendimento comentários" / "Status D0" da aba "Priorização Vale".</div>
+  <div class="footer-note">Fonte: colunas "Validação", "Retorno real", "Data atendimento comentários", "Data de emissão real" e "Status D0" da aba "Priorização Vale".</div>
 </div>
 </div>
 
@@ -2159,13 +2170,14 @@ function normalizePilar(escopo){
 // comentários quando a Vale já deu retorno. Retorna 'tenax' | 'vale' | null (sem pendência).
 function computePendencia(validacaoRaw, retornoReal, dataAtendimento){
   const v = _strip(validacaoRaw);
+  if(!v) return null;
+  // "Validado" encerra o ciclo: sem dependência, independentemente das outras colunas
+  if(v.includes('validado') && !v.includes('nao validado')) return null;
   let base = null;
-  if(!v) base = null;
-  else if(v.includes('nao validado')) base = 'vale';
+  if(v.includes('nao validado')) base = 'vale';
   else if(v.includes('assets')) base = 'tenax';
   else if(v.includes('envio')) base = 'tenax';
   else if(v.includes('analise') && v.includes('vale')) base = 'vale';
-  else if(v.includes('validado')) base = null;
 
   if(retornoReal && !dataAtendimento) return 'tenax';
   if(retornoReal && dataAtendimento) return 'vale';
@@ -3106,26 +3118,51 @@ function renderTable(){
 }
 
 // ---------- aba Validação: retorno de documentos enviados à Vale ----------
-// Etapa do fluxo de validação em que o documento está (disjuntas — todo item cai em uma).
+// Etapas do fluxo de validação (disjuntas — todo item cai em exatamente uma).
 const VAL_STAGES = [
-  {key:'assets',   resp:'tenax', label:'Pré-aprovação Assets',   desc:'aguardando aprovação interna no Assets (Inventário)'},
-  {key:'envio',    resp:'tenax', label:'Aguardando envio',       desc:'pronto para a Tenax enviar à Vale'},
-  {key:'analise',  resp:'vale',  label:'Em análise — Vale',      desc:'enviado; aguardando primeiro retorno da Vale'},
-  {key:'coment',   resp:'tenax', label:'Comentários a atender',  desc:'a Vale retornou; falta a Tenax responder'},
-  {key:'reanalise',resp:'vale',  label:'Validação final — Vale', desc:'comentários atendidos; falta a Vale validar'},
-  {key:'ok',       resp:'done',  label:'Validado',               desc:'ciclo concluído, sem pendência'}
+  {key:'assets',        resp:'tenax', label:'Pendente — Assets',  desc:'pré-aprovação interna no Assets (só Inventário)'},
+  {key:'envio',         resp:'tenax', label:'Ag. Envio',          desc:'pronto para a Tenax enviar à Vale'},
+  {key:'analise_vale',  resp:'vale',  label:'Em análise — Vale',  desc:'com a Vale — análise inicial ou validação final'},
+  {key:'analise_tenax', resp:'tenax', label:'Em análise — Tenax', desc:'a Vale retornou; devemos resposta aos comentários'},
+  {key:'ok',            resp:'done',  label:'Validado',           desc:'objetivo do processo — linha validada'}
 ];
 const VAL_STAGE_BY_KEY = {};
 VAL_STAGES.forEach(s=>{ VAL_STAGE_BY_KEY[s.key]=s; });
 
 function valStageOf(i){
   if(i.pendencia===null) return 'ok';
-  if(i.retorno_real && !i.data_atendimento) return 'coment';
-  if(i.retorno_real && i.data_atendimento) return 'reanalise';
+  // Em análise — Tenax: só existe com Retorno real preenchido e atendimento pendente
+  if(i.retorno_real && !i.data_atendimento) return 'analise_tenax';
   const v = _strip(i.validado);
   if(v.includes('assets')) return 'assets';
   if(v.includes('envio')) return 'envio';
-  return 'analise';
+  return 'analise_vale';
+}
+
+// soma dias a uma data ISO (aritmética UTC para não sofrer com fuso)
+function isoAddDays(iso, n){
+  const p = iso.split('-').map(Number);
+  return new Date(Date.UTC(p[0], p[1]-1, p[2]+n)).toISOString().slice(0,10);
+}
+
+// Prazo × atraso conforme a regra de cada etapa:
+//  - Ag. Envio / Pendente-Assets: Status D0 vencido => atraso
+//  - Em análise — Vale: retorno real (ou hoje, se ainda sem retorno) até 7 dias
+//    após a Data de emissão real => no prazo; depois disso => atraso de análise inicial
+//  - demais etapas: sem regra de prazo (null)
+function valPrazoOf(i, todayISO){
+  const st = i._stage;
+  if(st==='envio' || st==='assets'){
+    if(!i.status_d0) return 'prazo';
+    return i.status_d0 < todayISO ? 'atraso' : 'prazo';
+  }
+  if(st==='analise_vale'){
+    if(!i.emissao_real) return 'prazo';
+    const limite = isoAddDays(i.emissao_real, 7);
+    if(i.retorno_real) return i.retorno_real <= limite ? 'prazo' : 'atraso';
+    return todayISO <= limite ? 'prazo' : 'atraso';
+  }
+  return null;
 }
 
 // listas correntes para os painéis de pesquisa da aba Validação
@@ -3145,9 +3182,14 @@ function renderValTable(list, searchId, etapaId, countId, bodyId){
   });
   document.getElementById(countId).textContent = `${filtered.length} de ${list.length} linhas`;
   if(filtered.length===0){
-    document.getElementById(bodyId).innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">' +
+    document.getElementById(bodyId).innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;">' +
       (list.length===0 ? 'Nenhum documento nesta situação.' : 'Nenhum documento encontrado para os filtros atuais.') + '</td></tr>';
     return;
+  }
+  function prazoCell(i){
+    if(i._prazo==='atraso') return '<span style="color:#DC2626;font-weight:700;">🔴 Em atraso</span>';
+    if(i._prazo==='prazo') return '<span style="color:#16A34A;font-weight:600;">🟢 No prazo</span>';
+    return '—';
   }
   document.getElementById(bodyId).innerHTML = filtered.map(i=>`
     <tr>
@@ -3158,6 +3200,7 @@ function renderValTable(list, searchId, etapaId, countId, bodyId){
         <div class="floc-sub">${i.floc}${i.denom?' · '+i.denom:''}</div>
       </td>
       <td>${VAL_STAGE_BY_KEY[i._stage].label}</td>
+      <td>${prazoCell(i)}</td>
     </tr>`).join('');
 }
 function renderValTenaxTable(){ renderValTable(valPendTenaxList, 'valSearchTenax', 'valEtapaTenax', 'valCountTenax', 'valPendTenaxBody'); }
@@ -3181,32 +3224,42 @@ function renderValidacao(){
 
   const enviados = base.filter(i=>i.emissao_real);
   const respondidos = enviados.filter(i=>i.retorno_real);
-  const atrasados = enviados.filter(i=>!i.retorno_real && i.retorno_previsto && i.retorno_previsto < todayISO);
-
   document.getElementById('valKpiEnviados').textContent = enviados.length;
   document.getElementById('valKpiRespondidos').textContent = respondidos.length;
   document.getElementById('valKpiRespondidosSub').textContent = enviados.length ? `${respondidos.length} de ${enviados.length} enviados` : '"Retorno real" preenchido';
-  document.getElementById('valKpiAtrasados').textContent = atrasados.length;
 
-  // Pendência (coluna Validação + Retorno real/Data atendimento) considera todas as
-  // linhas, inclusive Inventário — a etapa "Pendente - Assets" só existe nesse pilar.
-  allItems.forEach(i=>{ i._stage = valStageOf(i); });
+  // Classificação por etapa + prazo (todas as linhas, inclusive Inventário)
+  allItems.forEach(i=>{ i._stage = valStageOf(i); i._prazo = valPrazoOf(i, todayISO); });
   const pendTenax = allItems.filter(i=>i.pendencia==='tenax');
   const pendVale = allItems.filter(i=>i.pendencia==='vale');
   const validados = allItems.filter(i=>i.pendencia===null);
-  const atrasoD0 = allItems.filter(i=>i.status_d0 && i.status_d0 < todayISO && i.pendencia!==null);
 
-  const stageCount = {};
-  VAL_STAGES.forEach(s=>{ stageCount[s.key]=0; });
-  allItems.forEach(i=>{ stageCount[i._stage]++; });
+  const stageCount = {}, stagePrazo = {}, stageAtraso = {};
+  VAL_STAGES.forEach(s=>{ stageCount[s.key]=0; stagePrazo[s.key]=0; stageAtraso[s.key]=0; });
+  allItems.forEach(i=>{
+    stageCount[i._stage]++;
+    if(i._prazo==='prazo') stagePrazo[i._stage]++;
+    if(i._prazo==='atraso') stageAtraso[i._stage]++;
+  });
+  const atrasoD0 = stageAtraso.envio + stageAtraso.assets;
+  const atraso7d = stageAtraso.analise_vale;
 
-  document.getElementById('valPendAgEnvioCount').textContent = stageCount.envio;
-  document.getElementById('valPendAssetsCount').textContent = stageCount.assets;
-  document.getElementById('valPendAtrasoCount').textContent = atrasoD0.length;
-  document.getElementById('valPendTenaxCount2').textContent = pendTenax.length;
-  document.getElementById('valPendValeCount').textContent = pendVale.length;
-  document.getElementById('valPendValeCount2').textContent = pendVale.length;
-  document.getElementById('valPendValidadoCount').textContent = validados.length;
+  const fmtN = n => n.toLocaleString('pt-BR');
+  function prazoSub(key){
+    return `🟢 ${fmtN(stagePrazo[key])} no prazo · 🔴 ${fmtN(stageAtraso[key])} em atraso`;
+  }
+  document.getElementById('valStEnvio').textContent = fmtN(stageCount.envio);
+  document.getElementById('valStEnvioSub').textContent = prazoSub('envio') + ' (Status D0)';
+  document.getElementById('valStAssets').textContent = fmtN(stageCount.assets);
+  document.getElementById('valStAssetsSub').textContent = prazoSub('assets') + ' (Status D0)';
+  document.getElementById('valStAnaliseVale').textContent = fmtN(stageCount.analise_vale);
+  document.getElementById('valStAnaliseValeSub').textContent = prazoSub('analise_vale') + ' (7 dias da emissão)';
+  document.getElementById('valStAnaliseTenax').textContent = fmtN(stageCount.analise_tenax);
+  document.getElementById('valStValidado').textContent = fmtN(stageCount.ok);
+  document.getElementById('valPendAtrasoCount').textContent = fmtN(atrasoD0);
+  document.getElementById('valKpiAtraso7d').textContent = fmtN(atraso7d);
+  document.getElementById('valPendTenaxCount2').textContent = fmtN(pendTenax.length);
+  document.getElementById('valPendValeCount2').textContent = fmtN(pendVale.length);
 
   // ---- fluxo visual do processo ----
   const total = allItems.length;
@@ -3215,18 +3268,21 @@ function renderValidacao(){
     const n = stageCount[s.key];
     const pct = total ? (n/total*100) : 0;
     const pctTxt = total ? (pct < 1 && n > 0 ? '<1%' : Math.round(pct) + '%') : '—';
+    const atrasoTxt = (s.key==='analise_tenax' || s.key==='ok') ? ''
+      : `<div class="st-atraso${stageAtraso[s.key]?'':' zero'}">🔴 ${fmtN(stageAtraso[s.key])} em atraso</div>`;
     const box = `
       <div class="val-stage resp-${s.resp}">
         <span class="st-chip">${RESP_LABEL[s.resp]}</span>
-        <div class="st-num">${n.toLocaleString('pt-BR')}</div>
+        <div class="st-num">${fmtN(n)}</div>
         <div class="st-name">${s.label}</div>
         <div class="st-desc">${s.desc}</div>
         <div class="st-pct">${pctTxt} das linhas</div>
+        ${atrasoTxt}
       </div>`;
     return ix < VAL_STAGES.length-1 ? box + '<div class="val-arrow">➜</div>' : box;
   }).join('');
 
-  // ---- barra de responsabilidade + alerta de atraso ----
+  // ---- barra de responsabilidade + alertas de atraso ----
   const nT = pendTenax.length, nV = pendVale.length, nD = validados.length;
   let summaryHtml = '';
   if(total){
@@ -3235,15 +3291,18 @@ function renderValidacao(){
       {n:nV, color:'#2563EB', label:'Vale'},
       {n:nD, color:'#16A34A', label:'Validado'}
     ].filter(s=>s.n>0);
-    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + total.toLocaleString('pt-BR') + ' linhas do plano</div>';
+    summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas do plano</div>';
     summaryHtml += '<div class="val-split-bar">' + segs.map(s=>{
       const pct = s.n/total*100;
-      const txt = pct >= 8 ? `${s.label}: ${s.n.toLocaleString('pt-BR')} (${Math.round(pct)}%)` : '';
-      return `<div class="seg" style="width:${pct}%;background:${s.color};" title="${s.label}: ${s.n.toLocaleString('pt-BR')} (${pct.toFixed(1)}%)">${txt}</div>`;
+      const txt = pct >= 8 ? `${s.label}: ${fmtN(s.n)} (${Math.round(pct)}%)` : '';
+      return `<div class="seg" style="width:${pct}%;background:${s.color};" title="${s.label}: ${fmtN(s.n)} (${pct.toFixed(1)}%)">${txt}</div>`;
     }).join('') + '</div>';
-    summaryHtml += atrasoD0.length
-      ? `<div class="val-alert">🔴 ${atrasoD0.length.toLocaleString('pt-BR')} documento(s) com prazo D0 vencido e ainda sem validação — priorize esses itens.</div>`
-      : '<div class="val-alert ok">✅ Nenhum documento com prazo D0 vencido.</div>';
+    const alertas = [];
+    if(atrasoD0) alertas.push(`🔴 ${fmtN(atrasoD0)} item(ns) em Ag. Envio / Pendente — Assets com prazo D0 vencido`);
+    if(atraso7d) alertas.push(`🔴 ${fmtN(atraso7d)} item(ns) Em análise — Vale estouraram os 7 dias de análise inicial`);
+    summaryHtml += alertas.length
+      ? `<div class="val-alert">${alertas.join('<br>')}</div>`
+      : '<div class="val-alert ok">✅ Nenhum item em atraso — prazos D0 e análise inicial (7 dias) em dia.</div>';
   }
   document.getElementById('valFlowSummary').innerHTML = summaryHtml;
 
