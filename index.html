@@ -2190,12 +2190,14 @@ function parsePriorizacaoVale(workbook, area){
     const validadoRaw = (r['Validação']!==null && r['Validação']!==undefined) ? r['Validação'] : r['Validado'];
     const validado = (validadoRaw && validadoRaw!=='-') ? String(validadoRaw).trim() : (status!=='Concluído' ? 'Ag. Envio' : null);
 
-    // Para o pilar Inventário, a conclusão da atividade não é o Status da planilha —
-    // é o envio para a Vale, ou seja, a coluna Validação = "Validado".
-    if(pilar==='Inventário'){
-      const vStrip = _strip(validado);
-      const isValidado = vStrip.includes('validado') && !vStrip.includes('nao validado');
-      status = isValidado ? 'Concluído' : (status==='Concluído' ? 'Em andamento' : status);
+    // A conclusão da atividade (em todas as abas de Planejamentos — Britagem e
+    // Energia) não é mais o Status da planilha: é a coluna Validação. A partir do
+    // momento em que ela sai de "Ag. Envio" (Pendente - Assets, Em análise - Vale,
+    // Validado, Não validado, ...) o item já conta como concluído.
+    const validadoKey = _strip(validado || '').replace(/[^a-z0-9]+/g,'');
+    if(validadoKey){
+      const isConcluded = validadoKey!=='agenvio';
+      status = isConcluded ? 'Concluído' : (status==='Concluído' ? 'Em andamento' : status);
     }
 
     // aba de Retorno de Validação: acompanha o ciclo de envio/resposta de
