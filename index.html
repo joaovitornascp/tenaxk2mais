@@ -2524,13 +2524,10 @@ function renderCurvaConsolidada(){
   });
 
   const pastPoints   = realPoints.filter(p=>p.ts<=todayTs);
-  const futurePoints = realPoints.filter(p=>p.ts>todayTs);
-  const lastPoint    = realPoints.length ? realPoints[realPoints.length-1] : null;
   const currentReal  = pastPoints.length ? pastPoints[pastPoints.length-1] : {count:0, pct:0};
 
   document.getElementById('a_curvaConsSub').textContent =
-    `Planejado e realizado: ${activeList.join(', ')} · hoje ${todayLabel} · ${currentReal.count} de ${totalItems} itens concluídos`
-    + (futurePoints.length ? ` · ${lastPoint.count} já registrados além de hoje` : '');
+    `Planejado e realizado: ${activeList.join(', ')} · hoje ${todayLabel} · ${currentReal.count} de ${totalItems} itens concluídos`;
 
   const W=1180,H=500,padL=56,padR=30,padT=40,padB=76;
   const plotW=W-padL-padR, plotH=H-padT-padB;
@@ -2622,25 +2619,6 @@ function renderCurvaConsolidada(){
     const lastPast = pastPoints[pastPoints.length-1];
     const lastPastX = xPosDate(lastPast.ts);
     svg+=`<line x1="${lastPastX}" y1="${padT}" x2="${lastPastX}" y2="${H-padB}" stroke="${realColor}" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>`;
-  }
-
-  // Linha Realizado FUTURO — continuação além de hoje, label apenas no ponto final
-  if(futurePoints.length){
-    const futColor = '#C0682A';
-    const anchor = pastPoints.length ? pastPoints[pastPoints.length-1] : {ts:todayTs, pct:0};
-    let dFut=`M${xPosDate(anchor.ts)},${yPos(anchor.pct)} `;
-    futurePoints.forEach(p=>{ dFut+=`L${xPosDate(p.ts)},${yPos(p.pct)} `; });
-    svg+=`<path d="${dFut}" fill="none" stroke="${futColor}" stroke-width="2" stroke-dasharray="5,3"/>`;
-    futurePoints.forEach((p,idx)=>{
-      const px=xPosDate(p.ts), py=yPos(p.pct);
-      const isLast = idx===futurePoints.length-1;
-      svg+=`<circle cx="${px}" cy="${py}" r="${isLast?5:3}" fill="${futColor}" stroke="#fff" stroke-width="1.5"/>`;
-      if(isLast){
-        svg+=`<text x="${px}" y="${py-14}" font-size="12" fill="${futColor}" text-anchor="middle" font-weight="700">${p.count}</text>`;
-      }
-    });
-    const lastX=xPosDate(lastPoint.ts);
-    svg+=`<line x1="${lastX}" y1="${padT}" x2="${lastX}" y2="${H-padB}" stroke="${futColor}" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>`;
   }
 
   ['a_curvaConsSvg','a_curvaConsSvg_fs'].forEach(id=>{
