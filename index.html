@@ -2199,21 +2199,23 @@ function parsePriorizacaoVale(workbook, area){
     const planEnd = toISO(r['Data de conclusão planejada']);
     const realStart = toISO(r['Data real de início']);
     const realEnd = toISO(r['Data real de conclusão']);
+    const statusRawTrim = (r['Status']!==null && r['Status']!==undefined) ? String(r['Status']).trim() : '';
     let status = normalizeStatus(r['Status'], !!(planStart || planEnd));
 
     const validadoRaw = (r['Validação']!==null && r['Validação']!==undefined) ? r['Validação'] : r['Validado'];
     const validado = (validadoRaw && validadoRaw!=='-') ? String(validadoRaw).trim() : (status!=='Concluído' ? 'Ag. Envio' : null);
 
+    // A coluna Status (S) traz, no texto bruto, "Registro concluído" (só
+    // Inventário) ou "Enviado para Vale" (demais pilares) quando o item já saiu
+    // da Tenax — usado como a régua "mais larga" na Curva S, para comparar com
+    // o que a coluna Validação (W) já confirma como "Validado - Vale".
+    const enviadoVale = statusRawTrim==='Registro concluído' || statusRawTrim==='Enviado para Vale';
+
     // A conclusão da atividade (em todas as abas de Planejamentos — Britagem e
     // Energia, para todos os pilares) é definida pela coluna Validação: só conta
-    // como Concluído quando ela chega em "Validado - Vale" (validação final da
-    // Vale). "registrado" é a régua anterior, mais larga (saiu de Ag. Envio) —
-    // mantida à parte para comparar, na Curva S do Inventário, o que já foi
-    // registrado/enviado do que já foi de fato validado pela Vale.
+    // como Concluído quando ela chega em "Validado - Vale" (validação final da Vale).
     const validadoKey = _strip(validado || '').replace(/[^a-z0-9]+/g,'');
-    let registrado = false;
     if(validadoKey){
-      registrado = !validadoKey.includes('agenvio');
       const isConcluded = validadoKey === 'validadovale';
       status = isConcluded ? 'Concluído' : (status==='Concluído' ? 'Em andamento' : status);
     }
@@ -2236,7 +2238,7 @@ function parsePriorizacaoVale(workbook, area){
       id: recs.length+1, pilar, sistema, ativo, floc, denom, n3: n3Nivel,
       plan_start: planStart || planEnd, plan_end: planEnd,
       real_start: realStart, real_end: realEnd, status,
-      validado, registrado, pendencia,
+      validado, enviadoVale, pendencia,
       status_d0: toISO(r['Status D0']),
       retorno_previsto: toISO(r['Retorno previsto']), retorno_real,
       emissao_real: toISO(r['Data de emissão real']),
@@ -2511,18 +2513,26 @@ function renderCurvaConsolidada(){
   }
 
   const realColor = '#E67E22';
-  const regColor = '#6D28D9';
-  const planColor = activeList.length===1 ? PILAR_COLOR_HEX[activeList[0]] : '#007E7A';
-  // Inventário tem duas réguas de avanço: o registro (saiu de Ag. Envio) e a
-  // validação final da Vale — mostrar as duas juntas evidencia o que já foi
-  // levantado em campo mas ainda não voltou validado.
-  const isInventarioOnly = activeList.length===1 && activeList[0]==='Inventário';
-  const realLabel = isInventarioOnly ? 'Validado - Vale' : 'Realizado';
+  const regColor = '#00B0CA'; // azul claro — mesma cor da Taxonomia, já usada no dashboard
+  // A cor do pilar (Taxonomia) coincide com regColor — se for a linha Planejado
+  // dessa mesma aba, cai para o teal genérico para não confundir com a linha
+  // "Enviado para Vale", que é sempre azul claro.
+  const planColor = activeList.length===1
+    ? (PILAR_COLOR_HEX[activeList[0]]===regColor ? '#007E7A' : PILAR_COLOR_HEX[activeList[0]])
+    : '#007E7A';
+  // Todo pilar isolado tem duas réguas de avanço: o que já saiu da Tenax
+  // (coluna Status — "Registro concluído" no Inventário, "Enviado para Vale"
+  // nos demais) e o que a Vale já validou de fato (coluna Validação =
+  // "Validado - Vale"). Mostrar as duas juntas evidencia o que já foi
+  // enviado/registrado mas ainda não voltou validado.
+  const singlePilar = activeList.length===1 ? activeList[0] : null;
+  const regLabel = singlePilar==='Inventário' ? 'Registro concluído' : 'Enviado para Vale';
+  const realLabel = singlePilar ? 'Validado - Vale' : 'Realizado';
 
   const legendHTML = `
     <span style="color:${planColor};"><i class="dash-line" style="border-color:${planColor};"></i> Planejado${activeList.length===1?' ('+activeList[0]+')':' (consolidado)'}</span>
     <span style="color:${realColor};"><i class="solid-line" style="background:${realColor};"></i> ${realLabel}</span>`
-    + (isInventarioOnly ? `<span style="color:${regColor};"><i class="solid-line" style="background:${regColor};"></i> Registro concluído</span>` : '');
+    + (singlePilar ? `<span style="color:${regColor};"><i class="solid-line" style="background:${regColor};"></i> ${regLabel}</span>` : '');
   ['a_legendConsolidada','a_legendConsolidada_fs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=legendHTML;
   });
@@ -2556,14 +2566,14 @@ function renderCurvaConsolidada(){
   const currentReal  = pastPoints.length ? pastPoints[pastPoints.length-1] : {count:0, pct:0};
 
   let regPastPoints = [], currentReg = {count:0, pct:0};
-  if(isInventarioOnly){
-    const regPoints = buildRealPoints(i=>i.registrado);
+  if(singlePilar){
+    const regPoints = buildRealPoints(i=>i.enviadoVale);
     regPastPoints = regPoints.filter(p=>p.ts<=todayTs);
     currentReg = regPastPoints.length ? regPastPoints[regPastPoints.length-1] : {count:0, pct:0};
   }
 
-  document.getElementById('a_curvaConsSub').textContent = isInventarioOnly
-    ? `Planejado e realizado: Inventário · hoje ${todayLabel} · ${currentReg.count} registrados · ${currentReal.count} validados pela Vale de ${totalItems} itens`
+  document.getElementById('a_curvaConsSub').textContent = singlePilar
+    ? `Planejado e realizado: ${singlePilar} · hoje ${todayLabel} · ${currentReg.count} ${regLabel==='Registro concluído'?'registrados':'enviados à Vale'} · ${currentReal.count} validados pela Vale de ${totalItems} itens`
     : `Planejado e realizado: ${activeList.join(', ')} · hoje ${todayLabel} · ${currentReal.count} de ${totalItems} itens concluídos`;
 
   const W=1180,H=500,padL=56,padR=30,padT=40,padB=76;
@@ -2659,7 +2669,7 @@ function renderCurvaConsolidada(){
       svg+=`<line x1="${lastPastX}" y1="${padT}" x2="${lastPastX}" y2="${H-padB}" stroke="${color}" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>`;
     }
   }
-  if(isInventarioOnly) drawRealizedLine(regPastPoints, regColor, false);
+  if(singlePilar) drawRealizedLine(regPastPoints, regColor, false);
   drawRealizedLine(pastPoints, realColor, true);
 
   ['a_curvaConsSvg','a_curvaConsSvg_fs'].forEach(id=>{
