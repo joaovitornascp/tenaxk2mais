@@ -514,9 +514,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     box-shadow:0 1px 2px rgba(16,24,40,.04);
   }
   .panel h2{
-    margin:0 0 4px;font-size:15px;font-weight:700;color:var(--text);
+    margin:0 0 4px;font-size:17px;font-weight:700;color:var(--text);
   }
-  .panel .sub{font-size:11.5px;color:var(--muted);margin-bottom:6px;}
+  .panel .sub{font-size:12.5px;color:var(--muted);margin-bottom:6px;}
   .legend-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--muted);}
   .legend-row span{display:inline-flex;align-items:center;gap:6px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
@@ -626,8 +626,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   .kpi-sub{font-size:11.5px;margin-top:4px;color:var(--muted2);}
 
   .panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
-  .panel h2{margin:0 0 4px;font-size:16px;font-weight:700;color:var(--teal-dark);font-style:italic;}
-  .panel .sub{font-size:11.5px;color:var(--muted);margin-bottom:10px;}
+  .panel h2{margin:0 0 4px;font-size:18px;font-weight:700;color:var(--teal-dark);font-style:italic;}
+  .panel .sub{font-size:12.5px;color:var(--muted);margin-bottom:10px;}
   .legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--muted);}
   .legend-row span{display:inline-flex;align-items:center;gap:6px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
@@ -1017,36 +1017,39 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 
 
 /* ===== Aba Validação: fluxo do processo, cards e manual recolhível ===== */
-#page-validacao .val-flow{ display:flex; align-items:stretch; flex-wrap:wrap; gap:0; margin:16px 0 4px; }
+#page-validacao .val-flow{ display:flex; align-items:stretch; flex-wrap:wrap; gap:0; margin:18px 0 4px; }
 #page-validacao .val-stage{
   flex:1 1 138px; min-width:138px; background:var(--bg); border:1px solid var(--border);
-  border-top:4px solid var(--border); border-radius:10px; padding:12px 12px 10px;
+  border-top:5px solid var(--border); border-radius:12px; padding:16px 16px 14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04), 0 2px 6px rgba(16,24,40,.05);
+  transition:box-shadow .15s ease, transform .15s ease;
 }
+#page-validacao .val-stage:hover{ box-shadow:0 2px 4px rgba(16,24,40,.06), 0 6px 16px rgba(16,24,40,.08); transform:translateY(-1px); }
 #page-validacao .val-stage.resp-tenax{ border-top-color:#D97706; }
 #page-validacao .val-stage.resp-vale{ border-top-color:#2563EB; }
 #page-validacao .val-stage.resp-done{ border-top-color:#16A34A; }
 #page-validacao .val-stage.resp-nok{ border-top-color:#DC2626; }
 #page-validacao .resp-nok .st-chip{ background:#DC2626; }
 #page-validacao .val-stage .st-chip{
-  display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.05em;
-  padding:2px 8px; border-radius:10px; color:#fff; margin-bottom:8px; text-transform:uppercase;
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em;
+  padding:3px 10px; border-radius:11px; color:#fff; margin-bottom:10px; text-transform:uppercase;
 }
 #page-validacao .resp-tenax .st-chip{ background:#D97706; }
 #page-validacao .resp-vale .st-chip{ background:#2563EB; }
 #page-validacao .resp-done .st-chip{ background:#16A34A; }
-#page-validacao .val-stage .st-num{ font-size:26px; font-weight:800; color:var(--text); line-height:1; }
-#page-validacao .val-stage .st-name{ font-size:12px; font-weight:700; color:var(--text); margin-top:6px; }
-#page-validacao .val-stage .st-desc{ font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
-#page-validacao .val-stage .st-pct{ font-size:10.5px; color:var(--muted); margin-top:7px; font-weight:600; }
-#page-validacao .val-stage .st-atraso{ font-size:10.5px; color:#DC2626; margin-top:4px; font-weight:700; }
+#page-validacao .val-stage .st-num{ font-size:33px; font-weight:800; color:var(--text); line-height:1; letter-spacing:-.01em; }
+#page-validacao .val-stage .st-name{ font-size:14.5px; font-weight:700; color:var(--text); margin-top:8px; }
+#page-validacao .val-stage .st-desc{ font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45; }
+#page-validacao .val-stage .st-pct{ font-size:12px; color:var(--muted); margin-top:9px; font-weight:600; }
+#page-validacao .val-stage .st-atraso{ font-size:12px; color:#DC2626; margin-top:5px; font-weight:700; }
 #page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
 @media (max-width:700px){ #valKpiWeekRow{ grid-template-columns:1fr !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
 /* Fluxo em 2 vias: linha principal reta embaixo (todas as equipes) e desvio
    elevado do Inventário passando pelo Assets — a geometria conta a história. */
 #page-validacao .val-flow2{
-  display:grid; align-items:center; margin:16px 0 4px; row-gap:10px;
-  grid-template-columns:minmax(146px,1fr) 64px minmax(146px,1fr) 64px minmax(146px,1fr) 38px minmax(146px,1fr) 38px minmax(146px,1fr);
+  display:grid; align-items:center; margin:20px 0 6px; row-gap:14px;
+  grid-template-columns:minmax(160px,1fr) 72px minmax(160px,1fr) 72px minmax(160px,1fr) 44px minmax(160px,1fr) 44px minmax(160px,1fr);
 }
 #page-validacao .vf2-envio{ grid-column:1; grid-row:2; }
 #page-validacao .vf2-assets{ grid-column:3; grid-row:1; }
@@ -1055,75 +1058,75 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 /* Via principal com altura uniforme: as caixas esticam até a altura da linha,
    que é dada pela pilha das duas saídas (Validado / Não validado). */
 #page-validacao .vf2-envio, #page-validacao .vf2-vale, #page-validacao .vf2-tenax2{ align-self:stretch; }
-#page-validacao .vf2-out{ grid-column:9; grid-row:2; align-self:stretch; display:flex; flex-direction:column; gap:10px; justify-content:center; }
-#page-validacao .vf2-out .val-stage{ flex:1 1 0; padding:10px 12px 8px; }
-#page-validacao .vf2-out .val-stage .st-num{ font-size:21px; }
-#page-validacao .vf2-out .val-stage .st-name{ margin-top:4px; }
-#page-validacao .vf2-out .val-stage .st-chip{ margin-bottom:5px; }
-#page-validacao .vf2-fork{ gap:30px; }
+#page-validacao .vf2-out{ grid-column:9; grid-row:2; align-self:stretch; display:flex; flex-direction:column; gap:12px; justify-content:center; }
+#page-validacao .vf2-out .val-stage{ flex:1 1 0; padding:12px 14px 10px; }
+#page-validacao .vf2-out .val-stage .st-num{ font-size:26px; }
+#page-validacao .vf2-out .val-stage .st-name{ margin-top:5px; }
+#page-validacao .vf2-out .val-stage .st-chip{ margin-bottom:6px; }
+#page-validacao .vf2-fork{ gap:34px; }
 #page-validacao .vf2-fork .glyph.ok{ color:#16A34A; }
 #page-validacao .vf2-fork .glyph.nok{ color:#DC2626; }
 #page-validacao .vf2-conn{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:2px; text-align:center; padding:0 4px;
+  gap:3px; text-align:center; padding:0 4px;
 }
-#page-validacao .vf2-conn .glyph{ font-size:24px; line-height:1; color:var(--muted2); font-weight:700; }
-#page-validacao .vf2-conn .vf2-lbl{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1.3; text-transform:uppercase; letter-spacing:.03em; }
-#page-validacao .vf2-up{ grid-column:2; grid-row:1; align-self:end; padding-bottom:6px; }
-#page-validacao .vf2-down{ grid-column:4; grid-row:1; align-self:end; padding-bottom:6px; }
+#page-validacao .vf2-conn .glyph{ font-size:28px; line-height:1; color:#007E7A; font-weight:700; }
+#page-validacao .vf2-conn .vf2-lbl{ font-size:10.5px; font-weight:700; color:var(--muted); line-height:1.3; text-transform:uppercase; letter-spacing:.03em; }
+#page-validacao .vf2-up{ grid-column:2; grid-row:1; align-self:end; padding-bottom:8px; }
+#page-validacao .vf2-down{ grid-column:4; grid-row:1; align-self:end; padding-bottom:8px; }
 #page-validacao .vf2-main1{ grid-column:2; grid-row:2; }
 #page-validacao .vf2-main2{ grid-column:4; grid-row:2; }
 #page-validacao .vf2-a1{ grid-column:6; grid-row:2; }
 #page-validacao .vf2-a2{ grid-column:8; grid-row:2; }
-#page-validacao .vf2-track{ grid-column:3; grid-row:2; border-top:2px dashed var(--muted2); opacity:.55; margin:0 -26px; }
+#page-validacao .vf2-track{ grid-column:3; grid-row:2; border-top:2px dashed var(--muted2); opacity:.55; margin:0 -30px; }
 @media (max-width:1100px){ #page-validacao .vf2-track{ display:none; } }
 /* Totalizadores de pendência por empresa (após o Ag. Envio) */
-#page-validacao .vf2-totais{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
-#page-validacao .vf2-total{ border-radius:10px; padding:14px 18px; border:1px solid var(--border); }
+#page-validacao .vf2-totais{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+#page-validacao .vf2-total{ border-radius:12px; padding:18px 22px; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.04), 0 2px 6px rgba(16,24,40,.05); }
 #page-validacao .vf2-total.tenax{ background:#FEF7EC; border-color:#F3D9A8; }
 #page-validacao .vf2-total.vale{ background:#EEF4FF; border-color:#C7D8FB; }
-#page-validacao .vf2-total .tot-label{ font-size:12px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
+#page-validacao .vf2-total .tot-label{ font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
 #page-validacao .vf2-total.tenax .tot-label{ color:#B45309; }
 #page-validacao .vf2-total.vale .tot-label{ color:#1D4ED8; }
-#page-validacao .vf2-total .tot-num{ font-size:32px; font-weight:800; line-height:1.15; }
+#page-validacao .vf2-total .tot-num{ font-size:38px; font-weight:800; line-height:1.15; margin-top:2px; }
 #page-validacao .vf2-total.tenax .tot-num{ color:#B45309; }
 #page-validacao .vf2-total.vale .tot-num{ color:#1D4ED8; }
-#page-validacao .vf2-total .tot-detail{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+#page-validacao .vf2-total .tot-detail{ font-size:13px; color:var(--muted); margin-top:6px; line-height:1.4; }
 body.dark-mode #page-validacao .vf2-total.tenax{ background:#2B2113; border-color:#57431F; }
 body.dark-mode #page-validacao .vf2-total.vale{ background:#131F35; border-color:#243B63; }
 @media (max-width:700px){ #page-validacao .vf2-totais{ grid-template-columns:1fr; } }
 #page-validacao .vf2-up .glyph, #page-validacao .vf2-down .glyph{ color:#6D28D9; }
 #page-validacao .vf2-up .vf2-lbl, #page-validacao .vf2-down .vf2-lbl{ color:#6D28D9; }
 #page-validacao .st-chip.st-chip-alt{ background:#6D28D9; margin-left:4px; }
-#page-validacao .val-stage.vf2-assets{ border-top-color:#6D28D9; border-style:dashed; border-top-style:solid; }
+#page-validacao .val-stage.vf2-assets{ border-top-color:#6D28D9; border-style:dashed; border-top-style:solid; background:linear-gradient(180deg, rgba(109,40,217,.05), var(--bg) 60%); }
 @media (max-width:1100px){
-  #page-validacao .val-flow2{ display:flex; flex-direction:column; align-items:stretch; gap:10px; }
+  #page-validacao .val-flow2{ display:flex; flex-direction:column; align-items:stretch; gap:12px; }
   #page-validacao .vf2-conn{ flex-direction:row; gap:8px; justify-content:flex-start; padding:0; }
-  #page-validacao .vf2-conn .glyph{ font-size:18px; transform:rotate(90deg); }
+  #page-validacao .vf2-conn .glyph{ font-size:20px; transform:rotate(90deg); }
   #page-validacao .vf2-out{ flex-direction:column; }
 }
-#page-validacao .val-split{ margin-top:16px; }
-#page-validacao .val-split-title{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
-#page-validacao .val-split-bar{ display:flex; height:24px; border-radius:7px; overflow:hidden; border:1px solid var(--border); }
-#page-validacao .val-split-bar .seg{ display:flex; align-items:center; justify-content:center; color:#fff; font-size:10.5px; font-weight:700; white-space:nowrap; overflow:hidden; }
+#page-validacao .val-split{ margin-top:20px; }
+#page-validacao .val-split-title{ font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:600; }
+#page-validacao .val-split-bar{ display:flex; height:30px; border-radius:8px; overflow:hidden; border:1px solid var(--border); box-shadow:inset 0 1px 2px rgba(16,24,40,.05); }
+#page-validacao .val-split-bar .seg{ display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; }
 #page-validacao .val-alert{
-  margin-top:12px; border-radius:8px; padding:9px 13px; font-size:12px; font-weight:600;
+  margin-top:14px; border-radius:9px; padding:11px 15px; font-size:13px; font-weight:600; line-height:1.5;
   background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C;
 }
 #page-validacao .val-alert.ok{ background:#ECFDF3; border-color:#C9F2DA; color:#15803D; }
 body.dark-mode #page-validacao .val-alert{ background:#2B1416; border-color:#5A1E22; }
 body.dark-mode #page-validacao .val-alert.ok{ background:#12281C; border-color:#1E4D33; }
 #page-validacao .val-explain{
-  background:var(--bg); border:1px dashed var(--border); border-radius:8px;
-  padding:10px 16px; margin-top:14px; font-size:12px; color:var(--muted); line-height:1.55;
+  background:var(--bg); border:1px dashed var(--border); border-radius:9px;
+  padding:12px 18px; margin-top:16px; font-size:13px; color:var(--muted); line-height:1.6;
 }
-#page-validacao .val-explain summary{ cursor:pointer; font-weight:700; color:var(--text); font-size:12.5px; list-style:none; }
+#page-validacao .val-explain summary{ cursor:pointer; font-weight:700; color:var(--text); font-size:13.5px; list-style:none; }
 #page-validacao .val-explain summary::-webkit-details-marker{ display:none; }
 #page-validacao .val-explain summary::before{ content:'▸ '; color:#2563EB; }
 #page-validacao .val-explain[open] summary::before{ content:'▾ '; }
 #page-validacao .val-explain b{ color:var(--text); }
 #page-validacao .val-explain ul{ margin:10px 0 4px; padding-left:18px; }
-#page-validacao .val-explain li{ margin-bottom:6px; }
+#page-validacao .val-explain li{ margin-bottom:7px; }
 @media (max-width:1300px){ #valKpiRow{ grid-template-columns:repeat(2,1fr) !important; } }
 @media (max-width:1100px){ #page-validacao .val-arrow{ display:none; } #page-validacao .val-flow{ gap:10px; } }
 
@@ -1395,7 +1398,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     </div>
     <div class="team-select" id="a_fluxoPilarSelect" style="display:none;margin-bottom:10px;"></div>
     <div class="svg-zoom-wrap" id="zoomFluxo">
-      <svg id="a_fluxoSvg" viewBox="0 0 1180 300" style="width: 100%; height: 300px; cursor: grab;"><text x="590" y="150" text-anchor="middle" font-size="14" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
+      <svg id="a_fluxoSvg" viewBox="0 0 1180 300" style="width: 100%; height: 300px; cursor: grab;"><text x="590" y="150" text-anchor="middle" font-size="16" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
     </div>
     <div class="zoom-hint">Scroll para zoom · arrastar para mover</div>
   </div>
@@ -1423,7 +1426,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
     </div>
     <div class="legend-row" id="a_legendIndividual"></div>
     <div class="svg-zoom-wrap" id="zoomIndividual">
-      <svg id="a_curvaIndividualSvg" viewBox="0 0 900 340" style="width:100%;height:340px;cursor:grab;"><text x="450" y="170" text-anchor="middle" font-size="14" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
+      <svg id="a_curvaIndividualSvg" viewBox="0 0 900 340" style="width:100%;height:340px;cursor:grab;"><text x="450" y="170" text-anchor="middle" font-size="16" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
     </div>
     <div class="zoom-hint">Scroll para zoom · arrastar para mover</div>
   </div>
@@ -1445,7 +1448,7 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
 
     <div class="legend-row" id="a_legendConsolidada"></div>
     <div class="svg-zoom-wrap" id="zoomConsolidada">
-      <svg id="a_curvaConsSvg" viewBox="0 0 1180 500" style="width:100%;height:500px;cursor:grab;"><text x="590" y="250" text-anchor="middle" font-size="14" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
+      <svg id="a_curvaConsSvg" viewBox="0 0 1180 500" style="width:100%;height:500px;cursor:grab;"><text x="590" y="250" text-anchor="middle" font-size="16" fill="#667085">Sem dados de Cronograma de Acompanhamento - Britagem III  (BRT Salobo III) — clique no botão 🔄 Atualizar dados e carregue a planilha 🪨 Britagem III</text></svg>
     </div>
     <div class="zoom-hint">Scroll para zoom · arrastar para mover</div>
 
@@ -2110,6 +2113,7 @@ function computePendencia(validacaoRaw, retornoReal, dataAtendimento){
   if(v.includes('validado') && !v.includes('nao validado')) return null;
   let base = null;
   if(v.includes('nao validado')) base = 'vale';
+  else if(v.includes('tenax')) base = 'tenax';
   else if(v.includes('assets')) base = 'tenax';
   else if(v.includes('envio')) base = 'tenax';
   else if(v.includes('analise') && v.includes('vale')) base = 'vale';
@@ -2135,11 +2139,21 @@ function parsePriorizacaoVale(workbook, area){
   if(!sheetName) throw new Error('nenhuma aba de dados encontrada nesta planilha');
   const sheet = workbook.Sheets[sheetName];
 
-  // nome do cabeçalho da COLUNA B (2ª coluna) — usado para ler o marcador de processo
-  const headerRow = (XLSX.utils.sheet_to_json(sheet, {header:1})[0]) || [];
+  // Cabeçalhos lidos e normalizados (trim) manualmente: a planilha pode trazer
+  // espaços extras num nome de coluna (ex.: "Status ") e isso faria o acesso
+  // exato r['Status'] falhar silenciosamente, então não confiamos no header
+  // bruto do sheet_to_json({}) — montamos os objetos nós mesmos.
+  const allRows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:null});
+  const headerRow = (allRows[0] || []).map(h => (h===null||h===undefined) ? h : String(h).trim());
   const colBKey = headerRow[1];
-
-  const rows = XLSX.utils.sheet_to_json(sheet, {defval:null});
+  const rows = allRows.slice(1).map(arr=>{
+    const obj = {};
+    headerRow.forEach((h,i)=>{
+      if(h===undefined || h===null || h==='') return;
+      obj[h] = (arr[i]!==undefined) ? arr[i] : null;
+    });
+    return obj;
+  });
 
   // decide o modo de separação: se a COLUNA B trouxer qualquer marcador de
   // processo, usamos coluna B; senão, caímos no método antigo (3º nível).
@@ -2420,11 +2434,11 @@ function renderCurvaIndividual(){
   [0,10,20,30,40,50,60,70,80,90,100].forEach(v=>{
     const y=yPos(v);
     svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${CHART_THEME.gridLine}"/>`;
-    svg += `<text x="${padL-8}" y="${y+4}" font-size="10" fill="${CHART_THEME.axisText}" text-anchor="end">${v}%</text>`;
+    svg += `<text x="${padL-8}" y="${y+4}" font-size="12" fill="${CHART_THEME.axisText}" text-anchor="end">${v}%</text>`;
   });
   const step = Math.max(1, Math.ceil(weeksTotal/20));
   for(let w=0; w<=weeksTotal; w+=step){
-    svg += `<text x="${xPos(w)}" y="${H-padB+16}" font-size="9.5" fill="${CHART_THEME.axisText}" text-anchor="middle">S${w}</text>`;
+    svg += `<text x="${xPos(w)}" y="${H-padB+16}" font-size="11.5" fill="${CHART_THEME.axisText}" text-anchor="middle">S${w}</text>`;
   }
 
   if(individualViewMode==='geral'){
@@ -2546,7 +2560,7 @@ function renderCurvaConsolidada(){
   [0,10,20,30,40,50,60,70,80,90,100].forEach(v=>{
     const y=yPos(v);
     svg+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${CHART_THEME.gridLine}"/>`;
-    svg+=`<text x="${padL-10}" y="${y+4}" font-size="12" fill="${CHART_THEME.axisText}" text-anchor="end">${v}%</text>`;
+    svg+=`<text x="${padL-10}" y="${y+4}" font-size="14" fill="${CHART_THEME.axisText}" text-anchor="end">${v}%</text>`;
   });
 
   // Eixo X: semanas + data + linhas de dia entre semanas
@@ -2555,8 +2569,8 @@ function renderCurvaConsolidada(){
     const wd=weekStartDate(w);
     const dl=`${String(wd.getDate()).padStart(2,'0')}/${String(wd.getMonth()+1).padStart(2,'0')}`;
     svg+=`<line x1="${xp}" y1="${padT}" x2="${xp}" y2="${H-padB}" stroke="${CHART_THEME.gridLine}" stroke-opacity="0.5"/>`;
-    svg+=`<text x="${xp}" y="${H-padB+18}" font-size="11" fill="${CHART_THEME.axisText}" text-anchor="middle">S${w}</text>`;
-    svg+=`<text x="${xp}" y="${H-padB+34}" font-size="10" fill="${CHART_THEME.axisText}" text-anchor="middle" opacity="0.7">${dl}</text>`;
+    svg+=`<text x="${xp}" y="${H-padB+18}" font-size="13" fill="${CHART_THEME.axisText}" text-anchor="middle">S${w}</text>`;
+    svg+=`<text x="${xp}" y="${H-padB+34}" font-size="12" fill="${CHART_THEME.axisText}" text-anchor="middle" opacity="0.7">${dl}</text>`;
     if(w<weeksTotal){
       for(let d=1;d<=6;d++){
         const dd=new Date(wd); dd.setDate(wd.getDate()+d);
@@ -2572,7 +2586,7 @@ function renderCurvaConsolidada(){
   // Marcador HOJE
   const todayX = xPosDate(todayTs);
   svg+=`<line x1="${todayX}" y1="${padT}" x2="${todayX}" y2="${H-padB}" stroke="${realColor}" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>`;
-  svg+=`<text x="${todayX}" y="${padT-8}" font-size="11" fill="${realColor}" text-anchor="middle" font-weight="700">Hoje ${todayLabel}</text>`;
+  svg+=`<text x="${todayX}" y="${padT-8}" font-size="13" fill="${realColor}" text-anchor="middle" font-weight="700">Hoje ${todayLabel}</text>`;
 
   // Linha Planejado (tracejada) — rótulos só a cada 2 semanas para reduzir poluição
   let dPlan=''; let planFirst=true;
@@ -2583,7 +2597,7 @@ function renderCurvaConsolidada(){
   for(let w=consStartWeek;w<=weeksTotal;w++){
     const showLabel = (w===consStartWeek || w===weeksTotal || (w-consStartWeek)%2===0);
     svg+=`<circle cx="${xPos(w)}" cy="${yPos(planned.cum[w]||0)}" r="2.5" fill="${planColor}"/>`;
-    if(showLabel) svg+=`<text x="${xPos(w)}" y="${yPos(planned.cum[w]||0)-9}" font-size="9.5" fill="${planColor}" text-anchor="middle">${Math.round(planned.cum[w]||0)}%</text>`;
+    if(showLabel) svg+=`<text x="${xPos(w)}" y="${yPos(planned.cum[w]||0)-9}" font-size="11.5" fill="${planColor}" text-anchor="middle">${Math.round(planned.cum[w]||0)}%</text>`;
   }
 
   // Ponto de interseção entre a linha "Hoje" e a curva Planejado — valor quantitativo real
@@ -2597,7 +2611,7 @@ function renderCurvaConsolidada(){
     const plannedCountToday = Math.round(plannedPctToday/100*planned.total);
     const ix = todayX, iy = yPos(plannedPctToday);
     svg+=`<circle cx="${ix}" cy="${iy}" r="4.5" fill="${planColor}" stroke="#fff" stroke-width="1.5"/>`;
-    svg+=`<text x="${ix}" y="${iy-11}" font-size="12" fill="${planColor}" text-anchor="middle" font-weight="700">${plannedCountToday}</text>`;
+    svg+=`<text x="${ix}" y="${iy-11}" font-size="14" fill="${planColor}" text-anchor="middle" font-weight="700">${plannedCountToday}</text>`;
   }
 
   // Linha Realizado PASSADO (até hoje) — exato por data, label apenas no ponto final
@@ -2612,7 +2626,7 @@ function renderCurvaConsolidada(){
       const isLast = idx===pastPoints.length-1;
       svg+=`<circle cx="${px}" cy="${py}" r="${isLast?5:3}" fill="${realColor}" stroke="#fff" stroke-width="1.5"/>`;
       if(isLast){
-        svg+=`<text x="${px}" y="${py-14}" font-size="12" fill="${realColor}" text-anchor="middle" font-weight="700">${p.count}</text>`;
+        svg+=`<text x="${px}" y="${py-14}" font-size="14" fill="${realColor}" text-anchor="middle" font-weight="700">${p.count}</text>`;
       }
     });
     // Linha vertical discreta no último ponto
@@ -2708,12 +2722,12 @@ function renderFluxoBlocos(){
     const labelY = y+22, subY = y+38, statY = y+56, barY = y+64;
     let s = '';
     s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${CHART_THEME.cardBg}" stroke="${meta.color}" stroke-width="1.4" ${strokeStyle}/>`;
-    s += `<text x="${x+12}" y="${y+16}" font-size="12.5" font-weight="700" fill="${meta.color}">${code}</text>`;
-    s += `<text x="${x+12}" y="${labelY+4}" font-size="11" font-weight="600" fill="${CHART_THEME.darkText}">${meta.label}</text>`;
-    s += `<text x="${x+12}" y="${subY+2}" font-size="9.5" fill="${CHART_THEME.mutedText}">${meta.sub}</text>`;
+    s += `<text x="${x+12}" y="${y+16}" font-size="14.5" font-weight="700" fill="${meta.color}">${code}</text>`;
+    s += `<text x="${x+12}" y="${labelY+4}" font-size="13" font-weight="600" fill="${CHART_THEME.darkText}">${meta.label}</text>`;
+    s += `<text x="${x+12}" y="${subY+2}" font-size="11.5" fill="${CHART_THEME.mutedText}">${meta.sub}</text>`;
     if(h >= 64){
       const andTxt = c.andamento ? ` · ${c.andamento} em and.` : '';
-      s += `<text x="${x+12}" y="${statY}" font-size="10" fill="${CHART_THEME.axisText}">${c.concl}/${c.total} itens · ${pct}%${andTxt}</text>`;
+      s += `<text x="${x+12}" y="${statY}" font-size="12" fill="${CHART_THEME.axisText}">${c.concl}/${c.total} itens · ${pct}%${andTxt}</text>`;
       const barW = w-24;
       s += `<rect x="${x+12}" y="${barY}" width="${barW}" height="5" rx="2.5" fill="${CHART_THEME.gridLine}"/>`;
       if(pctAnd>0) s += `<rect x="${x+12+barW*pct/100}" y="${barY}" width="${Math.min(barW*pctAnd/100, barW-barW*pct/100)}" height="5" rx="2.5" fill="${meta.color}" opacity="0.35"/>`;
@@ -2736,10 +2750,10 @@ function renderFluxoBlocos(){
     <path d="M1,1 L9,5 L1,9 Z" fill="${CHART_THEME.axisText}"/></marker></defs>`;
 
   // título de seção do fluxo principal
-  svg += `<text x="40" y="-8" font-size="11" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">FLUXO PRINCIPAL DO PROCESSO</text>`;
+  svg += `<text x="40" y="-8" font-size="13" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">FLUXO PRINCIPAL DO PROCESSO</text>`;
 
   // ---- entrada do processo: alimentação da britagem ----
-  svg += `<text x="${pos.BRT01.x+BW/2}" y="55" font-size="9.5" fill="${CHART_THEME.mutedText}" text-anchor="middle">Alimentação da britagem</text>`;
+  svg += `<text x="${pos.BRT01.x+BW/2}" y="55" font-size="11.5" fill="${CHART_THEME.mutedText}" text-anchor="middle">Alimentação da britagem</text>`;
   svg += arrow(pos.BRT01.x+BW/2, 60, pos.BRT01.x+BW/2, pos.BRT01.y, '#007E7A');
 
   // ---- conexões do fluxo principal ----
@@ -2749,14 +2763,14 @@ function renderFluxoBlocos(){
   svg += elbow(pos.BRT02.x+BW, pos.BRT02.y+BH/2, pos.BRT04.x, pos.BRT04.y+BH/2, pos.BRT02.x+BW+30, '#0F6E56');
   svg += elbow(pos.BRT03.x+BW, pos.BRT03.y+BH/2, pos.BRT04.x, pos.BRT04.y+BH/2, pos.BRT03.x+BW+30, '#0F6E56');
   svg += arrow(pos.BRT04.x+BW, pos.BRT04.y+BH/2, W-20, pos.BRT04.y+BH/2, '#045552');
-  svg += `<text x="${pos.BRT04.x+BW+18}" y="${pos.BRT04.y+BH/2-8}" font-size="9.5" font-weight="700" fill="${CHART_THEME.mutedText}">TCLD</text>`;
+  svg += `<text x="${pos.BRT04.x+BW+18}" y="${pos.BRT04.y+BH/2-8}" font-size="11.5" font-weight="700" fill="${CHART_THEME.mutedText}">TCLD</text>`;
 
   // ---- caixas principais ----
   Object.keys(pos).forEach(code=>{ svg += box(code, pos[code].x, pos[code].y, BW, BH, false); });
 
   // ---- linha divisória entre fluxo principal e sistemas de apoio ----
   svg += `<line x1="20" y1="245" x2="${W-20}" y2="245" stroke="${CHART_THEME.gridLine}" stroke-dasharray="2,3"/>`;
-  svg += `<text x="40" y="265" font-size="11" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">SISTEMAS DE APOIO</text>`;
+  svg += `<text x="40" y="265" font-size="13" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">SISTEMAS DE APOIO</text>`;
 
   // ---- links tracejados para caixas de apoio ----
   svg += dashedLink(pos.BRT01.x+BW/2, pos.BRT01.y+BH, auxPos.EQA01.x+BW/2, auxPos.EQA01.y);
@@ -2782,8 +2796,8 @@ function renderFluxoBlocos(){
   const labelY = dividerY + 18;
   const barY = labelY + 14;
   svg += `<line x1="${sumX}" y1="${dividerY}" x2="${sumX+sumW}" y2="${dividerY}" stroke="${CHART_THEME.gridLine}"/>`;
-  svg += `<text x="${sumX}" y="${labelY}" font-size="10" fill="${CHART_THEME.mutedText}">Concluído no fluxo${fluxoViewMode==='pilar' && fluxoPilar ? ' · '+fluxoPilar : ' (geral)'}</text>`;
-  svg += `<text x="${sumX+sumW}" y="${labelY}" font-size="10" fill="${CHART_THEME.mutedText}" text-anchor="end">${totalConcl} concluídos${totalAnd? ' + '+totalAnd+' em andamento':''} de ${totalAll} itens · ${summaryPct.toFixed(0)}%</text>`;
+  svg += `<text x="${sumX}" y="${labelY}" font-size="12" fill="${CHART_THEME.mutedText}">Concluído no fluxo${fluxoViewMode==='pilar' && fluxoPilar ? ' · '+fluxoPilar : ' (geral)'}</text>`;
+  svg += `<text x="${sumX+sumW}" y="${labelY}" font-size="12" fill="${CHART_THEME.mutedText}" text-anchor="end">${totalConcl} concluídos${totalAnd? ' + '+totalAnd+' em andamento':''} de ${totalAll} itens · ${summaryPct.toFixed(0)}%</text>`;
   svg += `<rect x="${sumX}" y="${barY}" width="${sumW}" height="3" rx="1.5" fill="${CHART_THEME.gridLine}"/>`;
   if(summaryPctAnd>0) svg += `<rect x="${sumX+sumW*summaryPct/100}" y="${barY}" width="${Math.min(sumW*summaryPctAnd/100, sumW-sumW*summaryPct/100)}" height="3" rx="1.5" fill="#045552" opacity="0.35"/>`;
   svg += `<rect x="${sumX}" y="${barY}" width="${sumW*summaryPct/100}" height="3" rx="1.5" fill="#045552"/>`;
@@ -2816,12 +2830,12 @@ function renderFluxoBlocosEnergia(){
     const labelY = y+22, subY = y+38, statY = y+56, barY = y+64;
     let s = '';
     s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${CHART_THEME.cardBg}" stroke="${meta.color}" stroke-width="1.4" ${strokeStyle}/>`;
-    s += `<text x="${x+12}" y="${y+16}" font-size="12.5" font-weight="700" fill="${meta.color}">${code}</text>`;
-    s += `<text x="${x+12}" y="${labelY+4}" font-size="11" font-weight="600" fill="${CHART_THEME.darkText}">${meta.label}</text>`;
-    s += `<text x="${x+12}" y="${subY+2}" font-size="9.5" fill="${CHART_THEME.mutedText}">${meta.sub}</text>`;
+    s += `<text x="${x+12}" y="${y+16}" font-size="14.5" font-weight="700" fill="${meta.color}">${code}</text>`;
+    s += `<text x="${x+12}" y="${labelY+4}" font-size="13" font-weight="600" fill="${CHART_THEME.darkText}">${meta.label}</text>`;
+    s += `<text x="${x+12}" y="${subY+2}" font-size="11.5" fill="${CHART_THEME.mutedText}">${meta.sub}</text>`;
     if(h >= 64){
       const andTxt = c.andamento ? ` · ${c.andamento} em and.` : '';
-      s += `<text x="${x+12}" y="${statY}" font-size="10" fill="${CHART_THEME.axisText}">${c.concl}/${c.total} itens · ${pct}%${andTxt}</text>`;
+      s += `<text x="${x+12}" y="${statY}" font-size="12" fill="${CHART_THEME.axisText}">${c.concl}/${c.total} itens · ${pct}%${andTxt}</text>`;
       const barW = w-24;
       s += `<rect x="${x+12}" y="${barY}" width="${barW}" height="5" rx="2.5" fill="${CHART_THEME.gridLine}"/>`;
       if(pctAnd>0) s += `<rect x="${x+12+barW*pct/100}" y="${barY}" width="${Math.min(barW*pctAnd/100, barW-barW*pct/100)}" height="5" rx="2.5" fill="${meta.color}" opacity="0.35"/>`;
@@ -2837,13 +2851,13 @@ function renderFluxoBlocosEnergia(){
     <path d="M1,1 L9,5 L1,9 Z" fill="${CHART_THEME.axisText}"/></marker></defs>`;
 
   // ---- fluxo principal: LTR01 -> SUB01 -> DST01 ----
-  svg += `<text x="40" y="-8" font-size="11" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">FLUXO PRINCIPAL — TRANSMISSÃO E DISTRIBUIÇÃO</text>`;
+  svg += `<text x="40" y="-8" font-size="13" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">FLUXO PRINCIPAL — TRANSMISSÃO E DISTRIBUIÇÃO</text>`;
   const mainY = 30;
   const mainPos = { LTR01:{x:40}, SUB01:{x:355}, DST01:{x:670} };
   svg += arrow(mainPos.LTR01.x+BW, mainY+BH/2, mainPos.SUB01.x, mainY+BH/2, '#007E7A');
   svg += arrow(mainPos.SUB01.x+BW, mainY+BH/2, mainPos.DST01.x, mainY+BH/2, '#045552');
   svg += arrow(mainPos.DST01.x+BW, mainY+BH/2, W-40, mainY+BH/2, '#00B0CA');
-  svg += `<text x="${mainPos.DST01.x+BW+18}" y="${mainY+BH/2-8}" font-size="9.5" font-weight="700" fill="${CHART_THEME.mutedText}">SUBESTAÇÕES</text>`;
+  svg += `<text x="${mainPos.DST01.x+BW+18}" y="${mainY+BH/2-8}" font-size="11.5" font-weight="700" fill="${CHART_THEME.mutedText}">SUBESTAÇÕES</text>`;
   Object.keys(mainPos).forEach(code=>{ svg += box(code, mainPos[code].x, mainY, BW, BH, false); });
 
   // seta descendo do DST01 para a grade
@@ -2852,7 +2866,7 @@ function renderFluxoBlocosEnergia(){
   // ---- grade de subestações unitárias (SUB02..SUB16) ----
   const gridLabelY = mainY+BH+58;
   svg += `<line x1="20" y1="${gridLabelY-16}" x2="${W-20}" y2="${gridLabelY-16}" stroke="${CHART_THEME.gridLine}" stroke-dasharray="2,3"/>`;
-  svg += `<text x="40" y="${gridLabelY}" font-size="11" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">SUBESTAÇÕES UNITÁRIAS (13,8 kV)</text>`;
+  svg += `<text x="40" y="${gridLabelY}" font-size="13" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">SUBESTAÇÕES UNITÁRIAS (13,8 kV)</text>`;
   const subs = ['SUB02','SUB03','SUB04','SUB05','SUB06','SUB07','SUB08','SUB09','SUB10','SUB11','SUB12','SUB13','SUB14','SUB15','SUB16'];
   const cols = 5;
   const gridX0 = 40, gridY0 = gridLabelY+14;
@@ -2869,7 +2883,7 @@ function renderFluxoBlocosEnergia(){
   // ---- distribuição / alimentadores auxiliares (DST02..DST09) ----
   const auxLabelY = gridBottom + 34;
   svg += `<line x1="20" y1="${auxLabelY-16}" x2="${W-20}" y2="${auxLabelY-16}" stroke="${CHART_THEME.gridLine}" stroke-dasharray="2,3"/>`;
-  svg += `<text x="40" y="${auxLabelY}" font-size="11" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">DISTRIBUIÇÃO / ALIMENTADORES AUXILIARES</text>`;
+  svg += `<text x="40" y="${auxLabelY}" font-size="13" font-weight="700" fill="${CHART_THEME.mutedText}" letter-spacing="0.5">DISTRIBUIÇÃO / ALIMENTADORES AUXILIARES</text>`;
   const auxCodes = ['DST02','DST03','DST04','DST05','DST06','DST07','DST08','DST09'];
   const auxY = auxLabelY+14;
   const auxStep = (W-80-AW)/(auxCodes.length-1);
@@ -2887,8 +2901,8 @@ function renderFluxoBlocosEnergia(){
   const labelY2 = dividerY + 18;
   const barY2 = labelY2 + 14;
   svg += `<line x1="${sumX}" y1="${dividerY}" x2="${sumX+sumW}" y2="${dividerY}" stroke="${CHART_THEME.gridLine}"/>`;
-  svg += `<text x="${sumX}" y="${labelY2}" font-size="10" fill="${CHART_THEME.mutedText}">Concluído no fluxo${fluxoViewMode==='pilar' && fluxoPilar ? ' · '+fluxoPilar : ' (geral)'}</text>`;
-  svg += `<text x="${sumX+sumW}" y="${labelY2}" font-size="10" fill="${CHART_THEME.mutedText}" text-anchor="end">${totalConcl} concluídos${totalAnd? ' + '+totalAnd+' em andamento':''} de ${totalAll} itens · ${summaryPct.toFixed(0)}%</text>`;
+  svg += `<text x="${sumX}" y="${labelY2}" font-size="12" fill="${CHART_THEME.mutedText}">Concluído no fluxo${fluxoViewMode==='pilar' && fluxoPilar ? ' · '+fluxoPilar : ' (geral)'}</text>`;
+  svg += `<text x="${sumX+sumW}" y="${labelY2}" font-size="12" fill="${CHART_THEME.mutedText}" text-anchor="end">${totalConcl} concluídos${totalAnd? ' + '+totalAnd+' em andamento':''} de ${totalAll} itens · ${summaryPct.toFixed(0)}%</text>`;
   svg += `<rect x="${sumX}" y="${barY2}" width="${sumW}" height="3" rx="1.5" fill="${CHART_THEME.gridLine}"/>`;
   if(summaryPctAnd>0) svg += `<rect x="${sumX+sumW*summaryPct/100}" y="${barY2}" width="${Math.min(sumW*summaryPctAnd/100, sumW-sumW*summaryPct/100)}" height="3" rx="1.5" fill="#045552" opacity="0.35"/>`;
   svg += `<rect x="${sumX}" y="${barY2}" width="${sumW*summaryPct/100}" height="3" rx="1.5" fill="#045552"/>`;
@@ -3081,8 +3095,11 @@ function valStageOf(i){
     return 'ok';
   }
   if(!v) return 'envio';
-  // Em análise — Tenax: retorno recebido e comentários ainda não atendidos
+  // Em análise — Tenax: retorno recebido e comentários ainda não atendidos —
+  // detectado tanto pelas datas quanto pelo texto da própria coluna Validação
+  // (algumas linhas trazem "Em análise - Tenax" sem as datas preenchidas ainda).
   if(i.retorno_real && !i.data_atendimento) return 'analise_tenax';
+  if(v.includes('tenax')) return 'analise_tenax';
   if(v.includes('assets')) return 'assets';
   if(v.includes('envio')) return 'envio';
   return 'analise_vale';
@@ -3315,7 +3332,7 @@ function renderValidacao(){
 function showChartError(svgId, subId, err){
   console.error(err);
   const svg = document.getElementById(svgId);
-  if(svg) svg.innerHTML = `<text x="20" y="40" font-size="12" fill="${CHART_THEME.errorText}">Erro ao desenhar este gráfico: ${(err && err.message) || err}</text>`;
+  if(svg) svg.innerHTML = `<text x="20" y="40" font-size="14" fill="${CHART_THEME.errorText}">Erro ao desenhar este gráfico: ${(err && err.message) || err}</text>`;
   const sub = document.getElementById(subId);
   if(sub) sub.textContent = 'Falha ao calcular esta curva — veja a mensagem em vermelho acima e o console do navegador (F12) para detalhes.';
 }
@@ -3347,7 +3364,7 @@ function renderEmptyDashboard(){
     const el = document.getElementById(id); if(!el) return;
     el.setAttribute('viewBox', `0 0 ${w} ${h}`);
     if(fixHeight) el.style.height = h + 'px';
-    el.innerHTML = `<text x="${w/2}" y="${h/2}" text-anchor="middle" font-size="14" fill="${CHART_THEME.mutedText}">${msg}</text>`;
+    el.innerHTML = `<text x="${w/2}" y="${h/2}" text-anchor="middle" font-size="16" fill="${CHART_THEME.mutedText}">${msg}</text>`;
   }
   svgMsg('a_fluxoSvg', 1180, 300, true);
   svgMsg('a_fluxoSvg_fs', 1180, 300, false);
@@ -3431,25 +3448,25 @@ async function generatePdfReport(area, btnEl){
       doc.setFillColor(244,245,247);
       doc.rect(0,0,pageW,pageH,'F');
       doc.setFont('helvetica','bold');
-      doc.setFontSize(15);
+      doc.setFontSize(17);
       doc.setTextColor(4,85,82);
-      doc.text(stripEmoji(title), margin, margin+6);
+      doc.text(stripEmoji(title), margin, margin+7);
       if(sub){
         doc.setFont('helvetica','normal');
-        doc.setFontSize(10);
+        doc.setFontSize(11.5);
         doc.setTextColor(100,112,133);
-        doc.text(stripEmoji(sub), margin, margin+24);
+        doc.text(stripEmoji(sub), margin, margin+26);
       }
       let capH = 0;
       if(caption){
         doc.setFont('helvetica','italic');
-        doc.setFontSize(9);
+        doc.setFontSize(10.5);
         doc.setTextColor(70,82,94);
         const lines = doc.splitTextToSize(stripEmoji(caption), pageW - margin*2);
-        doc.text(lines, margin, margin+38);
-        capH = lines.length*12 + 6;
+        doc.text(lines, margin, margin+41);
+        capH = lines.length*13.5 + 6;
       }
-      return { x: margin, y: margin+46+capH, w: pageW - margin*2, h: pageH - margin*2 - 46 - capH };
+      return { x: margin, y: margin+48+capH, w: pageW - margin*2, h: pageH - margin*2 - 48 - capH };
     }
 
     // Páginas desenhadas em vetor (texto/formas do jsPDF), sem rasterizar DOM em canvas —
@@ -3473,13 +3490,37 @@ async function generatePdfReport(area, btnEl){
       const [r,g,b,a] = rgba;
       return [Math.round(r*a+255*(1-a)), Math.round(g*a+255*(1-a)), Math.round(b*a+255*(1-a))];
     }
+    // Tinta leve de uma cor sobre branco — usada para preencher os cards do
+    // fluxo de validação sem perder o contraste do texto/bordas.
+    function tintColor(rgb, alpha){
+      return blendOverWhite([rgb[0],rgb[1],rgb[2],alpha]);
+    }
+    // Seta com ponta triangular entre dois pontos — usada para desenhar as
+    // conexões do fluxograma de validação em vetor (sem depender de imagem).
+    function drawArrow(doc, x1,y1,x2,y2,color,opts){
+      opts = opts || {};
+      const lw = opts.lw || 1.7;
+      doc.setDrawColor(color[0],color[1],color[2]);
+      doc.setLineWidth(lw);
+      if(opts.dashed) doc.setLineDashPattern([3.2,2.2],0); else doc.setLineDashPattern([],0);
+      doc.line(x1,y1,x2,y2);
+      doc.setLineDashPattern([],0);
+      if(opts.noHead) return;
+      const angle = Math.atan2(y2-y1, x2-x1);
+      const size = opts.headSize || 5.5;
+      const back = size*1.7, spread = size*0.95;
+      const bx = x2 - back*Math.cos(angle), by = y2 - back*Math.sin(angle);
+      const px = -Math.sin(angle), py = Math.cos(angle);
+      doc.setFillColor(color[0],color[1],color[2]);
+      doc.triangle(x2,y2, bx+px*spread,by+py*spread, bx-px*spread,by-py*spread, 'F');
+    }
 
     function addKpiCardsPage(title, sub, rowSelector, caption){
       const box = pageHeader(title, sub, caption);
       const cards = Array.from(document.querySelectorAll(rowSelector+' .kpi-card'));
       if(!cards.length) return;
       const perRow = 3, gap = 14;
-      const cw = (box.w - gap*(perRow-1)) / perRow, ch = 92;
+      const cw = (box.w - gap*(perRow-1)) / perRow, ch = 100;
       cards.forEach((c,i)=>{
         const col = i % perRow, row = Math.floor(i/perRow);
         const x = box.x + col*(cw+gap), y = box.y + row*(ch+gap);
@@ -3487,13 +3528,13 @@ async function generatePdfReport(area, btnEl){
         const value = stripEmoji((c.querySelector('.kpi-value')||{}).textContent || '');
         const subTxt = stripEmoji((c.querySelector('.kpi-sub')||{}).textContent || '');
         doc.setDrawColor(212,216,222); doc.setLineWidth(1); doc.setFillColor(255,255,255);
-        doc.roundedRect(x, y, cw, ch, 6, 6, 'FD');
-        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(110,120,133);
-        doc.text(label, x+12, y+20, {maxWidth: cw-24});
-        doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(20,30,40);
-        doc.text(String(value), x+12, y+48);
-        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(130,140,150);
-        doc.text(subTxt, x+12, y+68, {maxWidth: cw-24});
+        doc.roundedRect(x, y, cw, ch, 7, 7, 'FD');
+        doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(110,120,133);
+        doc.text(label, x+14, y+22, {maxWidth: cw-28});
+        doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(20,30,40);
+        doc.text(String(value), x+14, y+54);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(130,140,150);
+        doc.text(subTxt, x+14, y+76, {maxWidth: cw-28});
       });
     }
 
@@ -3515,15 +3556,15 @@ async function generatePdfReport(area, btnEl){
       const cols = headCells.length;
       const rowHeadW = Math.min(140, box.w*0.22);
       const otherW = (box.w - rowHeadW) / (cols-1);
-      const rowH = 20;
+      const rowH = 23;
       let y = box.y;
       doc.setFillColor(230,232,236);
       doc.rect(box.x, y, box.w, rowH, 'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(60,70,80);
+      doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(60,70,80);
       headCells.forEach((t,i)=>{
         const cw = i===0 ? rowHeadW : otherW;
         const x = box.x + (i===0 ? 0 : rowHeadW+(i-1)*otherW);
-        doc.text(t, x+4, y+13, {maxWidth: cw-8});
+        doc.text(t, x+5, y+15, {maxWidth: cw-10});
       });
       y += rowH;
       bodyRows.forEach(row=>{
@@ -3539,9 +3580,9 @@ async function generatePdfReport(area, btnEl){
           doc.setDrawColor(225,228,232);
           doc.rect(x, y, cw, rowH);
           doc.setFont(i===0?'helvetica':'helvetica', i===0?'bold':'normal');
-          doc.setFontSize(8);
+          doc.setFontSize(9.5);
           doc.setTextColor(i===0 ? 30 : (cell.isZero?170:40), i===0?40:(cell.isZero?175:50), i===0?50:(cell.isZero?180:60));
-          doc.text(cell.text, x+4, y+13, {maxWidth: cw-8});
+          doc.text(cell.text, x+5, y+15, {maxWidth: cw-10});
         });
         y += rowH;
       });
@@ -3569,31 +3610,90 @@ async function generatePdfReport(area, btnEl){
         `De ${totalLinhas.toLocaleString('pt-BR')} linhas: ${numOf('Validado').toLocaleString('pt-BR')} já validadas e ${numOf('Não validado').toLocaleString('pt-BR')} não validadas.`;
       const box = pageHeader(title, sub, caption);
       let y = box.y;
-      if(stages.length){
+
+      // Card de etapa com fundo levemente tingido na cor do responsável, faixa de
+      // destaque no topo e tipografia maior — mais legível tanto na tela quanto impresso.
+      // compact: variante para caixas baixas (desfechos empilhados) — mostra só
+      // selo, número e nome, verticalmente centralizados, sem descrição/atraso.
+      function drawStageCard(s, x, sy, w, h, compact){
+        const c = RESP_COLOR[s.resp];
+        const tint = tintColor(c, 0.07);
+        doc.setFillColor(tint[0],tint[1],tint[2]);
+        doc.setDrawColor(c[0],c[1],c[2]); doc.setLineWidth(0.9);
+        doc.roundedRect(x, sy, w, h, 7, 7, 'FD');
+        doc.setFillColor(c[0],c[1],c[2]);
+        doc.roundedRect(x, sy, w, 5, 7, 7, 'F');
+        doc.rect(x, sy+2.5, w, 2.5, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+        const chipW = Math.max(46, doc.getStringUnitWidth(s.chip)*8.5+14);
+        doc.setFillColor(c[0],c[1],c[2]);
+        doc.roundedRect(x+12, sy+(compact?11:15), chipW, 16, 5, 5, 'F');
+        doc.setTextColor(255,255,255);
+        doc.text(s.chip, x+12+chipW/2, sy+(compact?21.5:25.5), {align:'center'});
+        if(compact){
+          doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(20,30,40);
+          doc.text(s.num, x+12, sy+40);
+          doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(30,40,50);
+          doc.text(s.name, x+12, sy+Math.min(h-8,54), {maxWidth: w-24});
+          return;
+        }
+        doc.setFont('helvetica','bold'); doc.setFontSize(23); doc.setTextColor(20,30,40);
+        doc.text(s.num, x+12, sy+52);
+        doc.setFont('helvetica','bold'); doc.setFontSize(11.5); doc.setTextColor(30,40,50);
+        doc.text(s.name, x+12, sy+68, {maxWidth: w-24});
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,120,133);
+        doc.text(s.desc, x+12, sy+83, {maxWidth: w-24});
+        if(s.atraso){
+          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(200,35,35);
+          doc.text(s.atraso, x+12, sy+Math.max(h-10,98), {maxWidth: w-24});
+        }
+      }
+
+      if(stages.length>=6){
+        const [sEnvio, sAssets, sVale, sTenax, sOk, sNok] = stages;
+        const gap = 42, mainH = 132, branchH = 122, branchGap = 36;
+        const cw = 180, ow = box.w - (cw*3 + gap*3);
+        const xEnvio = box.x, xVale = xEnvio+cw+gap, xTenax = xVale+cw+gap, xOut = xTenax+cw+gap;
+        const mainY = y + branchH + branchGap;
+        const branchW = Math.min(200, cw+gap+40);
+        const branchX = Math.max(box.x, Math.min(box.x+box.w-branchW, xEnvio+cw+gap/2-branchW/2));
+        const branchY = y;
+        const TEAL = [0,126,122], PURPLE = [109,40,217];
+
+        // faixa pontilhada de passagem direta (demais equipes) + seta principal
+        const passY = mainY + mainH/2;
+        drawArrow(doc, xEnvio+cw, passY-6, xVale, passY-6, [176,183,193], {dashed:true, noHead:true, lw:1.1});
+        drawArrow(doc, xEnvio+cw, passY+8, xVale-14, passY+8, TEAL, {lw:1.9});
+
+        // ramal Assets (só Inventário): sobe do Ag. Envio, volta ao fluxo antes da Vale
+        drawArrow(doc, xEnvio+cw-30, mainY, branchX+22, branchY+branchH, PURPLE, {dashed:true, headSize:5});
+        drawArrow(doc, branchX+branchW-22, branchY+branchH, xVale+cw*0.55, mainY-3, PURPLE, {dashed:true, headSize:5});
+        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(109,40,217);
+        doc.text('SÓ INVENTÁRIO', branchX+22, branchY+branchH+13, {align:'center', angle:0});
+        doc.text('VOLTA AO FLUXO', branchX+branchW-22, branchY+branchH+13, {align:'center'});
+
+        // seta Vale -> Tenax
+        drawArrow(doc, xVale+cw, mainY+mainH/2, xTenax-2, mainY+mainH/2, TEAL, {lw:1.9});
+        // bifurcação Tenax -> Validado / Não validado
+        drawArrow(doc, xTenax+cw, mainY+mainH*0.32, xOut-2, mainY+mainH*0.20, [22,163,74], {lw:1.9});
+        drawArrow(doc, xTenax+cw, mainY+mainH*0.68, xOut-2, mainY+mainH*0.80, [220,38,38], {lw:1.9});
+
+        drawStageCard(sAssets, branchX, branchY, branchW, branchH);
+        drawStageCard(sEnvio, xEnvio, mainY, cw, mainH);
+        drawStageCard(sVale, xVale, mainY, cw, mainH);
+        drawStageCard(sTenax, xTenax, mainY, cw, mainH);
+        const outGap = 10, outH = (mainH-outGap)/2;
+        drawStageCard(sOk, xOut, mainY, ow, outH, true);
+        drawStageCard(sNok, xOut, mainY+outH+outGap, ow, outH, true);
+
+        y = mainY + mainH + 20;
+      } else if(stages.length){
         const perRow = 3, gap = 12;
-        const cw = (box.w - gap*(perRow-1)) / perRow, ch = 96;
+        const cw = (box.w - gap*(perRow-1)) / perRow, ch = 110;
         stages.forEach((s,i)=>{
           const col = i % perRow, row = Math.floor(i/perRow);
           const x = box.x + col*(cw+gap), sy = y + row*(ch+gap);
-          const c = RESP_COLOR[s.resp];
-          doc.setDrawColor(212,216,222); doc.setLineWidth(1); doc.setFillColor(255,255,255);
-          doc.roundedRect(x, sy, cw, ch, 6, 6, 'FD');
-          doc.setFillColor(c[0],c[1],c[2]);
-          doc.rect(x+2, sy+2, cw-4, 3, 'F');
-          doc.setFillColor(c[0],c[1],c[2]);
-          doc.roundedRect(x+10, sy+12, 60, 13, 4, 4, 'F');
-          doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(255,255,255);
-          doc.text(s.chip, x+14, sy+21);
-          doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(20,30,40);
-          doc.text(s.num, x+10, sy+40);
-          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(30,40,50);
-          doc.text(s.name, x+10, sy+54, {maxWidth: cw-20});
-          doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(120,130,140);
-          doc.text(s.desc, x+10, sy+68, {maxWidth: cw-20});
-          if(s.atraso){
-            doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(220,38,38);
-            doc.text(s.atraso, x+10, sy+82, {maxWidth: cw-20});
-          }
+          drawStageCard(s, x, sy, cw, ch);
         });
         y += Math.ceil(stages.length/perRow)*(ch+gap) + 6;
       }
@@ -3606,21 +3706,21 @@ async function generatePdfReport(area, btnEl){
         tenax: el.classList.contains('tenax')
       }));
       if(totals.length){
-        const gap = 14, tw = (box.w-gap)/2, th = 56;
+        const gap = 16, tw = (box.w-gap)/2, th = 64;
         totals.forEach((t,i)=>{
           const x = box.x + i*(tw+gap);
           const bg = t.tenax ? [254,247,236] : [238,244,255];
           const fg = t.tenax ? [180,83,9] : [29,78,216];
           doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(230,220,200);
-          doc.roundedRect(x, y, tw, th, 6, 6, 'FD');
-          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(fg[0],fg[1],fg[2]);
-          doc.text(t.label, x+12, y+18);
-          doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(fg[0],fg[1],fg[2]);
-          doc.text(t.num, x+12, y+38);
-          doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(110,120,133);
-          doc.text(t.detail, x+12, y+50, {maxWidth: tw-24});
+          doc.roundedRect(x, y, tw, th, 7, 7, 'FD');
+          doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(fg[0],fg[1],fg[2]);
+          doc.text(t.label, x+14, y+20);
+          doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(fg[0],fg[1],fg[2]);
+          doc.text(t.num, x+14, y+44);
+          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,120,133);
+          doc.text(t.detail, x+14, y+58, {maxWidth: tw-28});
         });
-        y += th + 14;
+        y += th + 16;
       }
 
       // barra de responsabilidade
@@ -3631,12 +3731,12 @@ async function generatePdfReport(area, btnEl){
         widthPct: parseFloat(el.style.width) || 0
       }));
       if(splitTitle){
-        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,90,100);
-        doc.text(splitTitle, box.x, y+10);
-        y += 16;
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(80,90,100);
+        doc.text(splitTitle, box.x, y+11);
+        y += 18;
       }
       if(segs.length){
-        const barH = 18;
+        const barH = 22;
         let sx = box.x;
         segs.forEach(s=>{
           const sw = box.w * (s.widthPct/100);
@@ -3647,7 +3747,7 @@ async function generatePdfReport(area, btnEl){
         });
         doc.setDrawColor(200,205,212);
         doc.rect(box.x, y, box.w, barH);
-        y += barH + 14;
+        y += barH + 16;
       }
 
       // alerta
@@ -3657,11 +3757,11 @@ async function generatePdfReport(area, btnEl){
         const lines = (alertEl.innerText||'').split('\n').filter(Boolean).map(stripEmoji).filter(Boolean);
         const bg = isOk ? [236,253,243] : [254,242,242];
         const fg = isOk ? [21,128,61] : [185,28,28];
-        const boxH = 14 + lines.length*13;
+        const boxH = 16 + lines.length*15;
         doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(220,225,230);
-        doc.roundedRect(box.x, y, box.w, boxH, 5, 5, 'FD');
-        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(fg[0],fg[1],fg[2]);
-        lines.forEach((l,i)=>{ doc.text(l, box.x+10, y+16+i*13, {maxWidth: box.w-20}); });
+        doc.roundedRect(box.x, y, box.w, boxH, 6, 6, 'FD');
+        doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(fg[0],fg[1],fg[2]);
+        lines.forEach((l,i)=>{ doc.text(l, box.x+12, y+18+i*15, {maxWidth: box.w-24}); });
       }
     }
 
@@ -5368,17 +5468,17 @@ function renderTrend(){
   for(let i=0;i<=5;i++){
     const v = maxPct*i/5, y = yPos(v);
     s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${theme.gridLine}"/>`;
-    s += `<text x="${padL-8}" y="${y+4}" font-size="10" fill="${theme.axisText}" text-anchor="end">${(v*100).toFixed(0)}%</text>`;
+    s += `<text x="${padL-8}" y="${y+4}" font-size="12" fill="${theme.axisText}" text-anchor="end">${(v*100).toFixed(0)}%</text>`;
   }
   pts.forEach((p,i)=>{
-    s += `<text x="${xPos(i)}" y="${H-padB+18}" font-size="10" fill="${theme.axisText}" text-anchor="middle">${p.ciclo}</text>`;
+    s += `<text x="${xPos(i)}" y="${H-padB+18}" font-size="12" fill="${theme.axisText}" text-anchor="middle">${p.ciclo}</text>`;
   });
   let d=''; pts.forEach((p,i)=>{ d += (i===0?'M':'L') + xPos(i) + ',' + yPos(p.pct) + ' '; });
   s += `<path d="${d}" fill="none" stroke="#007E7A" stroke-width="2.5"/>`;
   pts.forEach((p,i)=>{
     const x=xPos(i), y=yPos(p.pct);
     s += `<circle cx="${x}" cy="${y}" r="4" fill="#007E7A" stroke="#fff" stroke-width="1.5"/>`;
-    s += `<text x="${x}" y="${y-10}" font-size="11" fill="#007E7A" text-anchor="middle" font-weight="700">${(p.pct*100).toFixed(1)}%</text>`;
+    s += `<text x="${x}" y="${y-10}" font-size="13" fill="#007E7A" text-anchor="middle" font-weight="700">${(p.pct*100).toFixed(1)}%</text>`;
   });
   svg.innerHTML = s;
 }
@@ -5574,16 +5674,16 @@ function renderParetoChart(pts){
   for(let i=0;i<=5;i++){
     const v = maxSaldo*i/5, y = yBar(v);
     s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${theme.gridLine}"/>`;
-    s += `<text x="${padL-8}" y="${y+4}" font-size="9" fill="${theme.axisText}" text-anchor="end">${fmtCur(v)}</text>`;
+    s += `<text x="${padL-8}" y="${y+4}" font-size="11" fill="${theme.axisText}" text-anchor="end">${fmtCur(v)}</text>`;
   }
   s += `<line x1="${W-padR}" y1="${padT}" x2="${W-padR}" y2="${H-padB}" stroke="${theme.axisLine}"/>`;
   for(let i=0;i<=5;i++){
     const v = i/5, y = yPct(v);
-    s += `<text x="${W-padR+8}" y="${y+4}" font-size="9" fill="${theme.axisText}" text-anchor="start">${(v*100).toFixed(0)}%</text>`;
+    s += `<text x="${W-padR+8}" y="${y+4}" font-size="11" fill="${theme.axisText}" text-anchor="start">${(v*100).toFixed(0)}%</text>`;
   }
   const y80 = yPct(0.8);
   s += `<line x1="${padL}" y1="${y80}" x2="${W-padR}" y2="${y80}" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,4"/>`;
-  s += `<text x="${padL+4}" y="${y80-5}" font-size="9" fill="#DC2626" text-anchor="start" font-weight="700">meta 80%</text>`;
+  s += `<text x="${padL+4}" y="${y80-5}" font-size="11" fill="#DC2626" text-anchor="start" font-weight="700">meta 80%</text>`;
 
   pts.forEach((p,i)=>{
     const x = xCenter(i) - barW/2;
@@ -5595,7 +5695,7 @@ function renderParetoChart(pts){
   pts.forEach((p,i)=>{
     const x = xCenter(i);
     const short = p.desc.length>16 ? p.desc.slice(0,14)+'…' : p.desc;
-    s += `<text x="${x}" y="${H-padB+14}" font-size="9" fill="${theme.axisText}" text-anchor="end" transform="rotate(-40 ${x} ${H-padB+14})">${short}<title>${p.desc}</title></text>`;
+    s += `<text x="${x}" y="${H-padB+14}" font-size="11" fill="${theme.axisText}" text-anchor="end" transform="rotate(-40 ${x} ${H-padB+14})">${short}<title>${p.desc}</title></text>`;
   });
 
   let d=''; pts.forEach((p,i)=>{ d += (i===0?'M':'L') + xCenter(i) + ',' + yPct(p.pctAcc) + ' '; });
@@ -5603,7 +5703,7 @@ function renderParetoChart(pts){
   pts.forEach((p,i)=>{
     const x=xCenter(i), y=yPct(p.pctAcc);
     s += `<circle cx="${x}" cy="${y}" r="4" fill="#DC2626" stroke="#fff" stroke-width="1.5"/>`;
-    s += `<text x="${x}" y="${y-10}" font-size="10" fill="#DC2626" text-anchor="middle" font-weight="700">${(p.pctAcc*100).toFixed(0)}%</text>`;
+    s += `<text x="${x}" y="${y-10}" font-size="12" fill="#DC2626" text-anchor="middle" font-weight="700">${(p.pctAcc*100).toFixed(0)}%</text>`;
   });
 
   svg.innerHTML = s;
