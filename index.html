@@ -2621,20 +2621,32 @@ function renderCurvaConsolidada(){
   svg+=`<line x1="${todayX}" y1="${padT}" x2="${todayX}" y2="${H-padB}" stroke="${realColor}" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>`;
   svg+=`<text x="${todayX}" y="${padT-8}" font-size="13" fill="${realColor}" text-anchor="middle" font-weight="700">Hoje ${todayLabel}</text>`;
 
-  // Linha Planejado (tracejada) — rótulos só a cada 2 semanas para reduzir poluição
+  // Rótulo com halo branco atrás do texto — garante leitura mesmo quando cruza
+  // grade, outras linhas ou fica perto de outro rótulo (menos "poluído").
+  function haloText(x, y, text, color, fontSize, weight){
+    return `<text x="${x}" y="${y}" font-size="${fontSize}" fill="${color}" text-anchor="middle" `+
+      `font-weight="${weight||400}" stroke="${CHART_THEME.cardBg}" stroke-width="3.2" `+
+      `paint-order="stroke" stroke-linejoin="round">${text}</text>`;
+  }
+
+  // Linha Planejado (tracejada) — rótulos a cada 2 semanas, pulando a semana
+  // mais próxima de hoje (o marcador de interseção já mostra esse valor com
+  // mais precisão logo abaixo, então repetir aqui só criava poluição visual).
+  const todayWeekFrac = (todayTs - startTs) / (7*24*3600*1000);
   let dPlan=''; let planFirst=true;
   for(let w=consStartWeek;w<=weeksTotal;w++){
     dPlan+=(planFirst?'M':'L')+xPos(w)+','+yPos(planned.cum[w]||0)+' '; planFirst=false;
   }
   svg+=`<path d="${dPlan}" fill="none" stroke="${planColor}" stroke-width="1.75" stroke-dasharray="7,5"/>`;
   for(let w=consStartWeek;w<=weeksTotal;w++){
-    const showLabel = (w===consStartWeek || w===weeksTotal || (w-consStartWeek)%2===0);
+    const nearToday = Math.abs(w-todayWeekFrac) < 0.6;
+    const showLabel = !nearToday && (w===consStartWeek || w===weeksTotal || (w-consStartWeek)%2===0);
     svg+=`<circle cx="${xPos(w)}" cy="${yPos(planned.cum[w]||0)}" r="2.5" fill="${planColor}"/>`;
-    if(showLabel) svg+=`<text x="${xPos(w)}" y="${yPos(planned.cum[w]||0)-9}" font-size="11.5" fill="${planColor}" text-anchor="middle">${Math.round(planned.cum[w]||0)}%</text>`;
+    if(showLabel) svg+=haloText(xPos(w), yPos(planned.cum[w]||0)-9, Math.round(planned.cum[w]||0)+'%', planColor, 11.5);
   }
 
   // Ponto de interseção entre a linha "Hoje" e a curva Planejado — valor quantitativo real
-  const todayWeekFrac = (todayTs - startTs) / (7*24*3600*1000);
+  const hojeLabels = [];
   if(todayWeekFrac >= consStartWeek && todayWeekFrac <= weeksTotal){
     const wFloor = Math.max(consStartWeek, Math.min(weeksTotal, Math.floor(todayWeekFrac)));
     const wCeil = Math.min(weeksTotal, wFloor+1);
@@ -2644,10 +2656,11 @@ function renderCurvaConsolidada(){
     const plannedCountToday = Math.round(plannedPctToday/100*planned.total);
     const ix = todayX, iy = yPos(plannedPctToday);
     svg+=`<circle cx="${ix}" cy="${iy}" r="4.5" fill="${planColor}" stroke="#fff" stroke-width="1.5"/>`;
-    svg+=`<text x="${ix}" y="${iy-11}" font-size="14" fill="${planColor}" text-anchor="middle" font-weight="700">${plannedCountToday}</text>`;
+    hojeLabels.push({x:ix, y:iy, text:plannedCountToday, color:planColor});
   }
 
-  // Linha Realizado PASSADO (até hoje) — exato por data, label apenas no ponto final
+  // Linha Realizado PASSADO (até hoje) — exato por data; o rótulo do ponto
+  // final entra na fila de "hojeLabels" para não colidir com o marcador acima.
   function drawRealizedLine(pts, color, withTodayLine){
     if(!pts.length) return;
     const firstRealX = xPosDate(pts[0].ts);
@@ -2660,7 +2673,7 @@ function renderCurvaConsolidada(){
       const isLast = idx===pts.length-1;
       svg+=`<circle cx="${px}" cy="${py}" r="${isLast?5:3}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
       if(isLast){
-        svg+=`<text x="${px}" y="${py-14}" font-size="14" fill="${color}" text-anchor="middle" font-weight="700">${p.count}</text>`;
+        hojeLabels.push({x:px, y:py, text:p.count, color});
       }
     });
     if(withTodayLine){
@@ -2671,6 +2684,20 @@ function renderCurvaConsolidada(){
   }
   if(singlePilar) drawRealizedLine(regPastPoints, regColor, false);
   drawRealizedLine(pastPoints, realColor, true);
+
+  // Resolve colisões verticais entre os rótulos que ficam perto de "hoje"
+  // (interseção + ponto final de cada linha de realizado) — todos sobem
+  // acima do respectivo ponto, empurrando uns aos outros quando muito perto.
+  hojeLabels.sort((a,b)=>a.y-b.y);
+  const MIN_GAP = 17;
+  for(let i=1;i<hojeLabels.length;i++){
+    if(hojeLabels[i].y - hojeLabels[i-1].y < MIN_GAP){
+      hojeLabels[i].y = hojeLabels[i-1].y + MIN_GAP;
+    }
+  }
+  hojeLabels.forEach(l=>{
+    svg += haloText(l.x, l.y-11, l.text, l.color, 14, 700);
+  });
 
   ['a_curvaConsSvg','a_curvaConsSvg_fs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=svg;
