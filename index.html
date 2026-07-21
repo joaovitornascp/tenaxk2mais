@@ -1020,28 +1020,28 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .val-flow{ display:flex; align-items:stretch; flex-wrap:wrap; gap:0; margin:18px 0 4px; }
 #page-validacao .val-stage{
   flex:1 1 138px; min-width:138px; background:var(--bg); border:1px solid var(--border);
-  border-top:5px solid var(--border); border-radius:12px; padding:16px 16px 14px;
-  box-shadow:0 1px 2px rgba(16,24,40,.04), 0 2px 6px rgba(16,24,40,.05);
+  border-top:3px solid var(--border); border-radius:10px; padding:16px 16px 14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);
   transition:box-shadow .15s ease, transform .15s ease;
 }
-#page-validacao .val-stage:hover{ box-shadow:0 2px 4px rgba(16,24,40,.06), 0 6px 16px rgba(16,24,40,.08); transform:translateY(-1px); }
-#page-validacao .val-stage.resp-tenax{ border-top-color:#D97706; }
-#page-validacao .val-stage.resp-vale{ border-top-color:#2563EB; }
-#page-validacao .val-stage.resp-done{ border-top-color:#16A34A; }
-#page-validacao .val-stage.resp-nok{ border-top-color:#DC2626; }
-#page-validacao .resp-nok .st-chip{ background:#DC2626; }
+#page-validacao .val-stage:hover{ box-shadow:0 4px 12px rgba(16,24,40,.07); transform:translateY(-1px); }
+#page-validacao .val-stage.resp-tenax{ border-top-color:#FF991F; }
+#page-validacao .val-stage.resp-vale{ border-top-color:#0052CC; }
+#page-validacao .val-stage.resp-done{ border-top-color:#36B37E; }
+#page-validacao .val-stage.resp-nok{ border-top-color:#FF5630; }
+#page-validacao .resp-nok .st-chip{ background:#FF5630; }
 #page-validacao .val-stage .st-chip{
   display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em;
-  padding:3px 10px; border-radius:11px; color:#fff; margin-bottom:10px; text-transform:uppercase;
+  padding:3px 10px; border-radius:9px; color:#fff; margin-bottom:10px; text-transform:uppercase;
 }
-#page-validacao .resp-tenax .st-chip{ background:#D97706; }
-#page-validacao .resp-vale .st-chip{ background:#2563EB; }
-#page-validacao .resp-done .st-chip{ background:#16A34A; }
+#page-validacao .resp-tenax .st-chip{ background:#FF991F; }
+#page-validacao .resp-vale .st-chip{ background:#0052CC; }
+#page-validacao .resp-done .st-chip{ background:#36B37E; }
 #page-validacao .val-stage .st-num{ font-size:33px; font-weight:800; color:var(--text); line-height:1; letter-spacing:-.01em; }
 #page-validacao .val-stage .st-name{ font-size:14.5px; font-weight:700; color:var(--text); margin-top:8px; }
 #page-validacao .val-stage .st-desc{ font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45; }
 #page-validacao .val-stage .st-pct{ font-size:12px; color:var(--muted); margin-top:9px; font-weight:600; }
-#page-validacao .val-stage .st-atraso{ font-size:12px; color:#DC2626; margin-top:5px; font-weight:700; }
+#page-validacao .val-stage .st-atraso{ font-size:12px; color:#FF5630; margin-top:5px; font-weight:700; }
 #page-validacao .val-stage .st-atraso.zero{ color:var(--muted2); font-weight:600; }
 @media (max-width:700px){ #valKpiWeekRow{ grid-template-columns:1fr !important; } }
 #page-validacao .val-arrow{ display:flex; align-items:center; justify-content:center; flex:0 0 24px; font-size:17px; color:var(--muted2); }
@@ -1064,13 +1064,13 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .vf2-out .val-stage .st-name{ margin-top:5px; }
 #page-validacao .vf2-out .val-stage .st-chip{ margin-bottom:6px; }
 #page-validacao .vf2-fork{ gap:34px; }
-#page-validacao .vf2-fork .glyph.ok{ color:#16A34A; }
-#page-validacao .vf2-fork .glyph.nok{ color:#DC2626; }
+#page-validacao .vf2-fork .glyph.ok{ color:#36B37E; }
+#page-validacao .vf2-fork .glyph.nok{ color:#FF5630; }
 #page-validacao .vf2-conn{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:3px; text-align:center; padding:0 4px;
 }
-#page-validacao .vf2-conn .glyph{ font-size:28px; line-height:1; color:#007E7A; font-weight:700; }
+#page-validacao .vf2-conn .glyph{ font-size:28px; line-height:1; color:#6B778C; font-weight:700; }
 #page-validacao .vf2-conn .vf2-lbl{ font-size:10.5px; font-weight:700; color:var(--muted); line-height:1.3; text-transform:uppercase; letter-spacing:.03em; }
 #page-validacao .vf2-up{ grid-column:2; grid-row:1; align-self:end; padding-bottom:8px; }
 #page-validacao .vf2-down{ grid-column:4; grid-row:1; align-self:end; padding-bottom:8px; }
@@ -1086,19 +1086,19 @@ body.dark-mode #page-planejamento .gnt-r-n3:hover{background:#182D3A}
 #page-validacao .vf2-total.tenax{ background:#FEF7EC; border-color:#F3D9A8; }
 #page-validacao .vf2-total.vale{ background:#EEF4FF; border-color:#C7D8FB; }
 #page-validacao .vf2-total .tot-label{ font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
-#page-validacao .vf2-total.tenax .tot-label{ color:#B45309; }
-#page-validacao .vf2-total.vale .tot-label{ color:#1D4ED8; }
+#page-validacao .vf2-total.tenax .tot-label{ color:#974F0C; }
+#page-validacao .vf2-total.vale .tot-label{ color:#0052CC; }
 #page-validacao .vf2-total .tot-num{ font-size:38px; font-weight:800; line-height:1.15; margin-top:2px; }
-#page-validacao .vf2-total.tenax .tot-num{ color:#B45309; }
-#page-validacao .vf2-total.vale .tot-num{ color:#1D4ED8; }
+#page-validacao .vf2-total.tenax .tot-num{ color:#974F0C; }
+#page-validacao .vf2-total.vale .tot-num{ color:#0052CC; }
 #page-validacao .vf2-total .tot-detail{ font-size:13px; color:var(--muted); margin-top:6px; line-height:1.4; }
 body.dark-mode #page-validacao .vf2-total.tenax{ background:#2B2113; border-color:#57431F; }
 body.dark-mode #page-validacao .vf2-total.vale{ background:#131F35; border-color:#243B63; }
 @media (max-width:700px){ #page-validacao .vf2-totais{ grid-template-columns:1fr; } }
-#page-validacao .vf2-up .glyph, #page-validacao .vf2-down .glyph{ color:#6D28D9; }
-#page-validacao .vf2-up .vf2-lbl, #page-validacao .vf2-down .vf2-lbl{ color:#6D28D9; }
-#page-validacao .st-chip.st-chip-alt{ background:#6D28D9; margin-left:4px; }
-#page-validacao .val-stage.vf2-assets{ border-top-color:#6D28D9; border-style:dashed; border-top-style:solid; background:linear-gradient(180deg, rgba(109,40,217,.05), var(--bg) 60%); }
+#page-validacao .vf2-up .glyph, #page-validacao .vf2-down .glyph{ color:#6B778C; }
+#page-validacao .vf2-up .vf2-lbl, #page-validacao .vf2-down .vf2-lbl{ color:#6B778C; }
+#page-validacao .st-chip.st-chip-alt{ background:#6B778C; margin-left:4px; }
+#page-validacao .val-stage.vf2-assets{ border-top-color:#6B778C; border-style:dashed; border-top-style:solid; background:linear-gradient(180deg, rgba(107,119,140,.06), var(--bg) 60%); }
 @media (max-width:1100px){
   #page-validacao .val-flow2{ display:flex; flex-direction:column; align-items:stretch; gap:12px; }
   #page-validacao .vf2-conn{ flex-direction:row; gap:8px; justify-content:flex-start; padding:0; }
@@ -1111,9 +1111,9 @@ body.dark-mode #page-validacao .vf2-total.vale{ background:#131F35; border-color
 #page-validacao .val-split-bar .seg{ display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; }
 #page-validacao .val-alert{
   margin-top:14px; border-radius:9px; padding:11px 15px; font-size:13px; font-weight:600; line-height:1.5;
-  background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C;
+  background:#FFEBE6; border:1px solid #FFBDAD; color:#BF2600;
 }
-#page-validacao .val-alert.ok{ background:#ECFDF3; border-color:#C9F2DA; color:#15803D; }
+#page-validacao .val-alert.ok{ background:#E3FCEF; border-color:#ABF5D1; color:#006644; }
 body.dark-mode #page-validacao .val-alert{ background:#2B1416; border-color:#5A1E22; }
 body.dark-mode #page-validacao .val-alert.ok{ background:#12281C; border-color:#1E4D33; }
 #page-validacao .val-explain{
@@ -1122,7 +1122,7 @@ body.dark-mode #page-validacao .val-alert.ok{ background:#12281C; border-color:#
 }
 #page-validacao .val-explain summary{ cursor:pointer; font-weight:700; color:var(--text); font-size:13.5px; list-style:none; }
 #page-validacao .val-explain summary::-webkit-details-marker{ display:none; }
-#page-validacao .val-explain summary::before{ content:'▸ '; color:#2563EB; }
+#page-validacao .val-explain summary::before{ content:'▸ '; color:#0052CC; }
 #page-validacao .val-explain[open] summary::before{ content:'▾ '; }
 #page-validacao .val-explain b{ color:var(--text); }
 #page-validacao .val-explain ul{ margin:10px 0 4px; padding-left:18px; }
@@ -1593,10 +1593,10 @@ body.dark-mode #page-contrato .ct-scenario.pessimista{background:#2B1515;border-
         <option value="Estratégia de Manutenção">Estratégia de Ativos / Manutenção</option>
       </select>
       <div class="legend-row" style="margin:0;">
-        <span><span class="dot" style="background:#D97706"></span> Ação da Tenax</span>
-        <span><span class="dot" style="background:#2563EB"></span> Ação da Vale</span>
-        <span><span class="dot" style="background:#16A34A"></span> Validado</span>
-        <span><span class="dot" style="background:#DC2626"></span> Não validado</span>
+        <span><span class="dot" style="background:#FF991F"></span> Ação da Tenax</span>
+        <span><span class="dot" style="background:#0052CC"></span> Ação da Vale</span>
+        <span><span class="dot" style="background:#36B37E"></span> Validado</span>
+        <span><span class="dot" style="background:#FF5630"></span> Não validado</span>
       </div>
     </div>
     <div id="valFlowCapture">
@@ -3193,8 +3193,8 @@ function renderValTable(list, searchId, etapaId, countId, bodyId){
     return;
   }
   function prazoCell(i){
-    if(i._prazo==='atraso') return '<span style="color:#DC2626;font-weight:700;">🔴 Em atraso</span>';
-    if(i._prazo==='prazo') return '<span style="color:#16A34A;font-weight:600;">🟢 No prazo</span>';
+    if(i._prazo==='atraso') return '<span style="color:#FF5630;font-weight:700;">🔴 Em atraso</span>';
+    if(i._prazo==='prazo') return '<span style="color:#36B37E;font-weight:600;">🟢 No prazo</span>';
     return '—';
   }
   document.getElementById(bodyId).innerHTML = filtered.map(i=>`
@@ -3326,10 +3326,10 @@ function renderValidacao(){
   let summaryHtml = '';
   if(total){
     const segs = [
-      {n:nT, color:'#D97706', label:'Tenax'},
-      {n:nV, color:'#2563EB', label:'Vale'},
-      {n:nOk, color:'#16A34A', label:'Validado'},
-      {n:nNok, color:'#DC2626', label:'Não validado'}
+      {n:nT, color:'#FF991F', label:'Tenax'},
+      {n:nV, color:'#0052CC', label:'Vale'},
+      {n:nOk, color:'#36B37E', label:'Validado'},
+      {n:nNok, color:'#FF5630', label:'Não validado'}
     ].filter(s=>s.n>0);
     const procLabel = proc==='britagem' ? ' — Britagem III' : (proc==='energia' ? ' — Energia' : '');
     summaryHtml += '<div class="val-split-title">Responsabilidade sobre as ' + fmtN(total) + ' linhas' + (team==='all' ? ' do plano' : ' da equipe ' + team) + procLabel + '</div>';
@@ -3640,7 +3640,7 @@ async function generatePdfReport(area, btnEl){
     }
 
     function addValFlowPage(title, sub){
-      const RESP_COLOR = { tenax:[217,119,6], vale:[37,99,235], done:[22,163,74], nok:[220,38,38] };
+      const RESP_COLOR = { tenax:[255,153,31], vale:[0,82,204], done:[54,179,126], nok:[255,86,48] };
       const stages = Array.from(document.querySelectorAll('#valFlow .val-stage')).map(el=>{
         let resp = 'tenax';
         if(el.classList.contains('resp-vale')) resp = 'vale';
@@ -3673,8 +3673,8 @@ async function generatePdfReport(area, btnEl){
         doc.setDrawColor(c[0],c[1],c[2]); doc.setLineWidth(0.9);
         doc.roundedRect(x, sy, w, h, 7, 7, 'FD');
         doc.setFillColor(c[0],c[1],c[2]);
-        doc.roundedRect(x, sy, w, 5, 7, 7, 'F');
-        doc.rect(x, sy+2.5, w, 2.5, 'F');
+        doc.roundedRect(x, sy, w, 3.5, 7, 7, 'F');
+        doc.rect(x, sy+1.75, w, 1.75, 'F');
         doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
         const chipW = Math.max(46, doc.getStringUnitWidth(s.chip)*8.5+14);
         doc.setFillColor(c[0],c[1],c[2]);
@@ -3695,7 +3695,7 @@ async function generatePdfReport(area, btnEl){
         doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110,120,133);
         doc.text(s.desc, x+12, sy+83, {maxWidth: w-24});
         if(s.atraso){
-          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(200,35,35);
+          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(255,86,48);
           doc.text(s.atraso, x+12, sy+Math.max(h-10,98), {maxWidth: w-24});
         }
       }
@@ -3709,25 +3709,25 @@ async function generatePdfReport(area, btnEl){
         const branchW = Math.min(200, cw+gap+40);
         const branchX = Math.max(box.x, Math.min(box.x+box.w-branchW, xEnvio+cw+gap/2-branchW/2));
         const branchY = y;
-        const TEAL = [0,126,122], PURPLE = [109,40,217];
+        const NEUTRAL = [107,119,140];
 
         // faixa pontilhada de passagem direta (demais equipes) + seta principal
         const passY = mainY + mainH/2;
         drawArrow(doc, xEnvio+cw, passY-6, xVale, passY-6, [176,183,193], {dashed:true, noHead:true, lw:1.1});
-        drawArrow(doc, xEnvio+cw, passY+8, xVale-14, passY+8, TEAL, {lw:1.9});
+        drawArrow(doc, xEnvio+cw, passY+8, xVale-14, passY+8, NEUTRAL, {lw:1.9});
 
         // ramal Assets (só Inventário): sobe do Ag. Envio, volta ao fluxo antes da Vale
-        drawArrow(doc, xEnvio+cw-30, mainY, branchX+22, branchY+branchH, PURPLE, {dashed:true, headSize:5});
-        drawArrow(doc, branchX+branchW-22, branchY+branchH, xVale+cw*0.55, mainY-3, PURPLE, {dashed:true, headSize:5});
-        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(109,40,217);
+        drawArrow(doc, xEnvio+cw-30, mainY, branchX+22, branchY+branchH, NEUTRAL, {dashed:true, headSize:5});
+        drawArrow(doc, branchX+branchW-22, branchY+branchH, xVale+cw*0.55, mainY-3, NEUTRAL, {dashed:true, headSize:5});
+        doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(107,119,140);
         doc.text('SÓ INVENTÁRIO', branchX+22, branchY+branchH+13, {align:'center', angle:0});
         doc.text('VOLTA AO FLUXO', branchX+branchW-22, branchY+branchH+13, {align:'center'});
 
         // seta Vale -> Tenax
-        drawArrow(doc, xVale+cw, mainY+mainH/2, xTenax-2, mainY+mainH/2, TEAL, {lw:1.9});
+        drawArrow(doc, xVale+cw, mainY+mainH/2, xTenax-2, mainY+mainH/2, NEUTRAL, {lw:1.9});
         // bifurcação Tenax -> Validado / Não validado
-        drawArrow(doc, xTenax+cw, mainY+mainH*0.32, xOut-2, mainY+mainH*0.20, [22,163,74], {lw:1.9});
-        drawArrow(doc, xTenax+cw, mainY+mainH*0.68, xOut-2, mainY+mainH*0.80, [220,38,38], {lw:1.9});
+        drawArrow(doc, xTenax+cw, mainY+mainH*0.32, xOut-2, mainY+mainH*0.20, [54,179,126], {lw:1.9});
+        drawArrow(doc, xTenax+cw, mainY+mainH*0.68, xOut-2, mainY+mainH*0.80, [255,86,48], {lw:1.9});
 
         drawStageCard(sAssets, branchX, branchY, branchW, branchH);
         drawStageCard(sEnvio, xEnvio, mainY, cw, mainH);
@@ -3761,7 +3761,7 @@ async function generatePdfReport(area, btnEl){
         totals.forEach((t,i)=>{
           const x = box.x + i*(tw+gap);
           const bg = t.tenax ? [254,247,236] : [238,244,255];
-          const fg = t.tenax ? [180,83,9] : [29,78,216];
+          const fg = t.tenax ? [151,79,12] : [0,82,204];
           doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(230,220,200);
           doc.roundedRect(x, y, tw, th, 7, 7, 'FD');
           doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(fg[0],fg[1],fg[2]);
@@ -3806,8 +3806,8 @@ async function generatePdfReport(area, btnEl){
       if(alertEl){
         const isOk = alertEl.classList.contains('ok');
         const lines = (alertEl.innerText||'').split('\n').filter(Boolean).map(stripEmoji).filter(Boolean);
-        const bg = isOk ? [236,253,243] : [254,242,242];
-        const fg = isOk ? [21,128,61] : [185,28,28];
+        const bg = isOk ? [227,252,239] : [255,235,230];
+        const fg = isOk ? [0,102,68] : [191,38,0];
         const boxH = 16 + lines.length*15;
         doc.setFillColor(bg[0],bg[1],bg[2]); doc.setDrawColor(220,225,230);
         doc.roundedRect(box.x, y, box.w, boxH, 6, 6, 'FD');
