@@ -3497,7 +3497,7 @@ async function generatePdfReport(area, btnEl){
           doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
           const tw = doc.getStringUnitWidth(clean)*10.5 + 16;
           const bx = margin, by = margin+14, bh = 17;
-          doc.setFillColor(180,83,9);
+          doc.setFillColor(22,163,74);
           doc.roundedRect(bx, by, tw, bh, 4, 4, 'F');
           doc.setTextColor(255,255,255);
           doc.text(clean, bx+8, by+11.5);
@@ -3816,12 +3816,91 @@ async function generatePdfReport(area, btnEl){
       }
     }
 
-    function addImagePage(title, sub, imgData, caption){
+    // Lê a legenda HTML de um gráfico (fica num <div> separado do SVG, então
+    // svgToImageData não a captura) para redesenhá-la em vetor no PDF.
+    function readLegendSpans(elId){
+      const el = document.getElementById(elId);
+      if(!el) return [];
+      return Array.from(el.querySelectorAll(':scope > span')).map(span=>({
+        label: stripEmoji(span.textContent || ''),
+        color: getComputedStyle(span).color,
+        dash: !!span.querySelector('.dash-line')
+      })).filter(it=>it.label);
+    }
+    function drawLegendRow(x0, y0, items){
+      if(!items.length) return y0;
+      let lx = x0;
+      const swW = 18, gapAfterSw = 6, itemGap = 24;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+      items.forEach(it=>{
+        const rgb = blendOverWhite(hexColor(it.color));
+        doc.setDrawColor(rgb[0],rgb[1],rgb[2]); doc.setLineWidth(1.8);
+        if(it.dash) doc.setLineDashPattern([3,2],0); else doc.setLineDashPattern([],0);
+        doc.line(lx, y0-3.5, lx+swW, y0-3.5);
+        doc.setLineDashPattern([],0);
+        doc.setTextColor(rgb[0],rgb[1],rgb[2]);
+        doc.text(it.label, lx+swW+gapAfterSw, y0);
+        const tw = doc.getStringUnitWidth(it.label)*10.5;
+        lx += swW+gapAfterSw+tw+itemGap;
+      });
+      return y0 + 20;
+    }
+
+    // Reproduz o painel "Avanço por pilar" (barra de progresso por pilar) como
+    // rodapé — usado só na Curva S consolidada geral, igual à visão do app.
+    function drawPilarBarsFooter(box, y0){
+      const rows = Array.from(document.querySelectorAll('#a_pilarBars .pilar-row'));
+      if(!rows.length) return y0;
+      let y = y0;
+      doc.setFont('helvetica','bold'); doc.setFontSize(12.5); doc.setTextColor(4,85,82);
+      doc.text('Avanço por pilar', box.x, y);
+      y += 20;
+      rows.forEach(row=>{
+        const swatch = row.querySelector('.swatch');
+        const fill = row.querySelector('.bar-fill');
+        const spans = row.querySelectorAll(':scope > .pilar-top > span');
+        const name = stripEmoji((spans[0]||{}).textContent || '');
+        const frac = stripEmoji((spans[1]||{}).textContent || '');
+        const pct = fill ? (parseFloat(fill.style.width)||0) : 0;
+        const rgb = swatch ? blendOverWhite(hexColor(getComputedStyle(swatch).backgroundColor)) : [0,126,122];
+        doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+        doc.roundedRect(box.x, y-7, 7, 7, 2, 2, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(30,40,50);
+        doc.text(name, box.x+14, y);
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(100,112,133);
+        doc.text(frac, box.x+box.w, y, {align:'right'});
+        const barY = y+6, barH=7;
+        doc.setFillColor(232,235,240);
+        doc.roundedRect(box.x, barY, box.w, barH, 3, 3, 'F');
+        if(pct>0){
+          doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+          doc.roundedRect(box.x, barY, Math.max(box.w*Math.min(pct,100)/100, barH), barH, 3, 3, 'F');
+        }
+        y += 30;
+      });
+      return y;
+    }
+
+    function addImagePage(title, sub, imgData, caption, opts){
+      opts = opts || {};
       const box = pageHeader(title, sub, caption);
-      const ratio = Math.min(box.w/imgData.width, box.h/imgData.height);
+      let y = box.y;
+      if(opts.legendId){
+        const items = readLegendSpans(opts.legendId);
+        if(items.length) y = drawLegendRow(box.x, y+10, items) + 4;
+      }
+      const footerRows = opts.pilarFooter ? document.querySelectorAll('#a_pilarBars .pilar-row').length : 0;
+      const footerH = footerRows ? (26 + footerRows*30 + 10) : 0;
+      const availH = (box.y+box.h) - y - footerH;
+      const ratio = Math.min(box.w/imgData.width, availH/imgData.height);
       const w = imgData.width*ratio, h = imgData.height*ratio;
       const x = box.x + (box.w-w)/2;
-      doc.addImage(imgData.dataUrl, 'JPEG', x, box.y, w, h);
+      doc.addImage(imgData.dataUrl, 'JPEG', x, y, w, h);
+      y += h;
+      if(opts.pilarFooter){
+        y += 14;
+        drawPilarBarsFooter(box, y);
+      }
     }
 
     // ----- capa -----
@@ -3875,7 +3954,7 @@ async function generatePdfReport(area, btnEl){
       const curvaGeralImg = await svgToImageData('a_curvaConsSvg');
       const curvaSub = (document.getElementById('a_curvaConsSub')||{}).textContent || '';
       const curvaCaption = 'Compara, ao longo do tempo, quanto já deveria estar pronto (linha tracejada, Planejado) com o que de fato foi entregue (linha cheia, Realizado). '+curvaSub;
-      addImagePage('Curva S consolidada do projeto', 'Visão geral — todos os pilares combinados', curvaGeralImg, curvaCaption);
+      addImagePage('Curva S consolidada do projeto', 'Visão geral — todos os pilares combinados', curvaGeralImg, curvaCaption, {legendId:'a_legendConsolidada', pilarFooter:true});
     }
 
     // ----- 4) Curva S consolidada — por pilar -----
@@ -3887,7 +3966,7 @@ async function generatePdfReport(area, btnEl){
       const curvaPilarImg = await svgToImageData('a_curvaConsSvg');
       const curvaSubP = (document.getElementById('a_curvaConsSub')||{}).textContent || '';
       const curvaCaptionP = `Mesma comparação Planejado × Realizado, isolada para o pilar ${p}. `+curvaSubP;
-      addImagePage('Curva S consolidada do projeto', 'Pilar: '+p, curvaPilarImg, curvaCaptionP);
+      addImagePage('Curva S consolidada do projeto', 'Pilar: '+p, curvaPilarImg, curvaCaptionP, {legendId:'a_legendConsolidada'});
     }
 
     // ----- 5) Mapa de entregas por equipe (por mês) -----
