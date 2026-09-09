@@ -47,19 +47,35 @@ negativo — **fibra tracionada é a superior** — e nulo no balanço EF.
 
 ## 5. Deslocamentos (efeito das barras elásticas)
 
-Encurtamento/alongamento das barras (`δ = N·L / (E·A)`):
+As barras pendem do viaduto (nós B e D fixos), então a variação de comprimento
+`δ = N·L/(E·A)` desloca a extremidade **inferior**: alongamento faz o ponto da
+viga descer; encurtamento faz subir. Com o deslocamento positivo para baixo:
 
 ```
-δ_A = −F·L/(E·A)   (desce)      δ_C = +2F·L/(E·A)   (sobe)
+δ_A = −F·L/(E·A)   (AB comprimida → A sobe)
+δ_C = +2F·L/(E·A)  (CD tracionada → C desce)
 ```
 
-Considerando a viga rígida, a rotação do suporte é
+Considerando a viga rígida frente às barras, a rotação do suporte é
 `θ = (δ_C − δ_A)/a = 3F·L/(E·A·a)` e o deslocamento vertical em E vale
-`v_E = δ_A + 2(δ_C − δ_A) = 5F·L/(E·A)` (para cima).
+`v_E = δ_A + 2(δ_C − δ_A) = 5F·L/(E·A)` (para baixo).
+
+## Arquivos
+
+| Arquivo | Conteúdo |
+|---|---|
+| `calculo_dmf_suporte.typ` | memorial de cálculo passo a passo em Typst (DEC e DMF desenhados nativamente, sem pacotes externos) |
+| `calculo_dmf_suporte.pdf` | PDF compilado do memorial |
+| `dmf_suporte_gasoduto.py` | script que resolve o equilíbrio e gera os diagramas |
+| `dmf_suporte_gasoduto.png` | figura gerada pelo script (usada no anexo do memorial) |
 
 ## Como reproduzir
 
 ```bash
+# diagramas numéricos
 pip install matplotlib numpy
 python3 dmf_suporte_gasoduto.py    # imprime os valores e gera dmf_suporte_gasoduto.png
+
+# memorial de cálculo (Typst >= 0.13)
+typst compile calculo_dmf_suporte.typ
 ```
