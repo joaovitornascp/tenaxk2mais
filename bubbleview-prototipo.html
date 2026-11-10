@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Bolhas 360</title>
+<style>
+/* Layout: visualizador em tela cheia; painéis translúcidos flutuam sobre a imagem (lista à esquerda, ficha à direita, ferramentas embaixo, planta-chave no canto). Visual único escuro, por escolha: a foto é o conteúdo. */
+:root{
+  color-scheme:dark;
+  --bg:#0c1216; --panel:rgba(16,24,30,.88); --panel-solid:#111a20; --line:rgba(160,190,205,.18);
+  --fg:#e6eef2; --muted:#93a6b0; --accent:#3cc4d8; --accent-ink:#04222a;
+  --ok:#43c98a; --warn:#f0b03c; --crit:#f0605a; --info:#3cc4d8;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:8px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.4 var(--font);overflow:hidden;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column}
+#top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-block:8px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--panel-solid);border-bottom:1px solid var(--line)}
+#top h1{font-size:15px;margin:0;font-weight:650;letter-spacing:.01em}
+#top h1 small{color:var(--muted);font-weight:400;margin-left:6px}
+.sp{flex:1}
+.btn{background:transparent;border:1px solid var(--line);border-radius:var(--r);padding:6px 11px;color:var(--fg);white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--crit)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 11px}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;background:var(--bg)}
+#gl,#ov{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ov{pointer-events:none}
+#gl.grab{cursor:grab}#gl.cross{cursor:crosshair}#gl.point{cursor:pointer}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;left:0;top:0;pointer-events:auto;white-space:nowrap;will-change:transform;
+  border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:14px;padding:3px 9px 3px 7px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.lb.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(60,196,216,.35)}
+.lb .dot{width:9px;height:9px;border-radius:50%;background:var(--info);flex:none}
+.lb.nav{border-color:var(--accent);padding:5px 11px;font-weight:600}
+.lb.nav::before{content:"";width:12px;height:12px;border:2px solid var(--accent);border-radius:50%}
+.lb.ms{pointer-events:none;font-family:var(--mono);font-variant-numeric:tabular-nums;background:rgba(240,176,60,.92);color:#1d1400;border:0;font-weight:600}
+.lb.st{font-weight:600;border-color:var(--accent)}
+#tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--panel-solid);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:12px}
+.float{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#side{top:10px;bottom:10px;left:max(10px,env(safe-area-inset-left,0px));width:236px;display:flex;flex-direction:column;overflow:hidden}
+#side h2,#card h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0;padding:10px 12px 6px;font-weight:600}
+.list{overflow:auto;min-height:40px;flex:1 1 0}
+.row{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;padding:7px 10px 7px 9px}
+.row:hover{background:rgba(255,255,255,.05)}
+.row.on{border-left-color:var(--accent);background:rgba(60,196,216,.1)}
+.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .dot,.pill .dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--info)}
+.chip{font-size:10px;border:1px solid var(--line);border-radius:10px;padding:0 6px;color:var(--muted);font-family:var(--mono)}
+.chip.d{color:var(--ok);border-color:var(--ok)}
+.empty{color:var(--muted);font-size:12px;padding:6px 12px 10px}
+#sidefoot{display:flex;flex-wrap:wrap;gap:6px;padding:10px;border-top:1px solid var(--line)}
+#card{top:10px;right:max(10px,env(safe-area-inset-right,0px));width:280px;max-height:calc(100% - 20px);overflow:auto;padding-bottom:12px}
+#card .bd{padding:0 12px;display:flex;flex-direction:column;gap:9px}
+#card h3{margin:0;font-size:17px;overflow-wrap:anywhere}
+#card p{margin:0;overflow-wrap:anywhere}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:1px 9px;font-size:12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12.5px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted)}
+label.f input,label.f select,label.f textarea{background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--fg);font-size:13.5px;width:100%}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#tools{left:50%;bottom:max(12px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:6px;padding:6px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px)}
+#tools .btn{border-color:transparent}
+#tools .btn.on{border-color:var(--accent)}
+#tools label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;padding:0 6px}
+.sepv{width:1px;height:22px;background:var(--line)}
+#mapbox{right:max(10px,env(safe-area-inset-right,0px));bottom:max(64px,env(safe-area-inset-bottom,0px));width:200px;height:200px;overflow:hidden}
+#map{width:100%;height:100%;display:block;touch-action:none}
+#hint{top:10px;left:50%;transform:translateX(-50%);padding:6px 12px;font-size:12.5px;max-width:min(520px,calc(100% - 24px));text-align:center;pointer-events:none}
+#hud{left:50%;bottom:max(64px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:3px 10px;font:12px var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);pointer-events:none;white-space:nowrap}
+#load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);z-index:5}
+#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast{position:absolute;left:50%;top:54px;transform:translateX(-50%);padding:7px 14px;z-index:6}
+dialog{background:var(--panel-solid);color:var(--fg);border:1px solid var(--line);border-radius:12px;max-width:min(760px,calc(100% - 32px));width:100%;max-height:calc(100% - 40px);padding:0}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.dh{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel-solid)}
+.dh h2{margin:0;font-size:17px;flex:1}
+.db{padding:6px 18px 18px;max-width:70ch}
+.db h3{font-size:14px;margin:18px 0 6px;color:var(--accent)}
+.db li{margin:4px 0}.db ul,.db ol{padding-left:20px;margin:6px 0}
+.db table{border-collapse:collapse;width:100%;font-size:13px}
+.db th,.db td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+#ioText{width:100%;height:220px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:6px;color:var(--fg);font:12px var(--mono);padding:8px}
+@media (max-width:760px){
+  #side{width:min(236px,calc(100% - 20px));z-index:4}
+  #card{width:min(280px,calc(100% - 20px));z-index:3;max-height:55%}
+  #mapbox{width:128px;height:128px}
+  #top h1 small{display:none}
+  #hud{display:none}
+  #tools{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start}
+  #tools .btn{padding:6px 9px}
+}
+@media (prefers-reduced-motion:reduce){#fade{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <button class="btn" id="bSide" aria-label="Mostrar ou ocultar lista">☰</button>
+    <h1>Bolhas 360 <small id="pname"></small></h1>
+    <span class="sp"></span>
+    <div class="seg" role="group" aria-label="Modo de visualização">
+      <button id="mPano" class="on">Panorama</button><button id="mCloud">Nuvem 3D</button>
+    </div>
+    <button class="btn" id="bEdit" aria-pressed="false">Editar</button>
+    <button class="btn" id="bGuide">Guia de captura</button>
+  </header>
+  <main id="stage">
+    <canvas id="gl" class="grab"></canvas>
+    <canvas id="ov"></canvas>
+    <div id="labels"></div>
+    <div id="tip" hidden></div>
+    <div id="fade"></div>
+    <div id="hint" class="float" hidden></div>
+    <div id="hud" class="float"></div>
+    <aside id="side" class="float">
+      <h2>Bolhas (estações)</h2>
+      <div class="list" id="bubList"></div>
+      <h2>Itens desta bolha</h2>
+      <div class="list" id="itemList"></div>
+      <div id="sidefoot">
+        <button class="btn sm" id="bAdd">+ Panoramas</button>
+        <button class="btn sm" id="bIO">Exportar / Importar</button>
+        <button class="btn sm" id="bDemo">Restaurar demo</button>
+      </div>
+    </aside>
+    <section id="card" class="float" hidden></section>
+    <div id="mapbox" class="float"><canvas id="map" aria-label="Planta-chave das estações"></canvas></div>
+    <div id="tools" class="float"></div>
+    <div id="toast" class="float" hidden></div>
+    <div id="load">Gerando cena de demonstração…</div>
+  </main>
+</div>
+<input type="file" id="fPano" accept="image/*" multiple hidden>
+<input type="file" id="fDepth" accept="image/*" hidden>
+<input type="file" id="fRepl" accept="image/*" hidden>
+<input type="file" id="fJson" accept=".json,application/json" hidden>
+
+<dialog id="dIO">
+  <div class="dh"><h2>Exportar / importar projeto</h2><button class="btn" data-close>Fechar</button></div>
+  <div class="db">
+    <p>O JSON guarda estações, superfícies, tags e medições. As imagens ficam salvas neste navegador (IndexedDB) e não entram no arquivo.</p>
+    <textarea id="ioText" spellcheck="false" aria-label="JSON do projeto"></textarea>
+    <div class="acts" style="margin-top:10px">
+      <button class="btn" id="ioCopy">Copiar</button>
+      <button class="btn" id="ioSave">Baixar .json</button>
+      <button class="btn" id="ioFile">Abrir arquivo…</button>
+      <button class="btn on" id="ioLoad">Importar o texto acima</button>
+    </div>
+    <p id="ioMsg" style="color:var(--muted)"></p>
+  </div>
+</dialog>
+
+<dialog id="dGuide">
+  <div class="dh"><h2>Guia de captura</h2><button class="btn" data-close>Fechar</button></div>
+  <div class="db">
+    <h3>Qual aparelho usar</h3>
+    <p><b>iPad Pro 11" para capturar.</b> Ele tem sensor LiDAR e rastreamento ARKit: cada pixel da foto ganha uma distância real (até uns 5 m) e a posição de cada estação sai em escala. É isso que permite medir em qualquer superfície e montar a nuvem 3D. O Galaxy S25 FE não tem sensor de profundidade; com ele a medição fica limitada ao método do piso.</p>
+    <p><b>S25 FE como apoio.</b> Câmera principal de 50 MP e ultra-wide de ~123°: use para fotos de detalhe (placas, manômetros) anexadas às tags e para panoramas rápidos onde o LiDAR não alcança (áreas externas, pé-direito alto).</p>
+    <h3>Formato que o protótipo aceita</h3>
+    <ul>
+      <li>Ideal: JPEG equirretangular 2:1 (360° × 180°), 8192 × 4096 px.</li>
+      <li>Panorama parcial (modo Pano nativo): aceito; ajuste "Cobertura horizontal" nas propriedades da bolha.</li>
+      <li>Profundidade (opcional): imagem em tons de cinza com o mesmo enquadramento do panorama, linear, preto = 0 m e branco = alcance máximo informado.</li>
+    </ul>
+    <h3>Como tirar as fotos</h3>
+    <ol>
+      <li><b>Fixe a altura.</b> Tripé ou monopé a 1,50 m do piso. Anote a altura: ela é a escala das medições sem LiDAR.</li>
+      <li><b>Gire em torno da lente, não do corpo.</b> O eixo de rotação deve passar pela câmera. Girar com o braço esticado cria paralaxe e a costura falha em objetos a menos de 2 m.</li>
+      <li><b>Trave exposição, foco e balanço de branco</b> (toque longo, AE/AF lock) antes da primeira foto e mantenha até o fim da estação.</li>
+      <li><b>Sobreposição de 30 a 50%</b> entre fotos vizinhas, aparelho em retrato.</li>
+      <li><b>Cubra a esfera inteira:</b> veja a tabela abaixo. Comece sempre apontando para a mesma referência (norte da planta ou um eixo da unidade).</li>
+      <li><b>Cena parada e luz uniforme.</b> Sem pessoas circulando; evite contraluz forte e sol direto na lente.</li>
+      <li><b>Nivele o horizonte.</b> Use a grade/nível da câmera; horizonte torto distorce alturas.</li>
+    </ol>
+    <div class="tw"><table>
+      <tr><th>Lente</th><th>Fileira 0°</th><th>Fileiras ±45°</th><th>Zênite / nadir</th><th>Total</th></tr>
+      <tr><td>Ultra-wide 0,5× (S25 FE; iPad Pro até 2022)</td><td>8 fotos (a cada 45°)</td><td>6 + 6</td><td>1 + 1</td><td>22</td></tr>
+      <tr><td>Principal 1× (iPad Pro M4, que não tem ultra-wide)</td><td>12 fotos (a cada 30°)</td><td>8 + 8</td><td>2 + 2</td><td>32</td></tr>
+    </table></div>
+    <h3>Onde posicionar as estações</h3>
+    <ul>
+      <li>Uma estação a cada 3 a 5 m, com linha de visada para a anterior. Coloque uma em cada porta e em cada mudança de direção.</li>
+      <li>No mínimo 1 m de qualquer equipamento. Para ver atrás de um equipamento, faça estações dos dois lados.</li>
+      <li>Marque cada estação na planta (X, Y em metros) e o rumo da primeira foto. No protótipo: Editar → engrenagem da bolha, ou arraste o ponto na planta-chave.</li>
+    </ul>
+    <h3>Varredura LiDAR (iPad)</h3>
+    <ul>
+      <li>Fique entre 0,5 e 4 m das superfícies e mova-se devagar (cerca de meio passo por segundo).</li>
+      <li>Vidro, inox polido, água e superfícies pretas foscas devolvem profundidade ruim. Sol direto reduz o alcance.</li>
+      <li>Apps do tipo Polycam, Scaniverse, 3D Scanner App ou SiteScape fazem a varredura e exportam nuvem de pontos; confira na versão atual de cada um se exportam panorama 360° e profundidade.</li>
+    </ul>
+    <h3>Limites deste protótipo</h3>
+    <ul>
+      <li>Sem profundidade, as medições assumem piso plano e câmera na altura informada. Erro típico de 2 a 5% perto da estação, crescendo com a distância.</li>
+      <li>A costura das fotos em equirretangular é feita fora daqui (no app de captura ou em software como Hugin ou PTGui).</li>
+    </ul>
+  </div>
+</dialog>
+
+<script>
+"use strict";
+/* ===================== utilidades ===================== */
+const $=s=>document.querySelector(s), RAD=Math.PI/180, DEG=180/Math.PI;
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l]};
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]], sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fm=v=>v.toFixed(2).replace('.',',')+' m';
+const STATUS={none:['Sem status','var(--info)','#3cc4d8'],ok:['OK','var(--ok)','#43c98a'],warn:['Atenção','var(--warn)','#f0b03c'],crit:['Crítico','var(--crit)','#f0605a']};
+const CATS=['Equipamento','Tubulação','Válvula','Instrumento','Elétrica','Estrutura','Outro'];
+// local (câmera) <-> mundo: X leste, Y cima, Z sul. north = rumo (graus, horário a partir do norte) do centro do panorama.
+function l2w(d,north){const c=Math.cos(north*RAD),s=Math.sin(north*RAD);return [d[0]*c-d[2]*s,d[1],d[0]*s+d[2]*c]}
+function w2l(d,north){const c=Math.cos(north*RAD),s=Math.sin(north*RAD);return [d[0]*c+d[2]*s,d[1],-d[0]*s+d[2]*c]}
+const camPos=b=>[b.x,b.h,-b.y];
+function tangent(c){let e1=cross([0,1,0],c);if(len(e1)<1e-3)e1=[1,0,0];e1=norm(e1);return [e1,cross(c,e1)]}
+
+/* ===================== estado ===================== */
+let project=null, cur=null, mode='pano', tool='nav', editing=false, showSurf=true;
+let sel=null, hover=null, draft=null, pend=null, cursorDir=null, cardMode=null;
+const rt={};                       // dados em memória por bolha: {src,blob,thumb,ar,depth,cloud}
+const view={yaw:100*RAD,pitch:-4*RAD,fov:75};
+const orb={az:-35*RAD,el:42*RAD,dist:18,t:[0,1,0],clip:3.3};
+let W=1,H=1,DPR=1,dirty=true,tween=null;
+const B=()=>project.bubbles.find(b=>b.id===cur);
+const R=b=>rt[b.id]||(rt[b.id]={});
+const hcov=b=>(b.hcov||360)*RAD;
+const vcov=b=>Math.min(Math.PI,hcov(b)/((R(b).ar)||2));
+const redraw=()=>{dirty=true};
+
+/* ===================== persistência (IndexedDB) ===================== */
+let dbp=null;
+function db(){return dbp||(dbp=new Promise((ok,no)=>{try{const r=indexedDB.open('bolhas360',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}))}
+async function kv(op,key,val){try{const d=await db();return await new Promise((ok,no)=>{const s=d.transaction('kv',op==='get'?'readonly':'readwrite').objectStore('kv');
+  const r=op==='get'?s.get(key):op==='put'?s.put(val,key):s.delete(key);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}catch(e){return undefined}}
+const toJSON=()=>JSON.stringify(project,(k,v)=>k[0]==='_'?undefined:v,1);
+let saveT=0;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>kv('put','project',toJSON()),400)}
+
+/* ===================== cena de demonstração (traçado de raios analítico) ===================== */
+const ROOM={mn:[-6,0,-4],mx:[6,4.5,4]};
+const PR=[
+ {t:'cyl',ax:1,c:[3.5,0,-1.5],r:1.1,a0:0,a1:3.2,col:[172,188,198],tag:'TQ-101'},
+ {t:'box',mn:[-3.2,0.12,1.6],mx:[-2.0,0.9,2.4],col:[46,132,98],tag:'B-201'},
+ {t:'box',mn:[-1,0.6,-4],mx:[0.2,2.4,-3.72],col:[206,198,172],tag:'PN-01'},
+ {t:'cyl',ax:0,c:[0,2.8,-2.6],r:.11,a0:-6,a1:2.5,col:[216,172,40]},
+ {t:'cyl',ax:1,c:[-2.6,0,2.0],r:.08,a0:.9,a1:3.4,col:[58,118,190]},
+ {t:'cyl',ax:0,c:[0,3.4,2.0],r:.08,a0:-2.6,a1:6,col:[58,118,190]},
+ {t:'sph',c:[-0.5,2.8,-2.6],r:.24,col:[198,52,44]},
+ {t:'box',mn:[-3.35,0,1.45],mx:[-1.85,0.12,2.55],col:[92,96,100]}
+];
+const DEMO_ST=[{name:'E1 · Entrada',x:-4,y:1,h:1.5,north:0},{name:'E2 · Centro',x:.5,y:-.5,h:1.5,north:40},{name:'E3 · Tanque',x:4.2,y:-2.2,h:1.5,north:0}];
+const HT={n:[0,0,0],i:-1};
+function hitPrims(o,d){
+  let bt=1e9;HT.i=-1;
+  for(let k=0;k<PR.length;k++){const p=PR[k];
+    if(p.t==='box'){let t0=-1e9,t1=1e9,ax=0,sg=0;
+      for(let a=0;a<3;a++){const inv=1/d[a];let ta=(p.mn[a]-o[a])*inv,tb=(p.mx[a]-o[a])*inv,s=-1;if(ta>tb){const x=ta;ta=tb;tb=x;s=1}
+        if(ta>t0){t0=ta;ax=a;sg=s}if(tb<t1)t1=tb}
+      if(t0<t1&&t0>1e-4&&t0<bt){bt=t0;HT.i=k;HT.n[0]=HT.n[1]=HT.n[2]=0;HT.n[ax]=sg}
+    }else if(p.t==='cyl'){const a=p.ax,b=(a+1)%3,c=(a+2)%3,ob=o[b]-p.c[b],oc=o[c]-p.c[c];
+      const A=d[b]*d[b]+d[c]*d[c],Bq=2*(ob*d[b]+oc*d[c]),C=ob*ob+oc*oc-p.r*p.r,ds=Bq*Bq-4*A*C;
+      if(ds>0&&A>1e-9){const t=(-Bq-Math.sqrt(ds))/(2*A),pa=o[a]+t*d[a];
+        if(t>1e-4&&t<bt&&pa>=p.a0&&pa<=p.a1){bt=t;HT.i=k;HT.n[a]=0;HT.n[b]=(ob+t*d[b])/p.r;HT.n[c]=(oc+t*d[c])/p.r}}
+      for(let e=0;e<2;e++){const cap=e?p.a1:p.a0,t=(cap-o[a])/d[a];
+        if(t>1e-4&&t<bt){const x=ob+t*d[b],y=oc+t*d[c];if(x*x+y*y<=p.r*p.r){bt=t;HT.i=k;HT.n[b]=HT.n[c]=0;HT.n[a]=e?1:-1}}}
+    }else{const ox=o[0]-p.c[0],oy=o[1]-p.c[1],oz=o[2]-p.c[2],b=ox*d[0]+oy*d[1]+oz*d[2],c=ox*ox+oy*oy+oz*oz-p.r*p.r,ds=b*b-c;
+      if(ds>0){const t=-b-Math.sqrt(ds);if(t>1e-4&&t<bt){bt=t;HT.i=k;HT.n[0]=(ox+t*d[0])/p.r;HT.n[1]=(oy+t*d[1])/p.r;HT.n[2]=(oz+t*d[2])/p.r}}}
+  }
+  return bt;
+}
+function renderDemo(st,w,h){
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;const cx=cv.getContext('2d'),im=cx.createImageData(w,h),px=im.data;
+  const depth=new Float32Array(w*h),o=[st.x,st.h,-st.y],d=[0,0,0],cn=Math.cos(st.north*RAD),sn=Math.sin(st.north*RAD);
+  const fr=x=>x-Math.floor(x);
+  for(let j=0;j<h;j++){const lat=Math.PI/2-(j+.5)/h*Math.PI,cl=Math.cos(lat),sl=Math.sin(lat);
+    for(let i=0;i<w;i++){const lon=(i+.5)/w*2*Math.PI-Math.PI,lx=Math.sin(lon)*cl,lz=-Math.cos(lon)*cl;
+      d[0]=lx*cn-lz*sn;d[1]=sl;d[2]=lx*sn+lz*cn;
+      let t=hitPrims(o,d),r,g,b,nx,ny,nz,emis=0;
+      let tr=1e9,ra=0,rs=0;
+      for(let a=0;a<3;a++){if(d[a]>1e-9){const q=(ROOM.mx[a]-o[a])/d[a];if(q<tr){tr=q;ra=a;rs=-1}}else if(d[a]<-1e-9){const q=(ROOM.mn[a]-o[a])/d[a];if(q<tr){tr=q;ra=a;rs=1}}}
+      let X,Y,Z;
+      if(HT.i>=0&&t<tr){const p=PR[HT.i];r=p.col[0];g=p.col[1];b=p.col[2];nx=HT.n[0];ny=HT.n[1];nz=HT.n[2];
+        X=o[0]+t*d[0];Y=o[1]+t*d[1];Z=o[2]+t*d[2];
+        if(HT.i===0&&Y>1.5&&Y<1.72){r=40;g=84;b=132}
+        if(HT.i===2&&Math.abs(Z+3.72)<1e-3){const u=fr((X+1)/.4),v=fr((Y-.6)/.6);if(u<.06||v<.05){r*=.6;g*=.6;b*=.6}}
+        if(HT.i===3&&fr(X/1.5)<.08){r=30;g=30;b=30}
+      }else{t=tr;nx=ny=nz=0;if(ra===0)nx=rs;else if(ra===1)ny=rs;else nz=rs;
+        X=o[0]+t*d[0];Y=o[1]+t*d[1];Z=o[2]+t*d[2];
+        if(ra===1&&rs===1){r=124;g=126;b=122;const gx=Math.abs(fr(X+.5)-.5),gz=Math.abs(fr(Z+.5)-.5);
+          if(gx<.012||gz<.012){r=70;g=74;b=74}else if((Math.floor(X)+Math.floor(Z))&1){r=116;g=118;b=115}}
+        else if(ra===1){r=72;g=76;b=82;if(Math.abs(fr(X/4+.5)-.5)<.14&&Math.abs(Z)<2.6&&Math.abs(fr(Z/2.6+.5)-.5)<.36){r=g=b=250;emis=1}}
+        else{if(Y<1.2){r=104;g=122;b=118}else if(Y<1.26){r=60;g=66;b=66}else{r=190;g=188;b=180}
+          if(ra===0&&rs===-1&&Z>1&&Z<2.2&&Y<2.1){r=82;g=70;b=58;if(Math.abs(Z-2.05)<.04&&Math.abs(Y-1.05)<.08){r=g=b=200}}}
+      }
+      let k=1;
+      if(!emis){const Lx=-X,Ly=4.1-Y,Lz=-Z,Ld=Math.hypot(Lx,Ly,Lz),ndl=Math.max(0,(nx*Lx+ny*Ly+nz*Lz)/Ld);
+        k=.44+.14*ny+.62*ndl/(1+.012*Ld*Ld)}
+      const dz=((i*73856093^j*19349663)&7)-3.5,q=(j*w+i)*4;
+      px[q]=clamp(r*k+dz,0,255);px[q+1]=clamp(g*k+dz,0,255);px[q+2]=clamp(b*k+dz,0,255);px[q+3]=255;depth[j*w+i]=t;
+    }}
+  cx.putImageData(im,0,0);return {cv,depth:{w,h,data:depth}};
+}
+function hull2(P){P=P.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]),L=[],U=[];
+  for(const p of P){while(L.length>1&&cr(L[L.length-2],L[L.length-1],p)<=0)L.pop();L.push(p)}
+  for(const p of P.slice().reverse()){while(U.length>1&&cr(U[U.length-2],U[U.length-1],p)<=0)U.pop();U.push(p)}
+  L.pop();U.pop();return L.concat(U)}
+function demoSurface(st,p){const pts=[];
+  if(p.t==='box')for(let i=0;i<8;i++)pts.push([i&1?p.mx[0]:p.mn[0],i&2?p.mx[1]:p.mn[1],i&4?p.mx[2]:p.mn[2]]);
+  else for(let i=0;i<16;i++){const a=i/16*2*Math.PI;for(const y of[p.a0,p.a1])pts.push([p.c[0]+p.r*Math.cos(a),y,p.c[2]+p.r*Math.sin(a)])}
+  const o=[st.x,st.h,-st.y],ds=pts.map(q=>norm(w2l(sub(q,o),st.north))),c=norm(ds.reduce(add)),[e1,e2]=tangent(c);
+  return hull2(ds.map(q=>{const z=dot(q,c);return [dot(q,e1)/z,dot(q,e2)/z]})).map(q=>norm(add(c,add(mul(e1,q[0]),mul(e2,q[1])))).map(v=>+v.toFixed(5)))}
+function demoProject(){
+  const meta={'TQ-101':['Equipamento','ok','Tanque de água de processo, 12 m³. Última inspeção NR-13: 03/2026.'],
+    'B-201':['Equipamento','warn','Bomba centrífuga de recalque. Vibração acima do limite no mancal LA; OS aberta.'],
+    'PN-01':['Elétrica','ok','Painel de comando local das bombas B-201 A/B.']};
+  const bubbles=DEMO_ST.map((st,i)=>{const items=[];
+    for(const p of PR)if(p.tag)items.push({id:uid(),kind:'surface',name:p.tag,cat:meta[p.tag][0],status:meta[p.tag][1],desc:meta[p.tag][2],url:'',pts:demoSurface(st,p)});
+    const o=[st.x,st.h,-st.y],tg=(n,P,cat,stt,desc)=>items.push({id:uid(),kind:'tag',name:n,cat,status:stt,desc,url:'',dir:norm(w2l(sub(P,o),st.north)).map(v=>+v.toFixed(5))});
+    tg('XV-102',[-.5,2.8,-2.6],'Válvula','crit','Válvula de bloqueio com vazamento na gaxeta. Isolar antes de intervir.');
+    tg('6"-PW-001',[-3,2.8,-2.6],'Tubulação','none','Linha de água de processo, aço carbono, sch 40.');
+    return {id:'demo'+i,demo:i,name:st.name,x:st.x,y:st.y,h:st.h,north:st.north,hcov:360,voff:0,items}});
+  return {name:'Casa de bombas (demonstração)',bubbles};
+}
+
+/* ===================== WebGL ===================== */
+const glc=$('#gl'),gl=glc.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+function prog(vs,fs){const p=gl.createProgram();for(const[t,s]of[[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]]){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+  if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh));gl.attachShader(p,sh)}gl.linkProgram(p);return p}
+const HP='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n';
+const pPano=prog('attribute vec2 a;varying vec2 v;void main(){v=a;gl_Position=vec4(a,0.,1.);}',
+ HP+`varying vec2 v;uniform vec3 uF,uR,uU;uniform sampler2D uT;uniform vec2 uCov;uniform float uOff,uHas;
+ void main(){vec3 d=normalize(uF+uR*v.x+uU*v.y);float lon=atan(d.x,-d.z),lat=asin(clamp(d.y,-1.,1.));
+  vec2 uv=vec2(lon/uCov.x+.5,.5-(lat-uOff)/uCov.y);
+  float gx=abs(fract(lon*3.8197186+.5)-.5),gy=abs(fract(lat*3.8197186+.5)-.5);
+  vec3 c=mix(vec3(.05,.07,.09),vec3(.09,.12,.15),smoothstep(-.4,.4,d.y));
+  c+=vec3(.05,.08,.09)*(1.-smoothstep(0.,.012,min(gx,gy)));
+  if(uHas>.5&&uv.x>=0.&&uv.x<=1.&&uv.y>=0.&&uv.y<=1.)c=texture2D(uT,uv).rgb;
+  gl_FragColor=vec4(c,1.);}`);
+const pCloud=prog(`attribute vec3 p;attribute vec3 c;uniform mat4 uM;uniform float uS,uClip;varying vec3 vc;
+ void main(){vc=c;gl_Position=uM*vec4(p,1.);if(p.y>uClip)gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=clamp(uS/gl_Position.w,1.5,14.);}`,
+ 'precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}');
+const quad=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,quad);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const U=(p,n)=>gl.getUniformLocation(p,n);
+let tex=null,texFor=null,texSeq=0;
+const MAXT=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),8192);
+function loadImg(blob){return new Promise((ok,no)=>{const u=URL.createObjectURL(blob),im=new Image();im.onload=()=>{ok(im);setTimeout(()=>URL.revokeObjectURL(u),3000)};im.onerror=no;im.src=u})}
+async function ensureTex(b){
+  if(texFor===b.id)return;const seq=++texSeq,r=R(b);let src=r.src;
+  if(!src&&r.blob){try{src=await loadImg(r.blob)}catch(e){src=null}}
+  if(seq!==texSeq)return;
+  if(tex){gl.deleteTexture(tex);tex=null}texFor=b.id;
+  if(src){const sw=src.naturalWidth||src.width,sh=src.naturalHeight||src.height;
+    if(sw>MAXT||sh>MAXT){const k=Math.min(4096/sw,4096/sh),c=document.createElement('canvas');c.width=Math.round(sw*k);c.height=Math.round(sh*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);src=c}
+    tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)}
+  redraw();
+}
+function makeThumb(src){const sw=src.naturalWidth||src.width,sh=src.naturalHeight||src.height,w=Math.min(1024,sw),h=Math.max(1,Math.round(w*sh/sw)),c=document.createElement('canvas');
+  c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,w,h);return {w,h,data:x.getImageData(0,0,w,h).data,ar:sw/sh}}
+
+/* ===================== câmera do panorama ===================== */
+function basis(){const cy=Math.cos(view.yaw),sy=Math.sin(view.yaw),cp=Math.cos(view.pitch),sp=Math.sin(view.pitch);
+  return {f:[sy*cp,sp,-cy*cp],r:[cy,0,sy],u:[-sy*sp,cp,cy*sp],ty:Math.tan(view.fov*RAD/2),tx:Math.tan(view.fov*RAD/2)*W/H}}
+function dirAt(px,py){const b=basis(),x=(px/W*2-1)*b.tx,y=(1-py/H*2)*b.ty;return norm(add(b.f,add(mul(b.r,x),mul(b.u,y))))}
+function toCam(d,b){return [dot(d,b.r),dot(d,b.u),dot(d,b.f)]}
+function proj(d,b){b=b||basis();const c=toCam(d,b);if(c[2]<=1e-3)return null;return [(c[0]/c[2]/b.tx*.5+.5)*W,(.5-c[1]/c[2]/b.ty*.5)*H]}
+const dirYaw=d=>Math.atan2(d[0],-d[2]), dirPitch=d=>Math.asin(clamp(d[1],-1,1));
+function lookAt(d){tween={y0:view.yaw,p0:view.pitch,dy:((dirYaw(d)-view.yaw+Math.PI*3)%(2*Math.PI))-Math.PI,dp:dirPitch(d)-view.pitch,t0:performance.now()};redraw()}
+function uvOf(b,d){const u=dirYaw(d)/hcov(b)+.5,v=.5-(dirPitch(d)-(b.voff||0)*RAD)/vcov(b);return u<0||u>1||v<0||v>1?null:[u,v]}
+function depthAt(b,d){const dp=R(b).depth;if(!dp)return 0;const uv=uvOf(b,d);if(!uv)return 0;
+  const v=dp.data[Math.min(dp.h-1,uv[1]*dp.h|0)*dp.w+Math.min(dp.w-1,uv[0]*dp.w|0)];return v>.05?v:0}
+// ponto 3D (m, origem na câmera) sob um raio: profundidade se houver; senão interseção com o plano do piso
+function pick3D(b,d){const t=depthAt(b,d);if(t)return {p:mul(d,t),via:'depth'};
+  if(d[1]<-.03)return {p:mul(d,b.h/-d[1]),via:'floor'};return null}
+
+/* ===================== superfícies ===================== */
+function sc(it){if(it._c)return it._c;const c=norm(it.pts.reduce(add)),[e1,e2]=tangent(c);
+  return it._c={c,e1,e2,p2:it.pts.map(d=>{const z=Math.max(dot(d,c),1e-3);return [dot(d,e1)/z,dot(d,e2)/z]})}}
+function inSurf(it,d){const s=sc(it),z=dot(d,s.c);if(z<.02)return false;const x=dot(d,s.e1)/z,y=dot(d,s.e2)/z,P=s.p2;let ins=false;
+  for(let i=0,j=P.length-1;i<P.length;j=i++)if((P[i][1]>y)!==(P[j][1]>y)&&x<(P[j][0]-P[i][0])*(y-P[i][1])/(P[j][1]-P[i][1])+P[i][0])ins=!ins;return ins}
+function area2(it){const P=sc(it).p2;let a=0;for(let i=0,j=P.length-1;i<P.length;j=i++)a+=P[j][0]*P[i][1]-P[i][0]*P[j][1];return Math.abs(a)}
+function hitSurface(d){if(!showSurf)return null;let best=null,ba=1e9;for(const it of B().items)if(it.kind==='surface'&&inSurf(it,d)){const a=area2(it);if(a<ba){ba=a;best=it}}return best}
+const itemDir=it=>it.kind==='tag'?it.dir:it.kind==='surface'?sc(it).c:norm(mul(add(it.a,it.b),.5));
+
+/* ===================== desenho ===================== */
+const ov=$('#ov'),ox=ov.getContext('2d');
+function resize(){const s=$('#stage');W=s.clientWidth||1;H=s.clientHeight||1;DPR=Math.min(2,window.devicePixelRatio||1);
+  for(const c of[glc,ov]){c.width=Math.round(W*DPR);c.height=Math.round(H*DPR)}redraw()}
+function drawPano(){const b=B(),k=basis();gl.viewport(0,0,glc.width,glc.height);gl.disable(gl.DEPTH_TEST);gl.useProgram(pPano);
+  gl.bindBuffer(gl.ARRAY_BUFFER,quad);const a=gl.getAttribLocation(pPano,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  gl.uniform3fv(U(pPano,'uF'),k.f);gl.uniform3fv(U(pPano,'uR'),mul(k.r,k.tx));gl.uniform3fv(U(pPano,'uU'),mul(k.u,k.ty));
+  gl.uniform2f(U(pPano,'uCov'),hcov(b),vcov(b));gl.uniform1f(U(pPano,'uOff'),(b.voff||0)*RAD);
+  const has=tex&&texFor===b.id;gl.uniform1f(U(pPano,'uHas'),has?1:0);if(has){gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(U(pPano,'uT'),0)}
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
+function clipNear(P){const n=.02,o=[];for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length],ia=a[2]>=n,ib=b[2]>=n;
+  if(ia)o.push(a);if(ia!==ib){const t=(n-a[2])/(b[2]-a[2]);o.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,n])}}return o}
+function pathCam(P,k,close){if(!P.length)return false;ox.beginPath();P.forEach((c,i)=>{const x=(c[0]/c[2]/k.tx*.5+.5)*W,y=(.5-c[1]/c[2]/k.ty*.5)*H;i?ox.lineTo(x,y):ox.moveTo(x,y)});if(close)ox.closePath();return true}
+function segCam(a,b,k){let A=toCam(a,k),Bc=toCam(b,k);const n=.02;if(A[2]<n&&Bc[2]<n)return false;
+  if(A[2]<n||Bc[2]<n){const t=(n-A[2])/(Bc[2]-A[2]),m=[A[0]+(Bc[0]-A[0])*t,A[1]+(Bc[1]-A[1])*t,n];if(A[2]<n)A=m;else Bc=m}return pathCam([A,Bc],k,false)}
+function dotAt(d,k,col,r){const p=proj(d,k);if(!p)return;ox.beginPath();ox.arc(p[0],p[1],r||5,0,7);ox.fillStyle=col;ox.fill();ox.lineWidth=1.5;ox.strokeStyle='#fff';ox.stroke()}
+function drawOverlay(){ox.setTransform(DPR,0,0,DPR,0,0);ox.clearRect(0,0,W,H);if(mode!=='pano')return;const b=B(),k=basis();ox.lineJoin='round';
+  if(showSurf)for(const it of b.items)if(it.kind==='surface'){const hot=it===hover||it.id===sel,col=STATUS[it.status||'none'][2];
+    if(pathCam(clipNear(it.pts.map(d=>toCam(d,k))),k,true)){ox.globalAlpha=hot?.42:.16;ox.fillStyle=col;ox.fill();ox.globalAlpha=1;ox.lineWidth=hot?3:1.5;ox.strokeStyle=col;ox.stroke()}}
+  for(const it of b.items)if(it.kind==='measure'){ox.strokeStyle='#f0b03c';ox.lineWidth=it.id===sel?3.5:2.2;if(segCam(it.a,it.b,k))ox.stroke();
+    dotAt(norm(it.a),k,'#f0b03c',4);dotAt(norm(it.b),k,'#f0b03c',4)}
+  if(pend){dotAt(norm(pend.p),k,'#f0b03c',5);
+    if(cursorDir){let q=null;if(tool==='alt'){const hd=Math.hypot(pend.p[0],pend.p[2]);q=[pend.p[0],hd*cursorDir[1]/Math.max(1e-6,Math.hypot(cursorDir[0],cursorDir[2])),pend.p[2]]}
+      else{const h3=pick3D(b,cursorDir);if(h3)q=h3.p}
+      if(q){ox.strokeStyle='#f0b03c';ox.lineWidth=1.5;ox.setLineDash([6,4]);if(segCam(pend.p,q,k))ox.stroke();ox.setLineDash([])}}}
+  if(draft){ox.strokeStyle='#3cc4d8';ox.lineWidth=2;const P=draft.concat(cursorDir?[cursorDir]:[]);
+    for(let i=0;i+1<P.length;i++)if(segCam(P[i],P[i+1],k))ox.stroke();draft.forEach((d,i)=>dotAt(d,k,i?'#3cc4d8':'#fff',i?4:6))}
+}
+/* ---- nuvem 3D ---- */
+function m4mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
+function orbM(){const f=1/Math.tan(55*RAD/2),n=.1,fa=400,P=new Float32Array([f/(W/H),0,0,0,0,f,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0]);
+  const ce=Math.cos(orb.el),eye=add(orb.t,mul([Math.sin(orb.az)*ce,Math.sin(orb.el),Math.cos(orb.az)*ce],orb.dist)),z=norm(sub(eye,orb.t)),x=norm(cross([0,1,0],z)),y=cross(z,x);
+  return m4mul(P,new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1]))}
+function projM(M,p){const w=M[3]*p[0]+M[7]*p[1]+M[11]*p[2]+M[15];if(w<=.01)return null;
+  return [((M[0]*p[0]+M[4]*p[1]+M[8]*p[2]+M[12])/w*.5+.5)*W,(.5-(M[1]*p[0]+M[5]*p[1]+M[9]*p[2]+M[13])/w*.5)*H]}
+function buildCloud(b){const r=R(b);if(!r.thumb){r.cloud=null;return}const gw=560,gh=280,pos=new Float32Array(gw*gh*3),col=new Uint8Array(gw*gh*3),o=camPos(b),th=r.thumb,mp=[];let n=0;
+  for(let j=0;j<gh;j++){const lat=Math.PI/2-(j+.5)/gh*Math.PI,cl=Math.cos(lat),sl=Math.sin(lat);
+    for(let i=0;i<gw;i++){const lon=(i+.5)/gw*2*Math.PI-Math.PI,d=[Math.sin(lon)*cl,sl,-Math.cos(lon)*cl],uv=uvOf(b,d);if(!uv)continue;
+      let t=depthAt(b,d);if(!t){if(r.depth||sl>-.17)continue;t=b.h/-sl;if(t*cl>7)continue}
+      const w=l2w(mul(d,t),b.north),q=(Math.min(th.h-1,uv[1]*th.h|0)*th.w+Math.min(th.w-1,uv[0]*th.w|0))*4;
+      pos[n*3]=o[0]+w[0];pos[n*3+1]=o[1]+w[1];pos[n*3+2]=o[2]+w[2];col[n*3]=th.data[q];col[n*3+1]=th.data[q+1];col[n*3+2]=th.data[q+2];
+      if((((i*2654435761)^(j*40503*i+j*9973))>>>7)%53===0&&pos[n*3+1]<2.2)mp.push(pos[n*3],pos[n*3+2],th.data[q],th.data[q+1],th.data[q+2]);n++}}
+  if(r.cloud){gl.deleteBuffer(r.cloud.pb);gl.deleteBuffer(r.cloud.cb)}
+  const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,pos.subarray(0,n*3),gl.STATIC_DRAW);
+  const cb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.bufferData(gl.ARRAY_BUFFER,col.subarray(0,n*3),gl.STATIC_DRAW);
+  r.cloud={pb,cb,n,mp}}
+function clouds(){for(const b of project.bubbles){const r=R(b);if(r.cloudDirty!==false){buildCloud(b);r.cloudDirty=false}}}
+function drawCloud(){clouds();gl.viewport(0,0,glc.width,glc.height);gl.clearColor(.04,.06,.075,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+  gl.useProgram(pCloud);gl.uniformMatrix4fv(U(pCloud,'uM'),false,orbM());gl.uniform1f(U(pCloud,'uS'),H*DPR*.055);gl.uniform1f(U(pCloud,'uClip'),orb.clip);
+  const ap=gl.getAttribLocation(pCloud,'p'),ac=gl.getAttribLocation(pCloud,'c');gl.enableVertexAttribArray(ap);gl.enableVertexAttribArray(ac);
+  for(const b of project.bubbles){const c=R(b).cloud;if(!c||!c.n)continue;gl.bindBuffer(gl.ARRAY_BUFFER,c.pb);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,c.cb);gl.vertexAttribPointer(ac,3,gl.UNSIGNED_BYTE,true,0,0);gl.drawArrays(gl.POINTS,0,c.n)}
+  gl.disableVertexAttribArray(ac)}
+
+/* ===================== rótulos (DOM) ===================== */
+const LB=$('#labels');let labels=[];
+function navTarget(b,o){const w=[o.x-b.x,-b.h,-(o.y-b.y)];return {d:norm(w2l(w,b.north)),dist:Math.hypot(w[0],w[2])}}
+function mk(cls,html,dir,fn,id){const e=document.createElement(fn?'button':'div');e.className='lb '+cls;e.innerHTML=html;if(fn)e.onclick=fn;LB.appendChild(e);labels.push({e,dir,id})}
+function rebuildLabels(){LB.innerHTML='';labels=[];if(!project||!cur)return;const b=B();
+  if(mode==='cloud'){for(const o of project.bubbles)mk('st',esc(o.name),camPos(o),()=>{setMode('pano');goTo(o.id)});redraw();return}
+  for(const o of project.bubbles)if(o!==b){const t=navTarget(b,o);if(t.dist>.3)mk('nav',esc(o.name)+' · '+fm(t.dist),t.d,()=>goTo(o.id))}
+  for(const it of b.items){if(it.kind==='tag')mk('tag'+(it.id===sel?' sel':''),`<span class="dot" style="background:${STATUS[it.status||'none'][1]}"></span>${esc(it.name)}`,it.dir,()=>select(it.id),it.id);
+    else if(it.kind==='measure')mk('ms',(it.type==='alt'?'↕ ':'')+fm(it.val),itemDir(it))}
+  redraw()}
+function placeLabels(){const k=mode==='pano'?basis():null,M=mode==='cloud'?orbM():null;
+  for(const l of labels){const p=k?proj(l.dir,k):projM(M,l.dir);if(!p||p[0]<-80||p[0]>W+80||p[1]<-30||p[1]>H+30){l.e.style.display='none';continue}
+    l.e.style.display='';l.e.style.transform=`translate(${p[0]}px,${p[1]}px) translate(-50%,${l.e.classList.contains('tag')?'-135%':'-50%'})`}}
+
+/* ===================== planta-chave ===================== */
+const mapc=$('#map'),mx=mapc.getContext('2d');let mapT=null,mapDrag=null;
+function mapFit(){const s=mapc.clientWidth,bs=project.bubbles;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const b of bs){x0=Math.min(x0,b.x);x1=Math.max(x1,b.x);y0=Math.min(y0,b.y);y1=Math.max(y1,b.y)}
+  const span=Math.max(x1-x0,y1-y0)+7,k=s/span;return {k,cx:(x0+x1)/2,cy:(y0+y1)/2,s}}
+function drawMap(){const s=mapc.clientWidth;if(!s)return;if(mapc.width!==s*DPR){mapc.width=mapc.height=s*DPR}const T=mapDrag?mapT:(mapT=mapFit());
+  const X=x=>s/2+(x-T.cx)*T.k,Y=y=>s/2-(y-T.cy)*T.k;mx.setTransform(DPR,0,0,DPR,0,0);mx.clearRect(0,0,s,s);
+  mx.strokeStyle='rgba(160,190,205,.13)';mx.lineWidth=1;mx.beginPath();const g0=Math.floor(T.cx-s/T.k/2),g1=Math.ceil(T.cx+s/T.k/2),h0=Math.floor(T.cy-s/T.k/2),h1=Math.ceil(T.cy+s/T.k/2);
+  for(let g=g0;g<=g1;g++){mx.moveTo(X(g),0);mx.lineTo(X(g),s)}for(let g=h0;g<=h1;g++){mx.moveTo(0,Y(g));mx.lineTo(s,Y(g))}mx.stroke();
+  for(const b of project.bubbles){const c=R(b).cloud;if(c)for(let i=0;i<c.mp.length;i+=5){mx.fillStyle=`rgb(${c.mp[i+2]},${c.mp[i+3]},${c.mp[i+4]})`;mx.fillRect(X(c.mp[i])-1,Y(-c.mp[i+1])-1,2,2)}}
+  const b=B();if(mode==='pano'){const hd=b.north*RAD+view.yaw,hf=Math.atan(Math.tan(view.fov*RAD/2)*W/H);mx.fillStyle='rgba(60,196,216,.28)';mx.beginPath();mx.moveTo(X(b.x),Y(b.y));
+    mx.arc(X(b.x),Y(b.y),46,hd-hf-Math.PI/2,hd+hf-Math.PI/2);mx.closePath();mx.fill()}
+  mx.font='11px system-ui,sans-serif';mx.textAlign='center';
+  for(const o of project.bubbles){mx.beginPath();mx.arc(X(o.x),Y(o.y),o===b?6:4.5,0,7);mx.fillStyle=o===b?'#3cc4d8':'#e6eef2';mx.fill();mx.strokeStyle='#0c1216';mx.lineWidth=1.5;mx.stroke();
+    mx.fillStyle='#e6eef2';mx.fillText(o.name.split(' ')[0],X(o.x),Y(o.y)-9)}
+  mx.fillStyle='#93a6b0';mx.textAlign='left';mx.fillText('N ↑',6,14);mx.fillText('grade 1 m',6,s-6)}
+function mapHit(e){const r=mapc.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,T=mapT;let best=null,bd=18;
+  for(const o of project.bubbles){const d=Math.hypot(T.s/2+(o.x-T.cx)*T.k-px,T.s/2-(o.y-T.cy)*T.k-py);if(d<bd){bd=d;best=o}}return {best,px,py}}
+mapc.addEventListener('pointerdown',e=>{const h=mapHit(e);if(!h.best)return;mapc.setPointerCapture(e.pointerId);mapDrag={b:h.best,moved:false,x:e.clientX,y:e.clientY}});
+mapc.addEventListener('pointermove',e=>{if(!mapDrag||!editing)return;if(Math.hypot(e.clientX-mapDrag.x,e.clientY-mapDrag.y)<4&&!mapDrag.moved)return;mapDrag.moved=true;
+  const r=mapc.getBoundingClientRect(),T=mapT,b=mapDrag.b;b.x=+((e.clientX-r.left-T.s/2)/T.k+T.cx).toFixed(2);b.y=+(-(e.clientY-r.top-T.s/2)/T.k+T.cy).toFixed(2);R(b).cloudDirty=true;rebuildLabels()});
+mapc.addEventListener('pointerup',()=>{if(!mapDrag)return;const d=mapDrag;mapDrag=null;if(d.moved){save();if(cardMode==='bubble')showBubble(d.b)}else{if(mode==='cloud')setMode('pano');goTo(d.b.id)}redraw()});
+
+/* ===================== navegação entre bolhas ===================== */
+function goTo(id,first){const nb=project.bubbles.find(b=>b.id===id);if(!nb)return;const old=cur&&B();
+  if(old&&!first){view.yaw+=(old.north-nb.north)*RAD;const f=$('#fade');f.style.opacity=.55;setTimeout(()=>f.style.opacity=0,160)}
+  cur=id;sel=null;hover=null;draft=null;pend=null;tween=null;closeCard();ensureTex(nb);lists();rebuildLabels();hint();redraw()}
+function setMode(m){mode=m;sel=null;closeCard();$('#mPano').classList.toggle('on',m==='pano');$('#mCloud').classList.toggle('on',m==='cloud');setTool('nav');
+  if(m==='cloud'){const bs=project.bubbles;orb.t=[bs.reduce((s,b)=>s+b.x,0)/bs.length,1,-bs.reduce((s,b)=>s+b.y,0)/bs.length]}
+  toolbar();rebuildLabels();hint();redraw()}
+
+/* ===================== listas, ficha, ferramentas ===================== */
+const ICON={tag:'◉',surface:'▱',measure:'↔'};
+function lists(){$('#pname').textContent=project.name;const bl=$('#bubList');bl.innerHTML='';
+  for(const b of project.bubbles){const r=document.createElement('div');r.style.display='flex';
+    r.innerHTML=`<button class="row${b.id===cur?' on':''}"><span class="nm">${esc(b.name)}</span>${R(b).depth?'<span class="chip d">3D</span>':''}<span class="chip">${Math.round(b.hcov||360)}°</span></button>`+
+      (editing?`<button class="btn sm" style="border:0" aria-label="Propriedades de ${esc(b.name)}">⚙</button>`:'');
+    r.children[0].style.flex='1';r.children[0].style.minWidth='0';r.children[0].onclick=()=>{if(mode==='cloud')setMode('pano');goTo(b.id)};if(editing)r.children[1].onclick=()=>{goTo(b.id);showBubble(b)};bl.appendChild(r)}
+  const il=$('#itemList');il.innerHTML='';const its=B().items;if(!its.length)il.innerHTML='<div class="empty">Nenhum item. Ative Editar para marcar superfícies e tags.</div>';
+  for(const it of its){const r=document.createElement('button');r.className='row'+(it.id===sel?' on':'');
+    r.innerHTML=`<span>${ICON[it.kind]}</span><span class="nm">${it.kind==='measure'?(it.type==='alt'?'Altura ':'Distância ')+fm(it.val):esc(it.name)}</span>`+(it.kind!=='measure'?`<span class="dot" style="background:${STATUS[it.status||'none'][1]}"></span>`:'');
+    r.onclick=()=>{select(it.id);lookAt(itemDir(it))};il.appendChild(r)}}
+function closeCard(){$('#card').hidden=true;cardMode=null}
+function select(id){sel=id;const it=B().items.find(i=>i.id===id);if(!it){closeCard()}else showItem(it);lists();rebuildLabels()}
+function showItem(it,edit){const c=$('#card');c.hidden=false;cardMode='item';const b=B();
+  if(it.kind==='measure'){c.innerHTML=`<h2>Medição</h2><div class="bd"><h3>${it.type==='alt'?'Altura':'Distância'}: ${fm(it.val)}</h3>
+    <dl class="kv"><dt>Método</dt><dd>${it.via==='depth'?'profundidade (LiDAR)':'plano do piso, câmera a '+fm(b.h)}</dd><dt>ΔX / ΔY / ΔZ</dt><dd>${[0,2,1].map(i=>fm(Math.abs(it.b[i]-it.a[i]))).join(' · ')}</dd></dl>
+    <div class="acts"><button class="btn danger" id="cDel">Excluir</button><button class="btn" id="cX">Fechar</button></div></div>`}
+  else if(edit){c.innerHTML=`<h2>Editar ${it.kind==='tag'?'tag':'superfície'}</h2><form class="bd" id="cForm">
+    <label class="f">Identificação (TAG)<input id="eName" value="${esc(it.name)}" required></label>
+    <div class="g2"><label class="f">Categoria<select id="eCat">${CATS.map(x=>`<option${x===it.cat?' selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="f">Status<select id="eSt">${Object.keys(STATUS).map(x=>`<option value="${x}"${x===(it.status||'none')?' selected':''}>${STATUS[x][0]}</option>`).join('')}</select></label></div>
+    <label class="f">Descrição<textarea id="eDesc" rows="3">${esc(it.desc)}</textarea></label>
+    <label class="f">Link do documento (opcional)<input id="eUrl" type="url" placeholder="https://…" value="${esc(it.url)}"></label>
+    <div class="acts"><button class="btn on" type="submit">Salvar</button><button class="btn danger" type="button" id="cDel">Excluir</button></div></form>`;
+    $('#cForm').onsubmit=e=>{e.preventDefault();it.name=$('#eName').value.trim()||it.name;it.cat=$('#eCat').value;it.status=$('#eSt').value;it.desc=$('#eDesc').value;it.url=$('#eUrl').value.trim();save();select(it.id)}}
+  else{const st=STATUS[it.status||'none'],others=project.bubbles.filter(o=>o!==b&&o.items.some(i=>i.kind!=='measure'&&i.name.toLowerCase()===it.name.toLowerCase()));
+    c.innerHTML=`<h2>${esc(it.cat||'Item')}</h2><div class="bd"><h3>${esc(it.name)}</h3>
+    <div><span class="pill"><span class="dot" style="background:${st[1]}"></span>${st[0]}</span></div>
+    ${it.desc?`<p>${esc(it.desc)}</p>`:''}${/^https?:\/\//.test(it.url||'')?`<p><a href="${esc(it.url)}" target="_blank" rel="noopener" style="color:var(--accent)">Abrir documento</a></p>`:''}
+    ${others.length?`<div><div style="color:var(--muted);font-size:12px;margin-bottom:4px">Também visível em</div><div class="acts" id="cOth"></div></div>`:''}
+    <div class="acts">${editing?'<button class="btn" id="cEd">Editar</button><button class="btn danger" id="cDel">Excluir</button>':''}<button class="btn" id="cX">Fechar</button></div></div>`;
+    others.forEach(o=>{const bt=document.createElement('button');bt.className='btn sm';bt.textContent=o.name;bt.onclick=()=>{goTo(o.id);const t=B().items.find(i=>i.kind!=='measure'&&i.name.toLowerCase()===it.name.toLowerCase());select(t.id);lookAt(itemDir(t))};$('#cOth').appendChild(bt)});
+    if($('#cEd'))$('#cEd').onclick=()=>showItem(it,true)}
+  if($('#cX'))$('#cX').onclick=()=>{sel=null;closeCard();lists();rebuildLabels()};
+  const del=$('#cDel');if(del)del.onclick=()=>{if(del.dataset.ok){b.items=b.items.filter(i=>i!==it);sel=null;closeCard();save();lists();rebuildLabels()}else{del.dataset.ok=1;del.textContent='Confirmar exclusão'}}}
+function showBubble(b){const c=$('#card');c.hidden=false;cardMode='bubble';const r=R(b),num=(id,l,v,st,mn,mxv)=>`<label class="f">${l}<input id="${id}" type="number" step="${st}" min="${mn}" max="${mxv}" value="${v}"></label>`;
+  c.innerHTML=`<h2>Propriedades da bolha</h2><div class="bd">
+   <label class="f">Nome<input id="pName" value="${esc(b.name)}"></label>
+   <div class="g2">${num('pX','X leste (m)',b.x,.1,-9999,9999)}${num('pY','Y norte (m)',b.y,.1,-9999,9999)}${num('pH','Altura da câmera (m)',b.h,.05,.2,10)}${num('pN','Rumo do centro (°)',b.north,1,-360,360)}
+   ${num('pC','Cobertura horizontal (°)',b.hcov||360,5,20,360)}${num('pV','Desvio do horizonte (°)',b.voff||0,1,-60,60)}</div>
+   <div style="font-size:12px;color:var(--muted)">Profundidade: ${r.depth?'carregada ('+r.depth.w+'×'+r.depth.h+')':'nenhuma; medições usam o plano do piso'}</div>
+   <div class="g2">${num('pDm','Alcance do mapa (m)',b.dmax||5,.5,.5,200)}<label class="f">Convenção<select id="pDi"><option value="0">branco = longe</option><option value="1"${b.dinv?' selected':''}>branco = perto</option></select></label></div>
+   <div class="acts"><button class="btn sm" id="pDep">Carregar profundidade…</button>${b.demo==null?'<button class="btn sm" id="pRep">Trocar imagem…</button>':''}</div>
+   <div class="acts"><button class="btn danger" id="pDel">Excluir bolha</button><button class="btn" id="cX">Fechar</button></div></div>`;
+  const bind=(id,key,isNum)=>{$('#'+id).oninput=e=>{const v=isNum?parseFloat(e.target.value):e.target.value;if(isNum&&!isFinite(v))return;b[key]=v;r.cloudDirty=true;save();lists();rebuildLabels();redraw()}};
+  bind('pName','name');bind('pX','x',1);bind('pY','y',1);bind('pH','h',1);bind('pN','north',1);bind('pC','hcov',1);bind('pV','voff',1);bind('pDm','dmax',1);
+  $('#pDi').onchange=e=>{b.dinv=e.target.value==='1'?1:0;save()};
+  $('#pDep').onclick=()=>{$('#fDepth').value='';$('#fDepth').click()};if($('#pRep'))$('#pRep').onclick=()=>{$('#fRepl').value='';$('#fRepl').click()};
+  $('#cX').onclick=closeCard;const del=$('#pDel');del.onclick=()=>{if(!del.dataset.ok){del.dataset.ok=1;del.textContent='Confirmar exclusão';return}
+    if(project.bubbles.length<2){toast('O projeto precisa de pelo menos uma bolha.');return}
+    project.bubbles=project.bubbles.filter(o=>o!==b);kv('delete','img:'+b.id);kv('delete','dep:'+b.id);delete rt[b.id];save();cur=null;goTo(project.bubbles[0].id,true)}}
+function toolbar(){const t=$('#tools');t.innerHTML='';const add=(id,txt,on,fn,title)=>{const b=document.createElement('button');b.className='btn'+(on?' on':'');b.textContent=txt;b.title=title||'';b.onclick=fn;t.appendChild(b)};
+  if(mode==='cloud'){const l=document.createElement('label');l.innerHTML=`Corte de altura <input id="clip" type="range" min="0.3" max="8" step="0.1" value="${orb.clip}"> <span id="clipV" style="font-family:var(--mono)">${fm(orb.clip)}</span>`;t.appendChild(l);
+    $('#clip').oninput=e=>{orb.clip=+e.target.value;$('#clipV').textContent=fm(orb.clip);redraw()};return}
+  add('nav','Navegar',tool==='nav',()=>setTool('nav'));add('dist','Distância',tool==='dist',()=>setTool('dist'),'Distância entre dois pontos');add('alt','Altura',tool==='alt',()=>setTool('alt'),'Altura vertical acima de um ponto do piso');
+  if(editing){const s=document.createElement('span');s.className='sepv';t.appendChild(s);add('tag','+ Tag',tool==='tag',()=>setTool('tag'));add('surf','+ Superfície',tool==='surf',()=>setTool('surf'));
+    if(draft&&draft.length>2)add('fin','Concluir',true,finishSurf)}
+  const s=document.createElement('span');s.className='sepv';t.appendChild(s);add('vis',showSurf?'Ocultar superfícies':'Mostrar superfícies',false,()=>{showSurf=!showSurf;toolbar();redraw()})}
+function setTool(t){tool=t;draft=t==='surf'?[]:null;pend=null;glc.className=t==='nav'?'grab':'cross';toolbar();hint();redraw()}
+function hint(){const h=$('#hint'),b=project&&cur&&B();let s='';if(!b)return;const dep=R(b).depth;
+  if(mode==='cloud')s='Arraste para orbitar, role ou pince para aproximar. Toque em uma estação para entrar na bolha.';
+  else if(tool==='dist')s=pend?'Clique no segundo ponto.':dep?'Distância: clique em dois pontos quaisquer (profundidade disponível).':'Distância: clique em dois pontos no piso. Sem profundidade, só o piso é mensurável.';
+  else if(tool==='alt')s=pend?'Agora clique no topo, na vertical do ponto marcado.':'Altura: clique primeiro na base do objeto'+(dep?'.':', no piso.');
+  else if(tool==='tag')s='Clique no ponto onde a tag deve ficar.';
+  else if(tool==='surf')s=draft&&draft.length?'Continue clicando no contorno. Feche clicando no primeiro ponto ou em Concluir. Esc cancela.':'Clique nos vértices do contorno da superfície.';
+  h.hidden=!s;h.textContent=s}
+let toastT=0;function toast(s){const t=$('#toast');t.textContent=s;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+function finishSurf(){if(!draft||draft.length<3)return;const it={id:uid(),kind:'surface',name:'Nova superfície',cat:'Equipamento',status:'none',desc:'',url:'',pts:draft.map(d=>d.map(v=>+v.toFixed(5)))};
+  B().items.push(it);save();setTool('nav');sel=it.id;lists();rebuildLabels();showItem(it,true)}
+
+/* ===================== interação ===================== */
+const ptr=new Map();let drag=null,pinch=0;
+function local(e){const r=glc.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]}
+glc.addEventListener('pointerdown',e=>{glc.setPointerCapture(e.pointerId);ptr.set(e.pointerId,local(e));drag={x:e.clientX,y:e.clientY,moved:false};tween=null;
+  if(ptr.size===2){const p=[...ptr.values()];pinch=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);drag.moved=true}});
+glc.addEventListener('pointermove',e=>{const p=local(e);
+  if(!ptr.has(e.pointerId)){if(mode==='pano'){cursorDir=dirAt(p[0],p[1]);if(tool==='nav'){const h=hitSurface(cursorDir);if(h!==hover){hover=h;glc.className=h?'point':'grab'}
+      const tp=$('#tip');tp.hidden=!h;if(h){tp.textContent=h.name;tp.style.transform=`translate(${p[0]+14}px,${p[1]+14}px)`}}redraw()}return}
+  const prev=ptr.get(e.pointerId);ptr.set(e.pointerId,p);
+  if(ptr.size===2){const q=[...ptr.values()],d=Math.hypot(q[0][0]-q[1][0],q[0][1]-q[1][1]);if(pinch){const k=pinch/d;if(mode==='pano')view.fov=clamp(view.fov*k,18,110);else orb.dist=clamp(orb.dist*k,2,150)}pinch=d;redraw();return}
+  const dx=p[0]-prev[0],dy=p[1]-prev[1];if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<5)return;drag.moved=true;
+  if(mode==='pano'){const a=view.fov*RAD/H;view.yaw-=dx*a;view.pitch=clamp(view.pitch+dy*a,-89*RAD,89*RAD)}
+  else{orb.az-=dx*.006;orb.el=clamp(orb.el+dy*.006,.05,1.55)}redraw()});
+function up(e){if(!ptr.has(e.pointerId))return;const p=local(e);ptr.delete(e.pointerId);if(ptr.size<2)pinch=0;if(ptr.size===0&&drag&&!drag.moved&&e.type==='pointerup')click(p[0],p[1]);if(ptr.size===0)drag=null}
+glc.addEventListener('pointerup',up);glc.addEventListener('pointercancel',up);
+glc.addEventListener('pointerleave',()=>{if(hover){hover=null;$('#tip').hidden=true;redraw()}});
+glc.addEventListener('wheel',e=>{e.preventDefault();const k=Math.exp(e.deltaY*.0012);if(mode==='pano')view.fov=clamp(view.fov*k,18,110);else orb.dist=clamp(orb.dist*k,2,150);redraw()},{passive:false});
+glc.addEventListener('dblclick',()=>{if(tool==='surf')finishSurf()});
+function click(px,py){if(mode!=='pano')return;const b=B(),d=dirAt(px,py);cursorDir=d;
+  if(tool==='nav'){const h=hitSurface(d);if(h){select(h.id)}else if(sel){sel=null;closeCard();lists();rebuildLabels()}}
+  else if(tool==='tag'){const it={id:uid(),kind:'tag',name:'Nova tag',cat:'Instrumento',status:'none',desc:'',url:'',dir:d.map(v=>+v.toFixed(5))};b.items.push(it);save();setTool('nav');sel=it.id;lists();rebuildLabels();showItem(it,true)}
+  else if(tool==='surf'){if(draft.length>2){const p0=proj(draft[0]);if(p0&&Math.hypot(p0[0]-px,p0[1]-py)<16){finishSurf();return}}draft.push(d);toolbar();hint()}
+  else{ // medições
+    if(!pend){const h=pick3D(b,d);if(!h){toast('Sem profundidade nesta bolha: o primeiro ponto precisa estar no piso (abaixo do horizonte).');return}pend=h;hint()}
+    else{let q,via=pend.via;if(tool==='alt'){const hd=Math.hypot(pend.p[0],pend.p[2]);q=[pend.p[0],hd*d[1]/Math.max(1e-6,Math.hypot(d[0],d[2])),pend.p[2]]}
+      else{const h=pick3D(b,d);if(!h){toast('Esse ponto não está no piso. Use a ferramenta Altura para medir na vertical.');return}q=h.p;if(h.via==='floor')via='floor'}
+      const r3=v=>v.map(x=>+x.toFixed(4)),it={id:uid(),kind:'measure',type:tool,a:r3(pend.p),b:r3(q),val:tool==='alt'?Math.abs(q[1]-pend.p[1]):len(sub(q,pend.p)),via};
+      b.items.push(it);pend=null;save();lists();rebuildLabels();hint();toast((tool==='alt'?'Altura: ':'Distância: ')+fm(it.val))}}
+  redraw()}
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const s=4*RAD;
+  if(e.key==='Escape')setTool('nav');else if(e.key==='ArrowLeft')view.yaw-=s;else if(e.key==='ArrowRight')view.yaw+=s;
+  else if(e.key==='ArrowUp')view.pitch=clamp(view.pitch+s,-1.55,1.55);else if(e.key==='ArrowDown')view.pitch=clamp(view.pitch-s,-1.55,1.55);
+  else if(e.key==='+'||e.key==='=')view.fov=clamp(view.fov*.9,18,110);else if(e.key==='-')view.fov=clamp(view.fov/.9,18,110);else return;redraw()});
+
+/* ===================== arquivos ===================== */
+async function addFiles(files){let first=null;for(const f of files){let im;try{im=await loadImg(f)}catch(e){toast('Não foi possível ler '+f.name);continue}
+    const th=makeThumb(im),ar=th.ar,mxX=Math.max(...project.bubbles.map(b=>b.x));
+    const b={id:uid(),name:f.name.replace(/\.[^.]+$/,'').slice(0,40),x:+(mxX+3).toFixed(2),y:0,h:1.5,north:0,hcov:ar>=1.9?360:Math.min(360,Math.round(ar*60)),voff:0,ar,items:[]};
+    rt[b.id]={blob:f,thumb:th,ar,cloudDirty:true};project.bubbles.push(b);kv('put','img:'+b.id,f);first=first||b}
+  if(first){save();editing||toggleEdit();goTo(first.id);showBubble(first);toast('Panorama adicionado. Confira posição, altura e cobertura.')}}
+$('#fPano').onchange=e=>addFiles([...e.target.files]);
+$('#fRepl').onchange=async e=>{const f=e.target.files[0],b=B();if(!f)return;try{const im=await loadImg(f),th=makeThumb(im);Object.assign(R(b),{blob:f,thumb:th,ar:th.ar,cloudDirty:true});b.ar=th.ar;kv('put','img:'+b.id,f);texFor=null;ensureTex(b);save()}catch(x){toast('Imagem inválida.')}};
+async function decodeDepth(b,blob){const im=await loadImg(blob),w=Math.min(1024,im.naturalWidth),h=Math.max(1,Math.round(w*im.naturalHeight/im.naturalWidth)),c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.drawImage(im,0,0,w,h);const px=x.getImageData(0,0,w,h).data,data=new Float32Array(w*h),mxd=b.dmax||5;
+  for(let i=0;i<w*h;i++){const v=px[i*4]/255;data[i]=(b.dinv?1-v:v)*mxd}R(b).depth={w,h,data};R(b).cloudDirty=true}
+$('#fDepth').onchange=async e=>{const f=e.target.files[0],b=B();if(!f)return;try{await decodeDepth(b,f);b.hasDepth=1;kv('put','dep:'+b.id,f);save();lists();showBubble(b);hint();toast('Profundidade carregada: medição livre e nuvem 3D ativas nesta bolha.')}catch(x){toast('Mapa de profundidade inválido.')}};
+$('#fJson').onchange=async e=>{const f=e.target.files[0];if(f)$('#ioText').value=await f.text()};
+
+/* ===================== projeto ===================== */
+async function prepare(){for(const b of project.bubbles){const r=R(b);r.cloudDirty=true;
+    if(b.demo!=null){await new Promise(z=>setTimeout(z,0));const d=renderDemo(DEMO_ST[b.demo],1280,640);r.src=d.cv;r.depth=d.depth;r.thumb=makeThumb(d.cv);r.ar=2}
+    else{const blob=await kv('get','img:'+b.id);r.ar=b.ar||2;if(blob){r.blob=blob;try{r.thumb=makeThumb(await loadImg(blob));r.ar=r.thumb.ar}catch(e){}}
+      if(b.hasDepth){const dp=await kv('get','dep:'+b.id);if(dp)try{await decodeDepth(b,dp)}catch(e){}}}}}
+async function openProject(p){project=p;for(const k in rt)delete rt[k];texFor=null;cur=null;$('#load').hidden=false;await prepare();$('#load').hidden=true;goTo(project.bubbles[0].id,true);clouds()}
+function validProject(p){return p&&Array.isArray(p.bubbles)&&p.bubbles.length&&p.bubbles.every(b=>b.id&&isFinite(b.x)&&isFinite(b.y)&&Array.isArray(b.items))}
+function toggleEdit(){editing=!editing;$('#bEdit').classList.toggle('on',editing);$('#bEdit').setAttribute('aria-pressed',editing);if(!editing&&(tool==='tag'||tool==='surf'))setTool('nav');toolbar();lists();if(cardMode==='bubble')closeCard();else if(sel)select(sel)}
+$('#bEdit').onclick=toggleEdit;$('#mPano').onclick=()=>setMode('pano');$('#mCloud').onclick=()=>setMode('cloud');
+$('#bSide').onclick=()=>{$('#side').hidden=!$('#side').hidden};
+$('#bAdd').onclick=()=>{$('#fPano').value='';$('#fPano').click()};
+$('#bGuide').onclick=()=>$('#dGuide').showModal();
+$('#bIO').onclick=()=>{$('#ioText').value=toJSON();$('#ioMsg').textContent='';$('#dIO').showModal()};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+$('#ioCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#ioText').value);$('#ioMsg').textContent='Copiado.'}catch(e){$('#ioText').select();$('#ioMsg').textContent='Selecione e copie manualmente.'}};
+$('#ioSave').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#ioText').value],{type:'application/json'}));a.download='bolhas360-projeto.json';a.click();$('#ioMsg').textContent='Se o download não iniciar neste ambiente, use Copiar.'};
+$('#ioFile').onclick=()=>{$('#fJson').value='';$('#fJson').click()};
+$('#ioLoad').onclick=async()=>{let p;try{p=JSON.parse($('#ioText').value)}catch(e){$('#ioMsg').textContent='JSON inválido: '+e.message;return}
+  if(!validProject(p)){$('#ioMsg').textContent='O arquivo não tem a estrutura de um projeto (lista "bubbles" com id, x, y e items).';return}$('#dIO').close();await openProject(p);save();toast('Projeto importado.')};
+$('#bDemo').onclick=async e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='Confirmar: apagar tudo';setTimeout(()=>{delete b.dataset.ok;b.textContent='Restaurar demo'},4000);return}
+  delete b.dataset.ok;b.textContent='Restaurar demo';view.yaw=100*RAD;view.pitch=-4*RAD;await openProject(demoProject());save()};
+
+/* ===================== laço ===================== */
+function hud(){const b=B();if(mode==='pano'){const az=(((b.north+view.yaw*DEG)%360)+360)%360;$('#hud').textContent=`Az ${az.toFixed(0).padStart(3,'0')}° · Elev ${(view.pitch*DEG).toFixed(0)}° · FOV ${view.fov.toFixed(0)}°`}
+  else{let n=0;for(const o of project.bubbles)n+=(R(o).cloud||{}).n||0;$('#hud').textContent=n.toLocaleString('pt-BR')+' pontos · '+project.bubbles.length+' estações'}}
+function frame(now){requestAnimationFrame(frame);if(!project||!cur)return;
+  if(tween){const t=Math.min(1,(now-tween.t0)/450),e=1-Math.pow(1-t,3);view.yaw=tween.y0+tween.dy*e;view.pitch=tween.p0+tween.dp*e;if(t>=1)tween=null;dirty=true}
+  if(!dirty)return;dirty=false;if(mode==='pano')drawPano();else drawCloud();drawOverlay();placeLabels();drawMap();hud()}
+new ResizeObserver(resize).observe($('#stage'));
+(async function boot(){resize();if(innerWidth<760)$('#side').hidden=true;let p=null;try{const s=await kv('get','project');if(s)p=JSON.parse(s)}catch(e){}
+  await openProject(validProject(p)?p:demoProject());toolbar();hint();requestAnimationFrame(frame)})();
+</script>
+</body>
+</html>
