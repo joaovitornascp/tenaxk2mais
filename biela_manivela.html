@@ -1,0 +1,713 @@
+<title>Biela–Manivela–Pistão</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mesma série da simulação de NPSH — uma coluna (máx. 860 px): cena animada, equação viva, dois gráficos, controles, notas. */
+:root{
+  --paper:#f3f6f9; --card:#ffffff; --ink:#15202b; --muted:#5a6775; --line:#d3dbe3; --grid:#e7edf2;
+  --accent:#1d5ea8; --steel:#9aa6b3; --steeldark:#46525f; --pipe:#e6ebf0;
+  --ok:#18804a; --warn:#b97300; --vapor:#cf2f27;
+  --crank:#1d5ea8; --rod:#7a3fb0; --piston:#9aa6b3; --vel:#18804a; --acc:#cf2f27; --ci:#b97300; --force:#7b5a2e; --gas:#f3c77a;
+  --serif:"STIX Two Text","Cambria","Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0d141b; --card:#121c26; --ink:#e6edf3; --muted:#93a1af; --line:#2a3846; --grid:#1c2834;
+  --accent:#6fa8e8; --steel:#5f6d7b; --steeldark:#aab6c2; --pipe:#22303d;
+  --ok:#4cc47f; --warn:#e9a83a; --vapor:#ff6a5e;
+  --crank:#6fa8e8; --rod:#b98ae6; --piston:#5f6d7b; --vel:#4cc47f; --acc:#ff6a5e; --ci:#e9a83a; --force:#c49a5c; --gas:#6b4e1f; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#0d141b; --card:#121c26; --ink:#e6edf3; --muted:#93a1af; --line:#2a3846; --grid:#1c2834;
+  --accent:#6fa8e8; --steel:#5f6d7b; --steeldark:#aab6c2; --pipe:#22303d;
+  --ok:#4cc47f; --warn:#e9a83a; --vapor:#ff6a5e;
+  --crank:#6fa8e8; --rod:#b98ae6; --piston:#5f6d7b; --vel:#4cc47f; --acc:#ff6a5e; --ci:#e9a83a; --force:#c49a5c; --gas:#6b4e1f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{text-align:center;display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(26px,5vw,40px);line-height:1.12;margin:0;text-wrap:balance}
+.assume{font-family:var(--serif);color:var(--muted);font-size:15px;margin:0;text-wrap:balance}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.stage{position:relative;overflow:hidden}
+.scroll{overflow-x:auto}
+canvas{display:block;width:100%;height:auto;max-width:100%}
+#scene{aspect-ratio:640/470;min-width:540px}
+.stagebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-top:1px solid var(--line)}
+.status{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:4px 12px;border-radius:999px;border:1.5px solid currentColor;text-wrap:balance}
+.status .dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+.status.ok{color:var(--ok)} .status.warn{color:var(--warn)} .status.bad{color:var(--vapor)}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+.eq{font-family:var(--serif);text-align:center;padding:14px 12px;display:flex;flex-direction:column;gap:4px}
+.eq .l1{font-size:clamp(18px,3.4vw,25px)}
+.eq .l2{font-size:clamp(15px,2.9vw,20px)}
+.eq .l3{font-size:clamp(14px,2.6vw,18px);color:var(--muted)}
+.eq i{font-style:italic}
+.c-vb{color:var(--vel)} .c-rod{color:var(--rod)} .c-vc{color:var(--vel);font-weight:600} .c-acc{color:var(--acc)} .c-force{color:var(--force)}
+.num{font-variant-numeric:tabular-nums}
+.hint{font-family:var(--sans);font-size:14px;color:var(--ink);margin-top:6px;text-wrap:pretty;text-align:left;border-top:1px solid var(--line);padding-top:8px}
+.hint b{font-weight:600}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.charts figure{margin:0;padding:10px 10px 8px;min-width:0}
+.charts figcaption{font-family:var(--serif);font-size:16px;margin:0 4px 6px}
+.charts figcaption small{display:block;font-family:var(--sans);font-size:12px;color:var(--muted)}
+#chartV,#chartT{aspect-ratio:420/290}
+.controls{padding:14px;display:flex;flex-direction:column;gap:14px}
+.presets,.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.presets span,.toggles span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);width:100%}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px}
+.sl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sl label{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.sl label output{font-family:var(--mono);font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl small{font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.note{padding:14px 16px;min-width:0}
+.note h3{font-family:var(--serif);font-weight:600;font-size:18px;margin:0 0 6px}
+.note p,.note li{font-size:14px;margin:0;color:var(--ink)}
+.note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.note .f{font-family:var(--serif);font-size:16px;margin:6px 0}
+.foot{font-size:12px;color:var(--muted);text-align:center;text-wrap:balance}
+@media (max-width:640px){.charts,.sliders,.notes{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Dinâmica · Corpo rígido em movimento plano</div>
+    <h1>A manivela gira com ω constante.<br>Por que o pistão não anda com velocidade constante?</h1>
+    <p class="assume">Mecanismo biela–manivela–pistão centrado (sem excentricidade), manivela OB de raio <i>R</i>, biela BC de comprimento <i>L</i>, pistão C em guia horizontal.
+      Movimento mostrado em câmera lenta (~60× mais lento). Arraste os controles e observe o triângulo de velocidades e o centro instantâneo.</p>
+  </header>
+
+  <section class="panel stage">
+    <div class="scroll"><canvas id="scene" aria-label="Animação do mecanismo biela-manivela-pistão com vetores de velocidade, aceleração e centro instantâneo"></canvas></div>
+    <div class="stagebar">
+      <span id="status" class="status ok"><span class="dot"></span><span id="statusTxt">Pistão em movimento</span></span>
+      <div class="btns">
+        <button id="bPause" aria-pressed="false">Pausar</button>
+        <button id="bStep" disabled>Passo +5°</button>
+        <button id="bPMS">Ir para PMS</button>
+        <button id="b90">Ir para 90°</button>
+        <button id="bPMI">Ir para PMI</button>
+        <button id="bResetW">Reiniciar ω</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel eq" aria-live="polite">
+    <div class="l1"><span class="c-vc"><i>v</i><sub>C</sub></span> = <span class="c-vb"><i>v</i><sub>B</sub></span> + <span class="c-rod"><i>ω</i><sub>BC</sub> × <i>r</i><sub>C/B</sub></span></div>
+    <div class="l2 num" id="eL2"></div>
+    <div class="l3 num" id="eL3"></div>
+    <div class="hint" id="hint"></div>
+  </section>
+
+  <div class="charts">
+    <figure class="panel">
+      <figcaption>Velocidade e aceleração do pistão ao longo de uma volta<small>θ de 0° a 360° · tracejado = aproximação harmônica · valores normalizados por ωR e ω²R</small></figcaption>
+      <canvas id="chartV" aria-label="Gráfico de velocidade e aceleração do pistão em função do ângulo da manivela"></canvas>
+    </figure>
+    <figure class="panel">
+      <figcaption>Triângulo de velocidades<small>v<sub>C</sub> = v<sub>B</sub> + v<sub>C/B</sub> · a soma vetorial fecha o triângulo · embaixo: ω da biela numa volta</small></figcaption>
+      <canvas id="chartT" aria-label="Polígono de velocidades e gráfico da velocidade angular da biela"></canvas>
+    </figure>
+  </div>
+
+  <section class="panel controls">
+    <div class="presets">
+      <span>Cenários (questões de prova)</span>
+      <button data-p="q14">Q14/25 · Manivela vertical</button>
+      <button data-p="q11">Q11 · ω da biela nula</button>
+      <button data-p="fgv">FGV TJ-GO · Curso máximo</button>
+      <button data-p="q23">Q23 · Biela = 2× manivela</button>
+      <button data-p="q28">Q28 · Manivela ⟂ biela</button>
+      <button data-p="q26">Q26 · Força na biela</button>
+      <button data-p="q27">Q27 · Sentido da aceleração</button>
+      <button data-p="lam">Biela curta × longa</button>
+    </div>
+    <div class="sliders">
+      <div class="sl"><label for="sN"><span>Rotação da manivela, <i>n</i></span> <output id="oN"></output></label>
+        <input id="sN" type="range" min="0" max="3000" step="10"><small>ω = 2πn/60, mostra também em rad/s</small></div>
+      <div class="sl"><label for="sR"><span>Raio da manivela, <i>R</i></span> <output id="oR"></output></label>
+        <input id="sR" type="range" min="20" max="200" step="1"><small>curso = 2R</small></div>
+      <div class="sl"><label for="sL"><span>Comprimento da biela, <i>L</i></span> <output id="oL"></output></label>
+        <input id="sL" type="range" min="30" max="600" step="1"><small>biela longa → movimento quase harmônico (mínimo 1,5R)</small></div>
+      <div class="sl"><label for="sA"><span>Aceleração angular, <i>α</i></span> <output id="oA"></output></label>
+        <input id="sA" type="range" min="-200" max="200" step="5"><small>≠ 0: manivela acelerando/freando</small></div>
+      <div class="sl"><label for="sF"><span>Força do gás no pistão, <i>F</i></span> <output id="oF"></output></label>
+        <input id="sF" type="range" min="0" max="5000" step="50"><small>gera F<sub>BC</sub> = F/cos φ e torque T</small></div>
+      <div class="sl"><label for="sM"><span>Massa do pistão, <i>m</i><sub>p</sub></span> <output id="oM"></output></label>
+        <input id="sM" type="range" min="0.1" max="5" step="0.1"><small>força de inércia m·a</small></div>
+      <div class="sl"><label>Sentido da manivela <output id="oDir"></output></label>
+        <div class="seg" role="group" aria-label="Sentido de rotação da manivela">
+          <button data-d="1">Anti-horário</button><button data-d="-1">Horário</button>
+        </div><small>inverte v<sub>C</sub>, mas a<sub>C</sub> não muda (depende de ω²)</small></div>
+      <div class="sl"><label>Mostrar na cena</label>
+        <div class="seg" role="group" aria-label="Elementos visíveis">
+          <button data-t="vel">Vetores v</button><button data-t="acc">Acelerações</button><button data-t="ci">Centro instantâneo</button><button data-t="trail">Rastro de G</button>
+        </div></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="panel note">
+      <h3>Manivela: rotação em torno de eixo fixo</h3>
+      <p>Todo ponto da manivela descreve um círculo. A velocidade é tangente (<i>v</i> = <i>ωr</i>) e a aceleração tem uma parte normal <i>ω</i>²<i>r</i> apontando para o centro e uma tangencial <i>αr</i>.</p>
+      <p class="f"><i>v</i> = <i>ω</i> × <i>r</i> &nbsp;;&nbsp; <i>a</i> = <i>α</i> × <i>r</i> − <i>ω</i>² <i>r</i></p>
+    </div>
+    <div class="panel note">
+      <h3>Biela: movimento plano geral</h3>
+      <p>A biela translada com B e gira em torno de B ao mesmo tempo. A velocidade de qualquer ponto é a de B mais a rotação relativa. A soma vetorial forma um triângulo com no máximo duas incógnitas, que se resolve pela lei dos senos ou por componentes.</p>
+      <p class="f"><i>v</i><sub>C</sub> = <i>v</i><sub>B</sub> + <i>ω</i><sub>BC</sub> × <i>r</i><sub>C/B</sub></p>
+    </div>
+    <div class="panel note">
+      <h3>Centro instantâneo (CI)</h3>
+      <p>É o ponto que, naquele instante, tem velocidade nula. Fica no cruzamento das perpendiculares a <i>v</i><sub>B</sub> e <i>v</i><sub>C</sub>. Vale só naquele instante e <b>não serve para aceleração</b>: o CI não tem aceleração nula. Com a manivela vertical, o CI vai para o infinito e a biela translada.</p>
+      <p class="f"><i>v</i> = <i>ω</i> · <i>r</i><sub>/CI</sub></p>
+    </div>
+    <div class="panel note">
+      <h3>O que a banca pergunta</h3>
+      <ul>
+        <li>Pontos mortos (PMS/PMI): <i>v</i><sub>pistão</sub> = 0, <i>ω</i><sub>biela</sub> = <i>ωR</i>/<i>L</i>, |<i>a</i><sub>pistão</sub>| máxima.</li>
+        <li>Manivela vertical: <i>v</i><sub>pistão</sub> = <i>ωR</i> e <i>ω</i><sub>biela</sub> = 0.</li>
+        <li>Manivela ⟂ biela: <i>v</i><sub>pistão</sub> = <i>ωR</i>/cos <i>φ</i>.</li>
+        <li>Força na biela: <i>F</i>/cos <i>φ</i>; potência <i>P</i> = <i>F·v</i> = <i>T·ω</i>.</li>
+        <li><i>ω</i> constante não significa pistão com aceleração nula.</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="foot">Modelo didático: mecanismo biela–manivela centrado, corpos rígidos, pinos sem folga e sem atrito. x<sub>C</sub> = R cosθ + √(L² − R² sen²θ); v<sub>C</sub> = x'(θ)·ω; a<sub>C</sub> = x''(θ)·ω² + x'(θ)·α; ω<sub>biela</sub> = −(R/L)ω cosθ/cosφ. Biela como barra delgada (I<sub>G</sub> = mL²/12) com 0,6 kg; manivela + volante com I<sub>O</sub> = 0,02 kg·m². Forças quase estáticas (F<sub>BC</sub> = F/cosφ, T = F·R·sen(θ+φ)/cosφ). Movimento mostrado ~60× mais lento. Baseado em Hibbeler, Dinâmica, 14ª ed.</p>
+</div>
+<script>
+(() => {
+/* ---------- física (função pura) ----------
+   p: { R, L (m), omega (rad/s, anti-horário +), alpha (rad/s², vetorial), F (N), mp (kg) }
+   Convenção: x para a direita, y para cima, ângulos anti-horários positivos. θ = 0 → PMS. */
+const MB = 0.6, IO = 0.02;   // massa da biela (kg) e inércia manivela+volante (kg·m²)
+function compute(p, thOverride) {
+  const th = thOverride ?? p.theta, R = p.R, L = p.L, w = p.omega, al = p.alpha;
+  const lam = R / L, s = Math.sin(th), c = Math.cos(th);
+  const S = Math.sqrt(L * L - R * R * s * s);
+  const sphi = lam * s, cphi = S / L, phi = Math.asin(sphi);
+  const xC = R * c + S;
+  const s2 = Math.sin(2 * th), c2 = Math.cos(2 * th);
+  const x1 = -R * s - R * R * s * c / S;
+  const x2 = -R * c - (R * R * c2 / S + R ** 4 * s2 * s2 / (4 * S ** 3));
+  const vC = x1 * w, aC = x2 * w * w + x1 * al;
+  const vCh = -w * R * (s + lam / 2 * s2), aCh = -w * w * R * (c + lam * c2);
+  const phi1 = lam * c / cphi;                                   // dφ/dθ
+  const phi2 = lam * s * (lam * lam - 1) / cphi ** 3;            // d²φ/dθ²
+  const wBC = -phi1 * w, aBC = -(phi2 * w * w + phi1 * al);      // biela (ψ = −φ)
+  const B = [R * c, R * s], C = [xC, 0];
+  const vB = [-w * R * s, w * R * c];
+  const aB = [-al * R * s - w * w * R * c, al * R * c - w * w * R * s];
+  const aBt = al * R, aBn = w * w * R;
+  const vCB = [vC - vB[0], -vB[1]];                              // = ω_BC × r_C/B
+  const G = [(B[0] + C[0]) / 2, B[1] / 2], vG = [(vB[0] + vC) / 2, vB[1] / 2];
+  // centro instantâneo da biela
+  const ciInf = Math.abs(c) < 0.02;
+  const CI = ciInf ? null : [xC, xC * Math.tan(th)];
+  const rB_CI = CI ? Math.hypot(CI[0] - B[0], CI[1] - B[1]) : Infinity, rC_CI = CI ? Math.abs(CI[1]) : Infinity;
+  // forças e potência (quase estático)
+  const FBC = p.F / cphi;
+  const T = p.F * R * Math.sin(th + phi) / cphi;                 // torque que a força do gás exerce na manivela
+  const Pfv = p.F * Math.abs(vC), Ptw = Math.abs(T * w);
+  const Fin = p.mp * aC;
+  // energia cinética
+  const IG = MB * L * L / 12;
+  const KEo = 0.5 * IO * w * w, KEp = 0.5 * p.mp * vC * vC, KEbt = 0.5 * MB * (vG[0] ** 2 + vG[1] ** 2), KEbr = 0.5 * IG * wBC * wBC;
+  return { th, R, L, w, al, lam, s, c, S, phi, sphi, cphi, xC, x1, x2, vC, aC, vCh, aCh, wBC, aBC, B, C, vB, aB, aBt, aBn, vCB, G, vG,
+    ciInf, CI, rB_CI, rC_CI, FBC, T, Pfv, Ptw, Fin, KEo, KEp, KEbt, KEbr, KE: KEo + KEp + KEbt + KEbr };
+}
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const fmt = (x, d = 2) => (Math.abs(x) < 0.5 * Math.pow(10, -d) ? 0 : x).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const $ = id => document.getElementById(id);
+const DEG = Math.PI / 180, TAU = 2 * Math.PI, SLOW = 60;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wrapPi = a => { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; };
+const wrap2 = a => { a %= TAU; return a < 0 ? a + TAU : a; };
+const rpm = w => w * 60 / TAU;
+
+/* ---------- estado ---------- */
+const base = { n: 1000, R: 50, L: 200, alpha: 0, F: 1000, mp: 0.5, dir: 1 };
+const P = { ...base };                       // alvo (controles)
+const S = { ...base };                       // suavizado
+let theta = 30 * DEG, omegaMag = TAU * base.n / 60, paused = false, stopped = false;
+let gotoTh = null, activePreset = null, lamAnim = null;
+const show = { vel: true, acc: false, ci: true, trail: false };
+let timeScale = reduce ? 0.35 : 1;
+
+/* ---------- controles ---------- */
+const sl = { n: $('sN'), R: $('sR'), L: $('sL'), alpha: $('sA'), F: $('sF'), mp: $('sM') };
+function sync() {
+  const Lmin = Math.ceil(1.5 * P.R);
+  sl.L.min = Lmin; if (P.L < Lmin) P.L = Lmin;
+  for (const k in sl) sl[k].value = P[k];
+  $('oN').textContent = Math.round(P.n) + ' rpm · ' + fmt(TAU * P.n / 60, 1) + ' rad/s';
+  $('oR').textContent = Math.round(P.R) + ' mm';
+  $('oL').textContent = Math.round(P.L) + ' mm · λ = ' + fmt(P.R / P.L, 2);
+  $('oA').textContent = fmt(P.alpha, 0) + ' rad/s²';
+  $('oF').textContent = fmt(P.F, 0) + ' N';
+  $('oM').textContent = fmt(P.mp, 1) + ' kg';
+  $('oDir').textContent = P.dir > 0 ? 'anti-horário' : 'horário';
+  document.querySelectorAll('[data-d]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.d === P.dir)));
+  document.querySelectorAll('[data-t]').forEach(b => b.setAttribute('aria-pressed', String(show[b.dataset.t])));
+  $('bPause').setAttribute('aria-pressed', String(paused));
+  $('bPause').textContent = paused ? 'Continuar' : 'Pausar';
+  $('bStep').disabled = !paused;
+}
+function userEdit() { activePreset = null; lamAnim = null; }
+for (const k in sl) sl[k].addEventListener('input', e => {
+  P[k] = +e.target.value; userEdit();
+  if (k === 'n') { stopped = false; if (P.alpha !== 0) omegaMag = TAU * P.n / 60; }
+  sync();
+});
+document.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { P.dir = +b.dataset.d; if (activePreset !== 'q27' && activePreset !== 'q23') userEdit(); sync(); }));
+document.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { show[b.dataset.t] = !show[b.dataset.t]; sync(); }));
+$('bPause').addEventListener('click', () => { paused = !paused; gotoTh = null; if (!paused) activePreset = null; sync(); });
+$('bStep').addEventListener('click', () => { if (paused) { gotoTh = null; theta = wrap2(theta + P.dir * 5 * DEG); } });
+const goTo = deg => { gotoTh = deg * DEG; paused = true; sync(); };
+$('bPMS').addEventListener('click', () => goTo(0));
+$('b90').addEventListener('click', () => goTo(90));
+$('bPMI').addEventListener('click', () => goTo(180));
+$('bResetW').addEventListener('click', () => { omegaMag = TAU * P.n / 60; stopped = false; });
+
+const PRESETS = {
+  q14: { set: { R: 200, L: 400, n: 60 * 80 / TAU }, th: () => 90 },
+  q11: { set: {}, th: () => 90 },
+  fgv: { set: {}, th: () => 0 },
+  q23: { set: { R: 100, L: 200, dir: -1 }, th: () => 0 },
+  q28: { set: {}, th: () => Math.atan(P.L / P.R) / DEG },
+  q26: { set: { R: 50, L: 100, F: 1000 }, th: () => Math.asin(Math.sin(25 * DEG) * P.L / P.R) / DEG },
+  q27: { set: {}, th: () => Math.atan(P.L / P.R) / DEG },
+  lam: { set: { R: 50, L: 100 }, th: null }
+};
+document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
+  const pr = PRESETS[b.dataset.p];
+  Object.assign(P, base, pr.set);
+  omegaMag = TAU * P.n / 60; stopped = false; lamAnim = null;
+  activePreset = b.dataset.p;
+  if (pr.th) { gotoTh = pr.th() * DEG; paused = true; }
+  else { paused = false; gotoTh = null; lamAnim = 0; }
+  sync();
+}));
+sync();
+
+/* ---------- tema ---------- */
+const C = {};
+function readTokens() {
+  const cs = getComputedStyle(document.documentElement);
+  ['paper','card','ink','muted','line','grid','accent','steel','steeldark','pipe','ok','warn','vapor','crank','rod','piston','vel','acc','ci','force','gas']
+    .forEach(k => C[k] = cs.getPropertyValue('--' + k).trim());
+}
+readTokens();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+/* ---------- canvas ---------- */
+function setup(id, W, H) {
+  const cv = $(id), ctx = cv.getContext('2d');
+  const o = { cv, ctx, W, H };
+  o.fit = () => {
+    const w = cv.clientWidth; if (!w) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(w * H / W * dpr); }
+    const k = cv.width / W; ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.fillStyle = C.card; ctx.fillRect(0, 0, W, H);
+  };
+  return o;
+}
+const SC = setup('scene', 640, 470), CV = setup('chartV', 420, 290), CT = setup('chartT', 420, 290);
+const FS = '"IBM Plex Sans", system-ui, sans-serif', FM = '"IBM Plex Mono", ui-monospace, monospace', FSER = '"STIX Two Text", Cambria, serif';
+function arrow(ctx, x1, y1, x2, y2, col, w = 2, head = 7) {
+  const len = Math.hypot(x2 - x1, y2 - y1); if (len < 1) return;
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w;
+  const a = Math.atan2(y2 - y1, x2 - x1), hh = Math.min(head, len * 0.6);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - Math.cos(a) * hh * 0.6, y2 - Math.sin(a) * hh * 0.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hh * Math.cos(a - 0.45), y2 - hh * Math.sin(a - 0.45));
+  ctx.lineTo(x2 - hh * Math.cos(a + 0.45), y2 - hh * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill();
+}
+function text(ctx, s, x, y, col, size = 13, align = 'left', font = FS, weight = '') {
+  ctx.fillStyle = col; ctx.font = `${weight} ${size}px ${font}`; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y);
+}
+// rótulo de vetor: letra itálica serifada + subscrito
+function vlab(ctx, main, sub, x, y, col, size = 16, align = 'left') {
+  ctx.font = `italic ${size}px ${FSER}`; const w1 = ctx.measureText(main).width;
+  ctx.font = `italic ${size * 0.68}px ${FSER}`; const w2 = ctx.measureText(sub).width;
+  const x0 = align === 'center' ? x - (w1 + w2) / 2 : align === 'right' ? x - w1 - w2 : x;
+  text(ctx, main, x0, y, col, size, 'left', FSER, 'italic');
+  text(ctx, sub, x0 + w1 + 1, y + size * 0.28, col, size * 0.68, 'left', FSER, 'italic');
+}
+function gauge(ctx, x, y, r, val, min, max, label, unit) {
+  ctx.fillStyle = C.card; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.stroke();
+  const a0 = Math.PI * 0.75, a1 = Math.PI * 2.25;
+  ctx.lineWidth = 1.2; ctx.strokeStyle = C.muted;
+  for (let i = 0; i <= 8; i++) { const a = a0 + (a1 - a0) * i / 8; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r * 0.72, y + Math.sin(a) * r * 0.72); ctx.lineTo(x + Math.cos(a) * r * 0.9, y + Math.sin(a) * r * 0.9); ctx.stroke(); }
+  if (min < 0 && max > 0) { const a = a0 + (a1 - a0) * (-min) / (max - min); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r * 0.62, y + Math.sin(a) * r * 0.62); ctx.lineTo(x + Math.cos(a) * r * 0.92, y + Math.sin(a) * r * 0.92); ctx.stroke(); }
+  const t = clamp((val - min) / (max - min), 0, 1), a = a0 + (a1 - a0) * t;
+  ctx.strokeStyle = C.vapor; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * r * 0.8, y + Math.sin(a) * r * 0.8); ctx.stroke();
+  ctx.fillStyle = C.steeldark; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, TAU); ctx.fill();
+  text(ctx, label, x, y - r - 10, C.muted, 11, 'center');
+  text(ctx, unit, x, y + r + 11, C.ink, 12, 'center', FM);
+}
+
+/* ---------- curvas de uma volta (cache por R, L, mp) ---------- */
+const NC = 180;
+const cache = { key: '', v: new Float32Array(NC + 1), a: new Float32Array(NC + 1), vh: new Float32Array(NC + 1), ah: new Float32Array(NC + 1), wb: new Float32Array(NC + 1), ke: new Float32Array(NC + 1), gx: new Float32Array(NC + 1), gy: new Float32Array(NC + 1), vmaxTh: 0 };
+function refreshCache(R, L, mp) {
+  const key = R.toFixed(5) + '|' + L.toFixed(5) + '|' + mp.toFixed(3);
+  if (key === cache.key) return; cache.key = key;
+  let best = 0;
+  for (let i = 0; i <= NC; i++) {
+    const th = TAU * i / NC, r = compute({ R, L, omega: 1, alpha: 0, F: 0, mp }, th);
+    cache.v[i] = r.x1 / R; cache.a[i] = r.x2 / R; cache.vh[i] = r.vCh / R; cache.ah[i] = r.aCh / R;
+    cache.wb[i] = r.wBC; cache.ke[i] = r.KE; cache.gx[i] = r.G[0]; cache.gy[i] = r.G[1];
+    if (i < NC / 2 && Math.abs(cache.v[i]) > Math.abs(cache.v[best])) best = i;
+  }
+  cache.vmaxTh = 360 * best / NC;
+  cache.keMax = Math.max(...cache.ke);
+}
+
+/* ---------- cena ---------- */
+function drawScene(r) {
+  SC.fit(); const ctx = SC.ctx, W = SC.W, H = SC.H;
+  const R = r.R, L = r.L, lam = r.lam, w = r.w;
+  const k = Math.min(400 / (R + L), 150 / R);
+  const Ox = 150, Oy = 250, X = x => Ox + x * k, Y = y => Oy - y * k;
+  const Bx = X(r.B[0]), By = Y(r.B[1]), Cx = X(r.xC), Cy = Oy;
+  const pw = 56, ph = 64, half = 45;
+  const xPMI = X(L - R), xPMS = X(L + R), xHead = xPMS + pw / 2 + 34;
+
+  // cilindro / guia em corte
+  const g0 = xPMI - pw / 2 - 16;
+  ctx.fillStyle = C.pipe; ctx.fillRect(g0, Oy - half - 12, xHead - g0 + 12, 12); ctx.fillRect(g0, Oy + half, xHead - g0 + 12, 12);
+  ctx.fillRect(xHead, Oy - half - 12, 12, 2 * half + 24);
+  ctx.strokeStyle = C.steeldark; ctx.lineWidth = 1.5;
+  ctx.strokeRect(g0, Oy - half - 12, xHead - g0 + 12, 12); ctx.strokeRect(g0, Oy + half, xHead - g0 + 12, 12); ctx.strokeRect(xHead, Oy - half - 12, 12, 2 * half + 24);
+  ctx.lineWidth = 1; ctx.beginPath();
+  for (let x = g0 + 4; x < xHead + 10; x += 9) { ctx.moveTo(x, Oy - half - 12); ctx.lineTo(x + 7, Oy - half); ctx.moveTo(x, Oy + half); ctx.lineTo(x + 7, Oy + half + 12); }
+  ctx.stroke();
+  // gás atrás do pistão
+  if (S.F > 1) { ctx.fillStyle = C.gas; ctx.globalAlpha = clamp(0.15 + S.F / 5000 * 0.55, 0, 0.7); ctx.fillRect(Cx + pw / 2, Oy - half, xHead - Cx - pw / 2, 2 * half); ctx.globalAlpha = 1; }
+  // PMS / PMI e curso
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2;
+  [[xPMI, 'PMI'], [xPMS, 'PMS']].forEach(([x, s]) => { ctx.beginPath(); ctx.moveTo(x, Oy - half - 18); ctx.lineTo(x, Oy - half - 12); ctx.stroke(); text(ctx, s, x, Oy - half - 26, C.muted, 11, 'center', FS, '600'); });
+  const yc = Oy + half + 30;
+  ctx.setLineDash([2, 3]); ctx.strokeStyle = C.muted; ctx.beginPath(); ctx.moveTo(xPMI, Oy + half + 14); ctx.lineTo(xPMI, yc + 6); ctx.moveTo(xPMS, Oy + half + 14); ctx.lineTo(xPMS, yc + 6); ctx.stroke(); ctx.setLineDash([]);
+  arrow(ctx, (xPMI + xPMS) / 2, yc, xPMI + 1, yc, C.muted, 1, 5); arrow(ctx, (xPMI + xPMS) / 2, yc, xPMS - 1, yc, C.muted, 1, 5);
+  text(ctx, 'curso = 2R = ' + fmt(2 * R * 1000, 0) + ' mm', (xPMI + xPMS) / 2, yc + 13, C.ink, 12, 'center', FM);
+
+  // trajetória de B e rastro de G
+  ctx.setLineDash([4, 5]); ctx.strokeStyle = C.crank; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(Ox, Oy, R * k, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  if (show.trail) { ctx.strokeStyle = C.rod; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.5; ctx.beginPath(); for (let i = 0; i <= NC; i++) { const x = X(cache.gx[i]), y = Y(cache.gy[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); ctx.globalAlpha = 1; }
+
+  // volante translúcido com marcas
+  ctx.fillStyle = C.crank; ctx.globalAlpha = 0.07; ctx.beginPath(); ctx.arc(Ox, Oy, R * k, 0, TAU); ctx.fill(); ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = C.crank; ctx.lineWidth = 2;
+  for (let i = 0; i < 6; i++) { const a = -(r.th + i * TAU / 6); ctx.beginPath(); ctx.moveTo(Ox + Math.cos(a) * R * k * 0.55, Oy + Math.sin(a) * R * k * 0.55); ctx.lineTo(Ox + Math.cos(a) * R * k * 0.9, Oy + Math.sin(a) * R * k * 0.9); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  // mancal O
+  ctx.fillStyle = C.steel; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(Ox, Oy); ctx.lineTo(Ox - 22, Oy + 44); ctx.lineTo(Ox + 22, Oy + 44); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(Ox - 34, Oy + 44); ctx.lineTo(Ox + 34, Oy + 44); ctx.stroke();
+  ctx.lineWidth = 1; ctx.beginPath(); for (let x = Ox - 32; x < Ox + 34; x += 8) { ctx.moveTo(x, Oy + 44); ctx.lineTo(x - 6, Oy + 52); } ctx.stroke();
+
+  // pistão
+  const px0 = Cx - pw / 2;
+  ctx.fillStyle = C.piston; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 2;
+  ctx.fillRect(px0, Oy - ph / 2, pw, ph); ctx.strokeRect(px0, Oy - ph / 2, pw, ph);
+  ctx.lineWidth = 1; [-ph / 2 + 8, -ph / 2 + 14, ph / 2 - 8].forEach(dy => { ctx.beginPath(); ctx.moveTo(px0, Oy + dy); ctx.lineTo(px0 + pw, Oy + dy); ctx.stroke(); });
+
+  // manivela OB
+  ctx.lineCap = 'round'; ctx.strokeStyle = C.crank; ctx.lineWidth = 16;
+  ctx.beginPath(); ctx.moveTo(Ox, Oy); ctx.lineTo(Bx, By); ctx.stroke();
+  ctx.fillStyle = C.steeldark; ctx.beginPath(); ctx.arc(Ox, Oy, 6, 0, TAU); ctx.fill();
+  // biela BC
+  ctx.strokeStyle = C.rod; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(Bx, By); ctx.lineTo(Cx, Cy); ctx.stroke(); ctx.lineCap = 'butt';
+  [[Bx, By], [Cx, Cy]].forEach(([x, y]) => { ctx.fillStyle = C.card; ctx.strokeStyle = C.rod; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 10, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = C.steeldark; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill(); });
+  const Gx = X(r.G[0]), Gy = Y(r.G[1]);
+  ctx.fillStyle = C.card; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(Gx, Gy, 4, 0, TAU); ctx.fill(); ctx.stroke();
+  // rótulos dos pontos
+  const ux = Math.cos(-r.th), uy = Math.sin(-r.th);
+  text(ctx, 'O', Ox - 14, Oy + 14, C.ink, 15, 'center', FSER, 'italic');
+  text(ctx, 'B', Bx + ux * 20, By + uy * 20, C.ink, 15, 'center', FSER, 'italic');
+  text(ctx, 'C', Cx, Oy + ph / 2 + 12 > Oy + half ? Oy + 22 : Oy + ph / 2 + 12, C.ink, 15, 'center', FSER, 'italic');
+  text(ctx, 'G', Gx + 8, Gy - 10, C.ink, 13, 'left', FSER, 'italic');
+
+  // arco de θ e de φ
+  ctx.strokeStyle = C.crank; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(Ox + 26, Oy); ctx.lineTo(Ox + 44, Oy); ctx.stroke();
+  ctx.beginPath(); ctx.arc(Ox, Oy, 34, 0, -r.th, true); ctx.stroke();
+  const am = -r.th / 2; text(ctx, 'θ = ' + fmt(r.th / DEG, 0) + '°', Ox + Math.cos(am) * 52, Oy + Math.sin(am) * 52, C.crank, 12, 'center', FM, '600');
+  if (Math.abs(r.phi) > 0.5 * DEG) {
+    const aRod = Math.atan2(By - Cy, Bx - Cx), d = wrapPi(aRod - Math.PI);
+    ctx.strokeStyle = C.rod; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(Cx, Cy, 30, Math.PI, Math.PI + d, d < 0); ctx.stroke();
+    text(ctx, 'φ = ' + fmt(Math.abs(r.phi) / DEG, 1) + '°', Cx - 40, Cy + (d < 0 ? -12 : 12) * 0 + (r.phi > 0 ? 14 : -14) , C.rod, 12, 'right', FM, '600');
+  }
+
+  // força do gás e força na biela
+  if (S.F > 1) {
+    const fl = 18 + 40 * S.F / 5000;
+    arrow(ctx, Cx + pw / 2 + fl + 6, Oy, Cx + pw / 2 + 2, Oy, C.force, 3, 9);
+    vlab(ctx, 'F', '', Cx + pw / 2 + fl + 10, Oy - 12, C.force, 15);
+    const mx = (Bx + Cx) / 2, my = (By + Cy) / 2, rl = Math.hypot(Bx - Cx, By - Cy), tx = (Bx - Cx) / rl, ty = (By - Cy) / rl;
+    arrow(ctx, Cx + tx * 34, Cy + ty * 34, Cx + tx * 16, Cy + ty * 16, C.force, 2, 6);
+    arrow(ctx, Bx - tx * 34, By - ty * 34, Bx - tx * 16, By - ty * 16, C.force, 2, 6);
+    const nx = -ty, ny = tx, side = ny < 0 ? 1 : -1;
+    text(ctx, 'F_BC = ' + fmt(r.FBC, 0) + ' N', mx + nx * 22 * side, my + ny * 22 * side, C.force, 12, 'center', FM, '600');
+  }
+
+  // centro instantâneo
+  if (show.ci) {
+    if (r.ciInf) {
+      const xx = (Bx + Cx) / 2;
+      arrow(ctx, xx, Oy - 100, xx, 24, C.ci, 2, 8); text(ctx, 'CI → ∞ (biela em translação)', xx + 8, 34, C.ci, 12, 'left', FS, '600');
+    } else {
+      const cix = X(r.CI[0]), ciy = Y(r.CI[1]);
+      const inside = cix > 14 && cix < W - 14 && ciy > 14 && ciy < H - 14;
+      ctx.setLineDash([5, 4]); ctx.strokeStyle = C.ci; ctx.lineWidth = 1.3;
+      const cxl = clamp(cix, -2000, 3000), cyl = clamp(ciy, -2000, 3000);
+      ctx.beginPath(); ctx.moveTo(Bx, By); ctx.lineTo(cxl, cyl); ctx.moveTo(Cx, Cy); ctx.lineTo(cxl, cyl); ctx.stroke(); ctx.setLineDash([]);
+      if (inside) {
+        ctx.fillStyle = C.ci; ctx.beginPath(); ctx.arc(cix, ciy, 6, 0, TAU); ctx.fill();
+        text(ctx, 'CI', cix + 9, ciy - 9, C.ci, 14, 'left', FS, '600');
+        if (r.rC_CI > 1e-4) {
+          text(ctx, 'r_C/CI = ' + fmt(r.rC_CI * 1000, 0) + ' mm', Cx - 8, Cy + (ciy - Cy) * 0.35, C.ci, 11, 'right', FM);
+          text(ctx, 'r_B/CI = ' + fmt(r.rB_CI * 1000, 0) + ' mm', (Bx + cix) / 2 - 8, (By + ciy) / 2, C.ci, 11, 'right', FM);
+        } else text(ctx, 'CI = C', cix + 9, ciy + 12, C.ci, 11, 'left', FM);
+      } else {
+        // seta na borda apontando para o CI
+        const ex = clamp(cix, 30, W - 30), ey = clamp(ciy, 112, H - 70);
+        const dx = cix - Cx, dy = ciy - Cy, dl = Math.hypot(dx, dy);
+        arrow(ctx, ex - dx / dl * 40, ey - dy / dl * 40, ex, ey, C.ci, 2.2, 8);
+        text(ctx, 'CI a ' + fmt(Math.hypot(r.CI[0] - r.xC, r.CI[1]), 2) + ' m de C', ex + (dx > 0 ? -10 : 10), ey + (dy > 0 ? -14 : 14), C.ci, 11, dx > 0 ? 'right' : 'left', FS, '600');
+      }
+    }
+  }
+
+  // vetores de velocidade
+  const vRef = Math.abs(w) * R * (1 + lam), vs = vRef > 1e-9 ? 62 / vRef : 0;
+  if (show.vel && vs > 0) {
+    const vbx = r.vB[0] * vs, vby = -r.vB[1] * vs;
+    arrow(ctx, Bx, By, Bx + vbx, By + vby, C.vel, 2.6, 9);
+    vlab(ctx, 'v', 'B', Bx + vbx + (vbx >= 0 ? 6 : -6), By + vby - 8, C.vel, 16, vbx >= 0 ? 'left' : 'right');
+    const yv = Oy - ph / 2 + 18;
+    if (Math.abs(r.vC) * vs > 2) { arrow(ctx, Cx, yv, Cx + r.vC * vs, yv, C.vel, 2.6, 9); vlab(ctx, 'v', 'C', Cx + r.vC * vs + (r.vC > 0 ? 6 : -6), yv - 10, C.vel, 16, r.vC > 0 ? 'left' : 'right'); }
+    const rx = r.vCB[0] * vs, ry = -r.vCB[1] * vs;
+    if (Math.hypot(rx, ry) > 2) { ctx.globalAlpha = 0.9; arrow(ctx, Cx, Cy, Cx + rx, Cy + ry, C.rod, 2.2, 8); ctx.globalAlpha = 1; vlab(ctx, 'v', 'C/B', Cx + rx + 6, Cy + ry + (ry > 0 ? 12 : -8), C.rod, 15); }
+  }
+  // vetores de aceleração
+  const aRef = w * w * R * (1 + lam) + Math.abs(r.al) * R, as = aRef > 1e-9 ? 56 / aRef : 0;
+  if (show.acc && as > 0) {
+    const nx = (Ox - Bx) / Math.max(1, Math.hypot(Ox - Bx, Oy - By)), ny = (Oy - By) / Math.max(1, Math.hypot(Ox - Bx, Oy - By));
+    const an = r.aBn * as;
+    arrow(ctx, Bx, By, Bx + nx * an, By + ny * an, C.acc, 2.4, 8);
+    vlab(ctx, '(a', 'B', Bx + nx * an * 0.5 + 8, By + ny * an * 0.5 + 10, C.acc, 14); text(ctx, ')n', Bx + nx * an * 0.5 + 33, By + ny * an * 0.5 + 12, C.acc, 11, 'left', FSER, 'italic');
+    if (Math.abs(r.aBt) > 1e-6) {
+      const tvx = -Math.sin(r.th) * Math.sign(r.al), tvy = -Math.cos(r.th) * Math.sign(r.al), at = Math.abs(r.aBt) * as;
+      arrow(ctx, Bx, By, Bx + tvx * at, By + tvy * at, C.acc, 2, 7);
+      text(ctx, '(aB)t', Bx + tvx * at + 4, By + tvy * at - 8, C.acc, 12, 'left', FSER, 'italic');
+    }
+    const ya = Oy + ph / 2 - 16;
+    if (Math.abs(r.aC) * as > 2) { arrow(ctx, Cx, ya, Cx + r.aC * as, ya, C.acc, 2.6, 9); vlab(ctx, 'a', 'C', Cx + r.aC * as + (r.aC > 0 ? 6 : -6), ya + 12, C.acc, 16, r.aC > 0 ? 'left' : 'right'); }
+  }
+
+  // instrumentos
+  const vmax = Math.max(Math.abs(w) * R * (1 + lam / 2) * 1.1, 0.5);
+  gauge(ctx, 470, 56, 26, Math.abs(rpm(w)), 0, Math.max(3000, Math.ceil(Math.abs(rpm(w)) / 500) * 500), 'manivela', fmt(Math.abs(rpm(w)), 0) + ' rpm');
+  gauge(ctx, 570, 56, 26, r.vC, -vmax, vmax, 'pistão', fmt(r.vC, 2) + ' m/s');
+  ctx.fillStyle = C.card; ctx.globalAlpha = 0.85; ctx.fillRect(10, 10, 200, 64); ctx.globalAlpha = 1;
+  text(ctx, 'v_C = ' + fmt(r.vC, 2) + ' m/s', 16, 22, C.vel, 14, 'left', FM, '600');
+  text(ctx, 'a_C = ' + fmt(r.aC, 1) + ' m/s²', 16, 42, C.acc, 14, 'left', FM, '600');
+  text(ctx, 'ω_BC = ' + fmt(r.wBC, 2) + ' rad/s', 16, 62, C.rod, 13, 'left', FM);
+
+  // medidor de energia cinética
+  const parts = [[r.KEo, C.crank, 'manivela'], [r.KEp, C.piston, 'pistão'], [r.KEbt, C.rod, 'biela (transl.)'], [r.KEbr, C.ci, 'biela (rot.)']];
+  const ref = Math.max(cache.keMax * w * w, 1e-9), bw = 210, bx = 16, by = H - 44;
+  text(ctx, 'Energia cinética: ' + fmt(r.KE, r.KE < 10 ? 2 : 1) + ' J', bx, by - 10, C.ink, 12, 'left', FS, '600');
+  ctx.fillStyle = C.grid; ctx.fillRect(bx, by, bw, 12);
+  let xx = bx;
+  for (const [e, col] of parts) { const ww = bw * e / ref; ctx.fillStyle = col; ctx.fillRect(xx, by, ww, 12); xx += ww; }
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.strokeRect(bx, by, bw, 12);
+  let lx = bx;
+  for (const [, col, lab] of parts) { ctx.fillStyle = col; ctx.fillRect(lx, by + 20, 8, 8); text(ctx, lab, lx + 11, by + 24, C.muted, 10, 'left'); ctx.font = `10px ${FS}`; lx += ctx.measureText(lab).width + 22; }
+  text(ctx, '~' + SLOW + '× mais lento', W - 10, H - 12, C.muted, 10, 'right');
+}
+
+/* ---------- gráfico 1: v e a normalizados ---------- */
+function drawV(r) {
+  CV.fit(); const ctx = CV.ctx, W = CV.W, H = CV.H;
+  const L0 = 34, R0 = 12, T0 = 22, B0 = 34, ymax = 2;
+  const X = d => L0 + (W - L0 - R0) * d / 360, Y = v => T0 + (H - T0 - B0) * (1 - (v + ymax) / (2 * ymax));
+  ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = `11px ${FM}`; ctx.fillStyle = C.muted; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  for (let v = -2; v <= 2; v++) { ctx.beginPath(); ctx.moveTo(L0, Y(v)); ctx.lineTo(W - R0, Y(v)); ctx.stroke(); ctx.fillStyle = C.muted; ctx.fillText(String(v).replace('-', '−'), L0 - 5, Y(v)); }
+  ctx.strokeStyle = C.muted; ctx.beginPath(); ctx.moveTo(L0, Y(0)); ctx.lineTo(W - R0, Y(0)); ctx.stroke();
+  ['PMS', '90°', 'PMI', '270°', 'PMS'].forEach((s, i) => { ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(X(i * 90), T0); ctx.lineTo(X(i * 90), H - B0); ctx.stroke(); text(ctx, s, X(i * 90), H - B0 + 13, C.muted, 11, i === 0 ? 'left' : i === 4 ? 'right' : 'center'); });
+  text(ctx, 'θ', W - R0, H - 8, C.muted, 13, 'right', FSER, 'italic');
+  const dir = Math.sign(r.w) || P.dir;
+  const curve = (arr, sgn, col, wdt, dash) => {
+    ctx.setLineDash(dash || []); ctx.strokeStyle = col; ctx.lineWidth = wdt; ctx.beginPath();
+    for (let i = 0; i <= NC; i++) { const x = X(360 * i / NC), y = Y(clamp(arr[i] * sgn, -2.2, 2.2)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+  curve(cache.vh, dir, C.vel, 1.3, [5, 4]); curve(cache.ah, 1, C.acc, 1.3, [5, 4]);
+  curve(cache.v, dir, C.vel, 2.6); curve(cache.a, 1, C.acc, 2.6);
+  // legenda
+  ctx.fillStyle = C.vel; ctx.fillRect(L0 + 4, 6, 14, 3); text(ctx, 'v_C / ωR', L0 + 22, 8, C.vel, 11, 'left', FM, '600');
+  ctx.fillStyle = C.acc; ctx.fillRect(L0 + 104, 6, 14, 3); text(ctx, 'a_C / ω²R', L0 + 122, 8, C.acc, 11, 'left', FM, '600');
+  // máximo de |v|
+  const iM = Math.round(cache.vmaxTh / 360 * NC), vm = cache.v[iM] * dir;
+  ctx.fillStyle = C.vel; ctx.beginPath(); ctx.arc(X(cache.vmaxTh), Y(vm), 4, 0, TAU); ctx.fill();
+  text(ctx, 'máx. ≈ θ = ' + fmt(cache.vmaxTh, 0) + '°', X(cache.vmaxTh) + 6, Y(vm) + (vm < 0 ? 12 : -12), C.vel, 11, 'left', FM);
+  // θ atual
+  const d = r.th / DEG, xn = X(d);
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(xn, T0); ctx.lineTo(xn, H - B0); ctx.stroke(); ctx.setLineDash([]);
+  const wa = Math.abs(r.w);
+  const vn = wa > 1e-9 ? r.vC / (wa * r.R) : r.x1 / r.R * dir, an = wa > 1e-9 ? r.aC / (wa * wa * r.R) : r.x2 / r.R;
+  [[vn, C.vel], [an, C.acc]].forEach(([v, col]) => { ctx.fillStyle = C.card; ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(xn, Y(clamp(v, -2.2, 2.2)), 5, 0, TAU); ctx.fill(); ctx.stroke(); });
+}
+
+/* ---------- gráfico 2: triângulo de velocidades + ω da biela ---------- */
+function drawT(r) {
+  CT.fit(); const ctx = CT.ctx, W = CT.W, H = CT.H;
+  const vB = r.vB, vC = r.vC, mag = Math.max(Math.hypot(vB[0], vB[1]), Math.abs(vC), 1e-9);
+  if (Math.abs(r.w) < 1e-9) { text(ctx, 'Manivela parada: não há velocidades', W / 2, 100, C.muted, 13, 'center'); }
+  else {
+    const k = 92 / mag, ox = W / 2 - vC * k / 2, oy = 112;
+    const bx = ox + vB[0] * k, by = oy - vB[1] * k, cx = ox + vC * k, cy = oy;
+    ctx.fillStyle = C.vel; ctx.globalAlpha = 0.07; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(bx, by); ctx.lineTo(cx, cy); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+    arrow(ctx, ox, oy, bx, by, C.vel, 2.6, 9);
+    arrow(ctx, bx, by, cx, cy, C.rod, 2.6, 9);
+    if (Math.abs(vC) * k > 3) arrow(ctx, ox, oy, cx, cy, C.ok, 3.2, 10);
+    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(ox, oy, 3, 0, TAU); ctx.fill(); text(ctx, 'o', ox - 8, oy + 10, C.ink, 13, 'center', FSER, 'italic');
+    // rótulo ao lado de um segmento, do lado oposto ao ponto "longe"
+    const side = (x1, y1, x2, y2, fx, fy, s1, s2, col) => {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, l = Math.max(Math.hypot(x2 - x1, y2 - y1), 1);
+      let nx = -(y2 - y1) / l, ny = (x2 - x1) / l;
+      if ((fx - mx) * nx + (fy - my) * ny > 0) { nx = -nx; ny = -ny; }
+      const al = nx > 0.3 ? 'left' : nx < -0.3 ? 'right' : 'center', d = 12;
+      text(ctx, s1, mx + nx * d, my + ny * d - 6, col, 12, al, FM, '600');
+      text(ctx, s2, mx + nx * d, my + ny * d + 8, C.muted, 10, al, FS);
+    };
+    side(ox, oy, bx, by, cx, cy, 'v_B = ' + fmt(Math.hypot(vB[0], vB[1]), 2), '⟂ OB', C.vel);
+    const vcb = Math.hypot(r.vCB[0], r.vCB[1]);
+    if (vcb > 1e-6) side(bx, by, cx, cy, ox, oy, 'v_C/B = ' + fmt(vcb, 2), '⟂ biela', C.rod);
+    text(ctx, 'v_C = ' + fmt(vC, 2) + ' m/s', (ox + cx) / 2, oy + (by > oy ? -14 : 16), C.ok, 12, 'center', FM, '600');
+  }
+  // faixa: ω da biela / |ω| ao longo da volta
+  const L0 = 34, R0 = 12, T0 = 214, B0 = 18, lam = r.lam, ym = lam * 1.2;
+  const X = d => L0 + (W - L0 - R0) * d / 360, Y = v => T0 + (H - T0 - B0) * (1 - (v + ym) / (2 * ym));
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L0, T0 - 8); ctx.lineTo(W - R0, T0 - 8); ctx.stroke();
+  ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(L0, Y(0)); ctx.lineTo(W - R0, Y(0)); ctx.stroke();
+  [lam, -lam].forEach(v => { ctx.setLineDash([2, 3]); ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(L0, Y(v)); ctx.lineTo(W - R0, Y(v)); ctx.stroke(); ctx.setLineDash([]); text(ctx, (v > 0 ? '+' : '−') + 'λω', L0 - 4, Y(v), C.muted, 10, 'right', FM); });
+  const dir = Math.sign(r.w) || P.dir;
+  ctx.strokeStyle = C.rod; ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i <= NC; i++) { const x = X(360 * i / NC), y = Y(cache.wb[i] * dir); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.stroke();
+  const wn = Math.abs(r.w) > 1e-9 ? r.wBC / Math.abs(r.w) : -lam * Math.cos(r.th) / r.cphi * dir;
+  ctx.fillStyle = C.rod; ctx.beginPath(); ctx.arc(X(r.th / DEG), Y(wn), 4.5, 0, TAU); ctx.fill();
+  text(ctx, 'ω_biela / ω', L0 + 4, T0 - 1, C.rod, 11, 'left', FM, '600');
+  ['PMS', '90°', 'PMI', '270°', 'PMS'].forEach((s, i) => text(ctx, s, X(i * 90), H - 7, C.muted, 10, i === 0 ? 'left' : i === 4 ? 'right' : 'center'));
+}
+
+/* ---------- textos ---------- */
+const sentido = v => v > 0 ? 'anti-horário' : v < 0 ? 'horário' : '—';
+function phase(r) {
+  if (Math.abs(r.w) < 1e-9) return 'stop';
+  if (Math.abs(r.vC) < 0.01 * Math.abs(r.w) * r.R) return 'dead';
+  if (Math.abs(r.c) < 0.02) return 'vert';
+  if (Math.abs(Math.cos(r.th + r.phi)) < Math.sin(1 * DEG)) return 'perp';
+  return 'gen';
+}
+function presetText(r) {
+  const vC = Math.abs(r.vC), wb = Math.abs(r.wBC);
+  switch (activePreset) {
+    case 'q14': return `<b>Q14/Q25:</b> manivela de 200 mm a 80 rad/s, na vertical. v<sub>pistão</sub> = ωR = 80 × 0,2 = <b>${fmt(vC, 1)} m/s</b> (alternativa B). A biela está em translação: ω<sub>biela</sub> = ${fmt(wb, 2)}.`;
+    case 'q11': return `<b>Q11:</b> com a manivela vertical, a <b>velocidade angular da biela é nula</b> (alternativa D). Mas a aceleração angular dela não é: α<sub>biela</sub> = ${fmt(r.aBC, 0)} rad/s², e o pistão tem a<sub>C</sub> = ${fmt(r.aC, 1)} m/s².`;
+    case 'fgv': return `<b>FGV TJ-GO:</b> no curso máximo (PMS) o pistão para (v<sub>C</sub> = ${fmt(r.vC, 2)}) e a biela gira com <b>ω<sub>biela</sub> = ωR/L = ${fmt(wb, 2)} rad/s</b> (alternativa E).`;
+    case 'q23': return Math.abs(r.th - Math.PI) < 0.05
+      ? `<b>Q23, a pegadinha:</b> no PMI, ω<sub>biela</sub> = ω/2 = ${fmt(wb, 2)} rad/s no sentido <b>${sentido(r.wBC)}</b>, o <b>mesmo</b> da manivela.`
+      : `<b>Q23:</b> biela = 2 × manivela, manivela no sentido horário. No PMS, <b>ω<sub>biela</sub> = ω/2 = ${fmt(wb, 2)} rad/s, sentido ${sentido(r.wBC)}</b> (alternativa C). Clique em "Ir para PMI": lá a biela gira no mesmo sentido da manivela.`;
+    case 'q28': return `<b>Q28:</b> manivela perpendicular à biela (θ + φ = 90°). <b>v<sub>C</sub> = ωR/cos φ = ${fmt(vC, 3)} m/s</b> (alternativa D). Nesse instante v<sub>B</sub> aponta ao longo da própria biela, e a velocidade do pistão está perto do máximo.`;
+    case 'q26': return `<b>Q26:</b> com φ = ${fmt(Math.abs(r.phi) / DEG, 1)}°, a força na biela é <b>F<sub>BC</sub> = F/cos 25° = ${fmt(r.FBC, 1)} N</b> (alternativa E), em compressão. O torque na manivela é T = ${fmt(Math.abs(r.T), 1)} N·m.`;
+    case 'q27': return `<b>Q27:</b> troque o sentido da manivela no botão "Sentido". A velocidade do pistão inverte (v<sub>C</sub> = ${fmt(r.vC, 2)} m/s), mas <b>a<sub>C</sub> = ${fmt(r.aC, 1)} m/s² não muda</b>: ela depende de ω², não do sinal de ω (alternativa E).`;
+    case 'lam': return `<b>Biela curta × longa:</b> λ = R/L caindo de 0,5 para 0,1 (agora ${fmt(r.lam, 2)}). A curva de v<sub>C</sub> se aproxima de uma senoide pura e a aproximação harmônica (tracejada) encosta na exata.`;
+  }
+  return '';
+}
+function updateText(r) {
+  const wA = Math.abs(r.w), sPhi = Math.sin(r.th + r.phi);
+  $('eL2').innerHTML = `<span class="c-vc"><i>v</i><sub>C</sub></span> = −(<i>ωR</i>)·sen(<i>θ</i>+<i>φ</i>)/cos <i>φ</i> = −(${fmt(r.w, 1)} × ${fmt(r.R, 3)}) × ${fmt(sPhi, 3)}/${fmt(r.cphi, 3)} = <span class="c-vc">${fmt(r.vC, 2)} m/s</span> (${r.vC > 1e-9 ? 'para a direita' : r.vC < -1e-9 ? 'para a esquerda' : 'parado'})`;
+  $('eL3').innerHTML = `<span class="c-rod"><i>ω</i><sub>biela</sub> = λω cos θ/cos φ = ${fmt(Math.abs(r.wBC), 2)} rad/s (${sentido(r.wBC)})</span> · <span class="c-acc"><i>a</i><sub>C</sub> = ${fmt(r.aC, 1)} m/s²</span> · <span class="c-force"><i>P</i> = <i>F·v</i> = ${fmt(r.Pfv, 1)} W = <i>T·ω</i> = ${fmt(r.Ptw, 1)} W</span>`;
+
+  const ph = phase(r);
+  let cls = 'ok', msg;
+  if (ph === 'stop') { cls = 'bad'; msg = 'Manivela parada'; }
+  else if (ph === 'dead') { cls = 'warn'; msg = 'Ponto morto (' + (Math.cos(r.th) > 0 ? 'PMS' : 'PMI') + '): pistão parado, biela gira com ω·R/L'; }
+  else if (ph === 'vert') msg = 'Manivela vertical: biela em translação, v_pistão = ωR';
+  else if (ph === 'perp') msg = 'Manivela ⟂ biela: v_pistão = ωR / cos φ (máx. próximo daqui)';
+  else msg = 'Pistão indo para a ' + (r.vC > 0 ? 'direita' : 'esquerda') + ' · ' + (r.vC * r.aC > 0 ? 'acelerando' : 'freando');
+  $('status').className = 'status ' + cls; $('statusTxt').textContent = msg;
+
+  let h = presetText(r);
+  if (!h) {
+    if (ph === 'stop') h = 'A manivela parou: com α < 0 a rotação caiu até zero. Use "Reiniciar ω" ou mude a rotação.';
+    else if (ph === 'dead') {
+      const pms = Math.cos(r.th) > 0;
+      h = `No ${pms ? 'PMS' : 'PMI'} o pistão para e inverte o sentido. A biela gira com ωR/L = ${fmt(Math.abs(r.wBC), 2)} rad/s, em sentido <b>${pms ? 'oposto' : 'igual'}</b> ao da manivela (no ${pms ? 'PMI' : 'PMS'} gira no sentido ${pms ? 'igual' : 'oposto'}). A aceleração do pistão é máxima em módulo: ω²R(1${pms ? '+' : '−'}λ) = ${fmt(Math.abs(r.aC), 1)} m/s².`;
+    }
+    else if (ph === 'vert') h = `O CI foi para o infinito: a biela translada, todos os pontos dela têm v = ωR = ${fmt(wA * r.R, 2)} m/s e ω<sub>biela</sub> = 0. Mas a aceleração angular da biela não é zero: α<sub>biela</sub> = ${fmt(r.aBC, 0)} rad/s².`;
+    else if (ph === 'perp') h = `v<sub>C</sub> = ωR/cos φ = ${fmt(wA * r.R / r.cphi, 3)} m/s. Com a manivela perpendicular à biela, v<sub>B</sub> tem a direção da biela, e o pistão está perto da velocidade máxima.`;
+    else {
+      const err = Math.abs(r.vC) > 1e-6 ? Math.abs((r.vCh - r.vC) / r.vC) * 100 : 0;
+      h = `O pistão está a ${fmt((r.R + r.L - r.xC) * 1000, 1)} mm do PMS; λ = R/L = ${fmt(r.lam, 2)}; a aproximação harmônica erra ${fmt(err, 1)} % na velocidade aqui. O CI da biela está a ${fmt(r.rB_CI, 3)} m de B: ω<sub>biela</sub> = v<sub>B</sub>/r<sub>B/CI</sub> = ${fmt(wA * r.R, 2)}/${fmt(r.rB_CI, 3)} = ${fmt(Math.abs(r.wBC), 2)} rad/s.`;
+    }
+    if (r.F > 1 && ph !== 'stop') h += ` Força na biela F<sub>BC</sub> = F/cos φ = ${fmt(r.FBC, 0)} N; torque T = ${fmt(Math.abs(r.T), 1)} N·m; força de inércia do pistão m·a = ${fmt(r.Fin, 0)} N.`;
+    if (ph !== 'stop') h += ' Lembre: o CI tem velocidade nula, mas não aceleração nula. Não use o CI para acelerações.';
+  }
+  if (Math.abs(r.al) > 1e-9 && ph !== 'stop') h += ` A manivela está ${r.al * r.w > 0 ? 'acelerando' : 'freando'}: (a<sub>B</sub>)<sub>t</sub> = αR = ${fmt(Math.abs(r.aBt), 2)} m/s².`;
+  $('hint').innerHTML = h;
+}
+
+/* ---------- laço ---------- */
+let last = performance.now(), textT = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const k = Math.min(1, dt * 5);
+  if (lamAnim !== null) { lamAnim += dt; P.L = 100 + 400 * Math.min(1, lamAnim / 5); if (lamAnim > 5) lamAnim = null; sync(); }
+  for (const key of ['n', 'R', 'L', 'F', 'mp']) S[key] += (P[key] - S[key]) * k;
+  S.alpha = P.alpha; S.dir = P.dir;
+  const dtSim = paused ? 0 : dt * timeScale / SLOW;
+  if (S.alpha === 0) { omegaMag += (TAU * S.n / 60 - omegaMag) * k; stopped = omegaMag < 1e-6; }
+  else if (!paused) {
+    omegaMag += S.alpha * dtSim;                 // mesma câmera lenta do ângulo
+    if (omegaMag <= 0) { omegaMag = 0; stopped = true; } else stopped = false;
+    omegaMag = Math.min(omegaMag, TAU * 6000 / 60);
+  }
+  const omega = S.dir * omegaMag;
+  if (gotoTh !== null) { const d = wrapPi(gotoTh - theta); theta = wrap2(theta + d * Math.min(1, dt * 6)); if (Math.abs(d) < 1e-4) { theta = wrap2(gotoTh); gotoTh = null; } }
+  else theta = wrap2(theta + omega * dtSim);
+  const p = { R: S.R / 1000, L: S.L / 1000, omega, alpha: omegaMag > 0 || S.alpha > 0 ? S.dir * S.alpha : 0, F: S.F, mp: S.mp, theta };
+  refreshCache(p.R, p.L, p.mp);
+  const r = compute(p);
+  drawScene(r); drawV(r); drawT(r);
+  textT -= dt; if (textT <= 0) { updateText(r); textT = 0.12; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
