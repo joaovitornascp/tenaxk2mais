@@ -69,6 +69,7 @@ nav{max-width:900px;margin:0 auto;display:flex;gap:10px 18px;flex-wrap:wrap}
 <div class="grp"><span>Máquinas de fluxo</span><div class="tabs"><a class="tab" href="#npsh" data-key="npsh">NPSH e cavitação</a><a class="tab" href="#bombas" data-key="bombas">Ponto de operação</a></div></div>
 <div class="grp"><span>Resistência dos materiais</span><div class="tabs"><a class="tab" href="#tracao" data-key="tracao">Ensaio de tração</a><a class="tab" href="#torcao" data-key="torcao">Torção</a><a class="tab" href="#flexao" data-key="flexao">Flexão de vigas</a><a class="tab" href="#vasos" data-key="vasos">Vasos de pressão</a><a class="tab" href="#mohr" data-key="mohr">Círculo de Mohr</a><a class="tab" href="#flambagem" data-key="flambagem">Flambagem</a><a class="tab" href="#impacto" data-key="impacto">Carga de impacto</a></div></div>
 <div class="grp"><span>Dinâmica</span><div class="tabs"><a class="tab" href="#biela" data-key="biela">Biela–manivela</a></div></div>
+<div class="grp"><span>Questões de prova</span><div class="tabs"><a class="tab" href="#questao10" data-key="questao10">Q10 · Tensões no engaste</a></div></div>
   </nav>
 </header>
 <main id="app">
@@ -1655,12 +1656,159 @@ nav{max-width:900px;margin:0 auto;display:flex;gap:10px 18px;flex-wrap:wrap}
   <p class="foot">Modelo didático: mecanismo biela–manivela centrado, corpos rígidos, pinos sem folga e sem atrito. x<sub>C</sub> = R cosθ + √(L² − R² sen²θ); v<sub>C</sub> = x'(θ)·ω; a<sub>C</sub> = x''(θ)·ω² + x'(θ)·α; ω<sub>biela</sub> = −(R/L)ω cosθ/cosφ. Biela como barra delgada (I<sub>G</sub> = mL²/12) com 0,6 kg; manivela + volante com I<sub>O</sub> = 0,02 kg·m². Forças quase estáticas (F<sub>BC</sub> = F/cosφ, T = F·R·sen(θ+φ)/cosφ). Movimento mostrado ~60× mais lento. Baseado em Hibbeler, Dinâmica, 14ª ed.</p>
 </div>
 </section>
+<style>#sim-questao10 *{box-sizing:border-box}
+#sim-questao10 .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+#sim-questao10 header{text-align:center;display:flex;flex-direction:column;gap:6px}
+#sim-questao10 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#sim-questao10 h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,5.4vw,42px);line-height:1.12;margin:0;text-wrap:balance}
+#sim-questao10 .assume{font-family:var(--serif);color:var(--muted);font-size:15px;margin:0;text-wrap:balance}
+#sim-questao10 .panel{background:var(--card);border:1px solid var(--line);border-radius:10px}
+#sim-questao10 .stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#sim-questao10 .stage figure{margin:0;padding:10px;min-width:0}
+#sim-questao10 .stage figure + figure{border-left:1px solid var(--line)}
+#sim-questao10 .stage figure.wide{grid-column:1/-1;border-left:0;border-bottom:1px solid var(--line)}
+#sim-questao10 .stage figcaption{font-family:var(--serif);font-size:16px;margin:0 4px 4px}
+#sim-questao10 .stage figcaption small{display:block;font-family:var(--sans);font-size:12px;color:var(--muted)}
+#sim-questao10 canvas{display:block;width:100%;height:auto;max-width:100%}
+#sim-questao10 .stagebar{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-top:1px solid var(--line)}
+#sim-questao10 .status{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:4px 12px;border-radius:999px;border:1.5px solid currentColor}
+#sim-questao10 .status .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+#sim-questao10 .status.ok{color:var(--ok)}
+#sim-questao10 .status.warn{color:var(--warn)}
+#sim-questao10 .status.bad{color:var(--bad)}
+#sim-questao10 button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+#sim-questao10 button:hover{border-color:var(--accent);color:var(--accent)}
+#sim-questao10 button:focus-visible,#sim-questao10 input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#sim-questao10 button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+#sim-questao10 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#sim-questao10 .lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);width:100%}
+#sim-questao10 .eq{font-family:var(--serif);padding:14px;display:flex;flex-direction:column;gap:6px}
+#sim-questao10 .eq .big{font-size:clamp(18px,3.2vw,24px);text-align:center}
+#sim-questao10 .eq .mid2{font-size:clamp(15px,2.7vw,19px);text-align:center}
+#sim-questao10 .eq i{font-style:italic}
+#sim-questao10 .num{font-variant-numeric:tabular-nums}
+#sim-questao10 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-family:var(--sans);margin-top:4px}
+#sim-questao10 .tiles div{border:1px solid var(--line);border-radius:8px;padding:5px 8px;min-width:0}
+#sim-questao10 .tiles b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+#sim-questao10 .tiles span{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#sim-questao10 .hint{font-family:var(--sans);font-size:14px;text-wrap:pretty;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+#sim-questao10 .controls{padding:14px;display:flex;flex-direction:column;gap:14px}
+#sim-questao10 .sliders{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px}
+#sim-questao10 .sl{display:flex;flex-direction:column;gap:2px;min-width:0}
+#sim-questao10 .sl label{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+#sim-questao10 .sl label output{font-family:var(--mono);font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+#sim-questao10 .sl small{font-size:12px;color:var(--muted)}
+#sim-questao10 input[type=range]{width:100%;accent-color:var(--accent)}
+#sim-questao10 .notes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#sim-questao10 .note{padding:14px 16px;min-width:0}
+#sim-questao10 .note h3{font-family:var(--serif);font-weight:600;font-size:18px;margin:0 0 6px}
+#sim-questao10 .note p,#sim-questao10 .note li{font-size:14px;margin:0}
+#sim-questao10 .note p + p{margin-top:6px}
+#sim-questao10 .note ul,#sim-questao10 .note ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:3px}
+#sim-questao10 .note .f{font-family:var(--serif);font-size:16px}
+#sim-questao10 .foot{font-size:12px;color:var(--muted);text-align:center;text-wrap:balance}
+@media (max-width:680px){#sim-questao10 .stage,#sim-questao10 .sliders,#sim-questao10 .notes{grid-template-columns:1fr}
+#sim-questao10 .stage figure + figure{border-left:0;border-top:1px solid var(--line)}
+#sim-questao10 .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#sim-questao10 #questao10-scene{aspect-ratio:640/400;touch-action:none;cursor:grab;min-width:520px}
+#sim-questao10 .stage figure.wide{overflow-x:auto}
+#sim-questao10 .comp b em{font-style:normal}
+#sim-questao10 #questao10-sec{aspect-ratio:360/300;touch-action:none;cursor:pointer}
+#sim-questao10 #questao10-cube{aspect-ratio:360/300}
+#sim-questao10 .comp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-family:var(--sans)}
+#sim-questao10 .comp div{border:1px solid var(--line);border-radius:8px;padding:6px 9px;min-width:0}
+#sim-questao10 .comp div.nz{border-color:var(--tens)}
+#sim-questao10 .comp b{display:flex;justify-content:space-between;gap:6px;font-family:var(--serif);font-size:17px;font-weight:400}
+#sim-questao10 .comp b span{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#sim-questao10 .comp small{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+#sim-questao10 .alts{display:flex;flex-direction:column;gap:4px;font-family:var(--sans);font-size:14px}
+#sim-questao10 .alts div{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+#sim-questao10 .alts div.ok{border-color:var(--ok);background:color-mix(in srgb, var(--ok) 10%, transparent)}
+#sim-questao10 .alts .mk{font-family:var(--mono);font-weight:600;width:1.2em}
+#sim-questao10 .alts .why{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+#sim-questao10 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:680px){#sim-questao10 .comp{grid-template-columns:repeat(2,minmax(0,1fr))}
+#sim-questao10 .two{grid-template-columns:1fr}
+#sim-questao10 .alts .why{display:none}}</style>
+<section class="sim" id="sim-questao10" hidden>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Questão de prova · CESGRANRIO/TRANSPETRO 2023</div>
+    <h1>No ponto P do engaste,<br>quais tensões são nulas?</h1>
+    <p class="assume">Barra em L de seção circular, engastada em A. Trecho AB ao longo de x, trecho BC perpendicular, força <i>F</i> vertical para baixo em C.
+      Leve a força até o engaste, veja os esforços internos e depois o elemento de tensão no ponto P, no topo da seção.</p>
+  </header>
+
+  <section class="panel stage">
+    <figure class="wide">
+      <figcaption>A peça e os esforços no engaste<small>arraste a figura para girar a vista · ponto P no topo da seção em A</small></figcaption>
+      <canvas id="questao10-scene" aria-label="Barra em L engastada com força em C e esforços internos no engaste"></canvas>
+    </figure>
+    <figure>
+      <figcaption>Seção no engaste (plano yz)<small>toque no contorno para mover o ponto · cores: σx da flexão</small></figcaption>
+      <canvas id="questao10-sec" aria-label="Seção circular com distribuição de tensões e o ponto escolhido"></canvas>
+    </figure>
+    <figure>
+      <figcaption>Elemento de tensão no ponto<small>faces x, y e z; o que não aparece é zero</small></figcaption>
+      <canvas id="questao10-cube" aria-label="Cubo de tensões no ponto escolhido"></canvas>
+    </figure>
+    <div class="stagebar">
+      <span id="questao10-status" class="status ok"><span class="dot"></span><span id="questao10-statusTxt"></span></span>
+      <div class="row">
+        <button data-pt="0">Ponto P (topo)</button><button data-pt="90">Lateral (linha neutra)</button><button data-pt="180">Base</button><button data-pt="45">45°</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel eq num" aria-live="polite">
+    <div class="big">Esforços em A: &nbsp;<i>V</i><sub>z</sub> = <i>F</i> &nbsp;·&nbsp; <i>M</i><sub>y</sub> = <i>F</i>·<i>AB</i> &nbsp;·&nbsp; <i>T</i><sub>x</sub> = <i>F</i>·<i>BC</i></div>
+    <div class="mid2" id="questao10-eF"></div>
+    <div class="comp" id="questao10-comp"></div>
+    <div class="two">
+      <div class="alts" id="questao10-alts"></div>
+      <div class="hint" id="questao10-hint" style="border-top:0;margin-top:0;padding-top:0"></div>
+    </div>
+  </section>
+
+  <section class="panel controls">
+    <div class="sliders">
+      <div class="sl"><label for="questao10-sF"><span>Força em C, <i>F</i></span> <output id="questao10-oF"></output></label><input id="questao10-sF" type="range" min="50" max="2000" step="10"></div>
+      <div class="sl"><label for="questao10-sA"><span>Comprimento AB (braço da flexão)</span> <output id="questao10-oA"></output></label><input id="questao10-sA" type="range" min="50" max="600" step="5"></div>
+      <div class="sl"><label for="questao10-sB"><span>Comprimento BC (braço da torção)</span> <output id="questao10-oB"></output></label><input id="questao10-sB" type="range" min="0" max="400" step="5"><small>BC = 0: sem torção, a força fica em cima do eixo</small></div>
+      <div class="sl"><label for="questao10-sD"><span>Diâmetro, <i>d</i></span> <output id="questao10-oD"></output></label><input id="questao10-sD" type="range" min="10" max="60" step="1"></div>
+      <div class="sl"><label for="questao10-sBeta"><span>Posição do ponto na seção, <i>β</i></span> <output id="questao10-oBeta"></output></label><input id="questao10-sBeta" type="range" min="0" max="359" step="1"><small>0° = topo (P), 90° = lateral, 180° = base</small></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="panel note">
+      <h3>1. Leve a força até o engaste</h3>
+      <p>A força em C vale (<i>AB</i>, −<i>BC</i>, 0) em relação a A. O momento dela é <i>r</i> × <i>F</i>: a parte em x é <i>F·BC</i> (torção, porque gira em torno do eixo da barra AB) e a parte em y é <i>F·AB</i> (flexão). A força em si vira um cortante vertical <i>V</i><sub>z</sub>. Não há força axial, nem momento em torno de z.</p>
+    </div>
+    <div class="panel note">
+      <h3>2. Cada esforço, sua tensão</h3>
+      <p class="f"><i>σ</i><sub>x</sub> = <i>M</i><sub>y</sub> <i>z</i>/<i>I</i> &nbsp; <i>τ</i><sub>torção</sub> = <i>T ρ</i>/<i>J</i> &nbsp; <i>τ</i><sub>V</sub> = 4<i>V</i>/3<i>A</i>·(1 − <i>z</i>²/<i>c</i>²)</p>
+      <p>A flexão é máxima no topo e na base e zero na linha neutra (o eixo y). A torção é máxima em toda a borda e tangente a ela: no topo, aponta em y. O cortante é zero no topo e na base e máximo na linha neutra.</p>
+    </div>
+    <div class="panel note">
+      <h3>3. Por que σy, σz e τyz são sempre zero</h3>
+      <p>Na teoria de barras, só a face x (a seção transversal) carrega tensão. Nada empurra ou cisalha a barra nas direções y e z entre fibras, e a superfície externa é livre. No topo, a face z do elemento é a própria superfície da barra: sem carga, σz = τzx = τzy = 0. Por isso a alternativa E vale em qualquer ponto da seção.</p>
+    </div>
+    <div class="panel note">
+      <h3>A pegadinha</h3>
+      <p>No ponto P a componente τxz também é zero, porque o cortante some na fibra extrema. Mas τxy não é: é a torção. Por isso a alternativa A (σx, τxy, τyz) está errada em P, embora fique certa na lateral da seção (assim como a B), onde a flexão zera e a torção aponta em z. A resposta depende do ponto.</p>
+    </div>
+  </section>
+
+  <p class="foot">Modelo de barra (Euler–Bernoulli + torção de eixo circular), material elástico. Tensões no engaste, sem concentração de tensão. Cortante pela fórmula elementar τ = VQ/(It) para seção circular. Convenção: tensões na face de normal +x; z para cima, y para dentro da figura.</p>
+</div>
+</section>
 </main>
 <p class="sim-foot">Modelos didáticos para estudo. Cada simulação descreve suas hipóteses no rodapé.</p>
 
 <script>
 const Hub = (() => {
-  const KEYS = ["npsh", "bombas", "tracao", "torcao", "flexao", "vasos", "mohr", "flambagem", "impacto", "biela"];
+  const KEYS = ["npsh", "bombas", "tracao", "torcao", "flexao", "vasos", "mohr", "flambagem", "impacto", "biela", "questao10"];
   const active = {}, pending = {};
   const fix = (key, sel) => sel.replace(/#([A-Za-z][\w-]*)/g, (m, id) => '#' + key + '-' + id);
   function doc(key) {
@@ -5041,5 +5189,281 @@ requestAnimationFrame(frame);
 })();
 
 })(Hub.doc("biela"), Hub.raf("biela"));
+/* ===== Q10 · Tensões no engaste ===== */
+(function (document, requestAnimationFrame) {
+
+(() => {
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const fmt = (x, d = 1) => x.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const $ = id => document.getElementById(id);
+const DEG = Math.PI / 180;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C = {};
+function readTokens() {
+  const cs = getComputedStyle(document.documentElement);
+  ['paper','card','ink','muted','line','grid','accent','steel','steeldark','beam','comp','tens','green','violet','amber','ok','warn','bad']
+    .forEach(k => C[k] = cs.getPropertyValue('--' + k).trim());
+}
+readTokens();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+function setup(id, W, H) {
+  const cv = $(id), ctx = cv.getContext('2d'), o = { cv, ctx, W, H };
+  o.fit = () => {
+    const w = cv.clientWidth; if (!w) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5), pw = Math.round(w * dpr);
+    if (cv.width !== pw) { cv.width = pw; cv.height = Math.round(w * H / W * dpr); }
+    const k = cv.width / W; ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.fillStyle = C.card; ctx.fillRect(0, 0, W, H);
+  };
+  o.pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; };
+  return o;
+}
+const FS = '"IBM Plex Sans", system-ui, sans-serif', FM = '"IBM Plex Mono", ui-monospace, monospace', FSER = '"STIX Two Text", Cambria, serif';
+function text(ctx, s, x, y, col, size = 13, align = 'left', font = FS, weight = '') {
+  ctx.fillStyle = col; ctx.font = `${weight} ${size}px ${font}`; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y);
+}
+function arrow(ctx, x1, y1, x2, y2, col, w = 2, head = 8) {
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - head * Math.cos(a - 0.42), y2 - head * Math.sin(a - 0.42)); ctx.lineTo(x2 - head * Math.cos(a + 0.42), y2 - head * Math.sin(a + 0.42)); ctx.closePath(); ctx.fill();
+}
+function expo(v) { if (v <= 0) return '0'; const e = Math.floor(Math.log10(v)), m = v / 10 ** e; return fmt(m, 2) + '×10' + String(e).replace('-', '⁻').split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c] ?? c).join(''); }
+function setStatus(cls, msg) { $('status').className = 'status ' + cls; $('statusTxt').textContent = msg; }
+// eixos de gráfico: retorna mapeadores X, Y
+function axes(ctx, W, H, o) {
+  const L = o.L ?? 46, R = o.R ?? 12, T = o.T ?? 14, B = o.B ?? 32;
+  const X = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0), Y = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+  ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.font = `11px ${FM}`; ctx.fillStyle = C.muted; ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right';
+  for (let v = o.y0; v <= o.y1 + 1e-9; v += o.ys) { ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(W - R, Y(v)); ctx.stroke(); ctx.fillStyle = C.muted; ctx.fillText(o.yf ? o.yf(v) : fmt(v, 0), L - 5, Y(v)); }
+  ctx.textAlign = 'center';
+  for (let v = o.x0; v <= o.x1 + 1e-9; v += o.xs) { ctx.fillStyle = C.muted; ctx.fillText(o.xf ? o.xf(v) : fmt(v, 0), X(v), H - B + 13); }
+  if (o.xl) text(ctx, o.xl, W - R, H - 7, C.muted, 11, 'right');
+  if (o.yl) text(ctx, o.yl, L + 4, T + 2, C.muted, 10, 'left', FM);
+  return { X, Y, L, R, T, B, clip: () => { ctx.save(); ctx.beginPath(); ctx.rect(L, T, W - L - R, H - T - B); ctx.clip(); } };
+}
+function loop(fn) { let last = performance.now(), tt = 0; const f = now => { const dt = Math.min(0.05, (now - last) / 1000); last = now; tt -= dt; const doText = tt <= 0; if (doText) tt = 0.12; fn(dt, doText); requestAnimationFrame(f); }; requestAnimationFrame(f); }
+function bindRange(id, obj, key, onChange) { $(id).addEventListener('input', e => { obj[key] = +e.target.value; onChange && onChange(); }); }
+function bindGroup(attr, obj, key, onChange) { document.querySelectorAll(`[data-${attr}]`).forEach(b => b.addEventListener('click', () => { obj[key] = b.dataset[attr]; onChange && onChange(); })); }
+function pressGroup(attr, val) { document.querySelectorAll(`button[data-${attr}]`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(val)))); }
+const P = { F: 500, a: 300, b: 200, d: 25, beta: 0 };
+const S = { ...P };
+let yaw = 35 * DEG, pitch = 20 * DEG;
+function sync() {
+  $('sF').value = P.F; $('sA').value = P.a; $('sB').value = P.b; $('sD').value = P.d; $('sBeta').value = P.beta;
+  $('oF').textContent = P.F + ' N'; $('oA').textContent = P.a + ' mm'; $('oB').textContent = P.b + ' mm'; $('oD').textContent = P.d + ' mm';
+  $('oBeta').textContent = P.beta + '°' + (P.beta === 0 ? ' (ponto P)' : '');
+  pressGroup('pt', P.beta);
+}
+bindRange('sF', P, 'F', sync); bindRange('sA', P, 'a', sync); bindRange('sB', P, 'b', sync); bindRange('sD', P, 'd', sync); bindRange('sBeta', P, 'beta', sync);
+document.querySelectorAll('[data-pt]').forEach(b => b.addEventListener('click', () => { P.beta = +b.dataset.pt; sync(); }));
+sync();
+
+/* ---------- mecânica: tensões no ponto (y, z) = c (sen β, cos β) da seção em A ---------- */
+function solve(s) {
+  const c = s.d / 2, A = Math.PI * s.d * s.d / 4, I = Math.PI * s.d ** 4 / 64, J = 2 * I;
+  const V = s.F, My = s.F * s.a, T = s.F * s.b;           // N, N·mm
+  const bt = s.beta * DEG, y = c * Math.sin(bt), z = c * Math.cos(bt);
+  const sx = My * z / I;                                  // tração no topo
+  const tT_xy = -T * z / J, tT_xz = T * y / J;            // torção (face +x)
+  const tV_xz = -(4 * V / (3 * A)) * (1 - (z / c) ** 2);  // cortante (fórmula elementar)
+  const txy = tT_xy, txz = tT_xz + tV_xz;
+  const t = Math.hypot(txy, txz);
+  const s1 = sx / 2 + Math.hypot(sx / 2, t), s2 = sx / 2 - Math.hypot(sx / 2, t);
+  const vm = Math.sqrt(sx * sx + 3 * t * t);
+  return { c, A, I, J, V, My, T, y, z, sx, txy, txz, tT_xy, tT_xz, tV_xz, sy: 0, sz: 0, tyz: 0, s1, s2, vm,
+    sMax: My * c / I, tTmax: T * c / J, tVmax: 4 * V / (3 * A) };
+}
+
+/* ---------- projeção 3D ---------- */
+const SC = setup('scene', 640, 400), SE = setup('sec', 360, 300), CU = setup('cube', 360, 300);
+function proj(p, k, ox, oy) {
+  const x1 = p[0] * Math.cos(yaw) + p[1] * Math.sin(yaw), y1 = -p[0] * Math.sin(yaw) + p[1] * Math.cos(yaw);
+  return [ox + x1 * k, oy - (p[2] * Math.cos(pitch) + y1 * Math.sin(pitch) * 1)];
+}
+let drag = null;
+SC.cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw, pitch }; SC.cv.setPointerCapture(e.pointerId); });
+SC.cv.addEventListener('pointermove', e => { if (!drag) return; yaw = drag.yaw - (e.clientX - drag.x) * 0.008; pitch = clamp(drag.pitch + (e.clientY - drag.y) * 0.006, -0.2, 1.2); });
+['pointerup', 'pointercancel'].forEach(ev => SC.cv.addEventListener(ev, () => drag = null));
+
+function tube(ctx, P0, P1, r, k, ox, oy, fill) {
+  const a = proj(P0, k, ox, oy), b = proj(P1, k, ox, oy);
+  ctx.lineCap = 'butt';
+  ctx.strokeStyle = C.steeldark; ctx.lineWidth = 2 * r * k + 3; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+  ctx.strokeStyle = fill; ctx.lineWidth = 2 * r * k; ctx.stroke();
+}
+function ring(ctx, center, axis, r, k, ox, oy, n = 40) {   // círculo perpendicular a um eixo (0=x, 1=y)
+  const pts = [];
+  for (let i = 0; i <= n; i++) { const t = i / n * TAU2; const u = r * Math.sin(t), v = r * Math.cos(t);
+    pts.push(proj(axis === 0 ? [center[0], center[1] + u, center[2] + v] : [center[0] + u, center[1], center[2] + v], k, ox, oy)); }
+  return pts;
+}
+const TAU2 = 2 * Math.PI;
+function curvedArrow(ctx, center, axis, r, k, ox, oy, col, sign, label, labTop) {
+  const n = 30, pts = [];
+  for (let i = 0; i <= n; i++) { const t = (0.15 + 0.7 * i / n) * TAU2 * sign; const u = r * Math.sin(t), v = r * Math.cos(t);
+    pts.push(proj(axis === 0 ? [center[0], center[1] + u, center[2] + v] : [center[0] + u, center[1], center[2] + v], k, ox, oy)); }
+  ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+  const e = pts[n], e0 = pts[n - 2]; arrow(ctx, e0[0], e0[1], e[0], e[1], col, 2.4, 9);
+  let mi = 0; pts.forEach((p, i) => { if (labTop ? p[1] < pts[mi][1] : p[1] > pts[mi][1]) mi = i; });
+  text(ctx, label, pts[mi][0], pts[mi][1] + (labTop ? -12 : 14), col, 13, 'center', FM, '600');
+}
+
+function drawScene(r) {
+  SC.fit(); const ctx = SC.ctx, W = SC.W, H = SC.H;
+  const L = Math.max(S.a, S.b, 200), k = 330 / (S.a + S.b + 80), ox = 230, oy = 175;
+  const rad = Math.max(S.d / 2, 10 / k);
+  // parede
+  const wall = [[0, -L * 0.25, -L * 0.45], [0, L * 0.35, -L * 0.45], [0, L * 0.35, L * 0.45], [0, -L * 0.25, L * 0.45]].map(p => proj(p, k, ox, oy));
+  ctx.fillStyle = C.steel; ctx.globalAlpha = 0.55; ctx.beginPath(); wall.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.strokeStyle = C.steeldark; ctx.lineWidth = 1.5; ctx.stroke();
+  // eixos
+  const ax = (v, lab) => { const a = proj([0, 0, 0], k, ox, oy), b = proj(v, k, ox, oy); arrow(ctx, a[0], a[1], b[0], b[1], C.muted, 1.2, 7); text(ctx, lab, b[0] + 6, b[1] - 6, C.muted, 15, 'left', FSER, 'italic'); };
+  ax([S.a + 120, 0, 0], 'x'); ax([0, L * 0.55, 0], 'y'); ax([0, 0, L * 0.5], 'z');
+  // barras (desenha a mais distante primeiro)
+  const B = [S.a, 0, 0], Cp = [S.a, -S.b, 0];
+  tube(ctx, [0, 0, 0], B, rad, k, ox, oy, C.beam);
+  if (S.b > 1) tube(ctx, B, Cp, rad, k, ox, oy, C.beam);
+  const cEnd = ring(ctx, Cp, 1, rad, k, ox, oy);
+  ctx.fillStyle = C.beam; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 1.5; ctx.beginPath(); cEnd.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.fill(); ctx.stroke();
+  // seção em A com ponto
+  const sA = ring(ctx, [0, 0, 0], 0, rad, k, ox, oy);
+  ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.beginPath(); sA.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+  const bt = S.beta * DEG, Pp = proj([0, rad * Math.sin(bt), rad * Math.cos(bt)], k, ox, oy);
+  ctx.fillStyle = C.tens; ctx.beginPath(); ctx.arc(Pp[0], Pp[1], 5.5, 0, TAU2); ctx.fill();
+  text(ctx, S.beta === 0 ? 'P' : 'ponto', Pp[0] - 8, Pp[1] - 12, C.tens, 15, 'right', FSER, 'italic');
+  // rótulos A, B, C
+  const lab = (p, s, dx, dy) => { const q = proj(p, k, ox, oy); text(ctx, s, q[0] + dx, q[1] + dy, C.ink, 15, 'center', FSER, 'italic'); };
+  lab([0, 0, 0], 'A', -18, 18); lab(B, 'B', 14, -16); lab(Cp, 'C', -16, 16);
+  // força F em C
+  const fTop = proj([Cp[0], Cp[1], rad + 0.32 * L], k, ox, oy), fBot = proj([Cp[0], Cp[1], rad], k, ox, oy);
+  arrow(ctx, fTop[0], fTop[1], fBot[0], fBot[1], C.tens, 3, 10); text(ctx, 'F = ' + Math.round(S.F) + ' N', fTop[0] + 8, fTop[1] + 4, C.tens, 13, 'left', FM, '600');
+  // cotas AB e BC
+  const mid = (p, q) => proj([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2, (p[2] + q[2]) / 2], k, ox, oy);
+  const mAB = mid([0, 0, 0], B); text(ctx, 'AB = ' + Math.round(S.a) + ' mm', mAB[0] + 20, mAB[1] + rad * k + 18, C.muted, 12, 'center', FM);
+  if (S.b > 1) { const mBC = mid(B, Cp); text(ctx, 'BC = ' + Math.round(S.b) + ' mm', mBC[0] + rad * k + 10, mBC[1] + 4, C.muted, 12, 'left', FM); }
+  // esforços no engaste (desenhados um pouco à frente de A)
+  const E0 = [-L * 0.02, 0, 0];
+  const v0 = proj([E0[0], E0[1], -rad - L * 0.06], k, ox, oy), v1 = proj([E0[0], E0[1], -rad - L * 0.32], k, ox, oy);
+  arrow(ctx, v1[0], v1[1], v0[0], v0[1], C.green, 2.6, 9); text(ctx, 'Vz = ' + Math.round(r.V) + ' N', v1[0] - 6, v1[1] + 10, C.green, 13, 'right', FM, '600');
+  curvedArrow(ctx, [S.a * 0.3, 0, 0], 1, rad * 3, k, ox, oy, C.violet, 1, 'My = ' + fmt(r.My / 1000, 0) + ' N·m', true);
+  if (S.b > 1) curvedArrow(ctx, [S.a * 0.7, 0, 0], 0, rad * 3, k, ox, oy, C.amber, 1, 'Tx = ' + fmt(r.T / 1000, 0) + ' N·m', false);
+  text(ctx, 'arraste para girar', W - 10, H - 10, C.muted, 11, 'right');
+}
+
+/* ---------- seção yz ---------- */
+function drawSec(r) {
+  SE.fit(); const ctx = SE.ctx, W = SE.W, H = SE.H, cx = 150, cy = 150, R = 105;
+  // flexão em faixas horizontais
+  for (let i = 0; i < 40; i++) {
+    const z0 = R - i * 2 * R / 40, f = z0 / R;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU2); ctx.clip();
+    ctx.fillStyle = f > 0 ? C.tens : C.comp; ctx.globalAlpha = Math.abs(f) * 0.45 + 0.04; ctx.fillRect(cx - R, cy - z0, 2 * R, 2 * R / 40 + 0.6); ctx.restore();
+  }
+  ctx.globalAlpha = 1; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU2); ctx.stroke();
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - R - 14, cy); ctx.lineTo(cx + R + 14, cy); ctx.stroke(); ctx.setLineDash([]);
+  text(ctx, 'linha neutra (σx = 0)', cx, cy + 12, C.muted, 10, 'center');
+  text(ctx, 'tração', cx, cy - R + 18, C.tens, 11, 'center', FS, '600'); text(ctx, 'compressão', cx, cy + R - 16, C.comp, 11, 'center', FS, '600');
+  // eixos
+  arrow(ctx, cx + R + 4, cy, cx + R + 34, cy, C.muted, 1.2, 6); text(ctx, 'y', cx + R + 38, cy, C.muted, 14, 'left', FSER, 'italic');
+  arrow(ctx, cx, cy - R - 4, cx, cy - R - 30, C.muted, 1.2, 6); text(ctx, 'z', cx + 6, cy - R - 28, C.muted, 14, 'left', FSER, 'italic');
+  // torção: setas tangentes na borda
+  if (S.b > 1) for (let i = 0; i < 12; i++) {
+    const t = i * TAU2 / 12 + 0.26, y = Math.sin(t), z = Math.cos(t), px = cx + R * 0.86 * y, py = cy - R * 0.86 * z;
+    const ty = -z, tz = y;   // direção (−z, y) da torção, em coordenadas yz
+    arrow(ctx, px - ty * 9, py + tz * 9, px + ty * 9, py - tz * 9, C.amber, 1.6, 5);
+  }
+  // cortante: setas verticais na linha neutra
+  for (let i = -2; i <= 2; i++) { const y = i * R * 0.38, len = 22 * (1 - (y / R) ** 2); arrow(ctx, cx + y, cy + len / 2 + 22, cx + y, cy - len / 2 + 22, C.green, 1.5, 5); }
+  // ponto
+  const bt = S.beta * DEG, px = cx + R * Math.sin(bt), py = cy - R * Math.cos(bt);
+  ctx.fillStyle = C.card; ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(px, py, 7, 0, TAU2); ctx.fill(); ctx.stroke();
+  text(ctx, S.beta === 0 ? 'P' : 'β = ' + S.beta + '°', px + (Math.sin(bt) >= 0 ? 12 : -12), py - 10, C.ink, 13, Math.sin(bt) >= 0 ? 'left' : 'right', FSER, 'italic');
+  // legenda
+  ctx.fillStyle = C.amber; ctx.fillRect(272, 236, 10, 3); text(ctx, 'torção', 286, 238, C.muted, 11);
+  ctx.fillStyle = C.green; ctx.fillRect(272, 254, 10, 3); text(ctx, 'cortante', 286, 256, C.muted, 11);
+  ctx.fillStyle = C.tens; ctx.fillRect(272, 272, 10, 3); text(ctx, 'flexão', 286, 274, C.muted, 11);
+}
+SE.cv.addEventListener('pointerdown', e => {
+  const [x, y] = SE.pt(e), a = Math.atan2(x - 150, -(y - 150));
+  P.beta = Math.round(((a / DEG) + 360) % 360); sync();
+});
+
+/* ---------- cubo de tensões ---------- */
+function drawCube(r) {
+  CU.fit(); const ctx = CU.ctx, W = CU.W, H = CU.H;
+  const yw = 35 * DEG, pt = 22 * DEG, k = 1, ox = 170, oy = 160, h = 55;
+  const pj = p => { const x1 = p[0] * Math.cos(yw) + p[1] * Math.sin(yw), y1 = -p[0] * Math.sin(yw) + p[1] * Math.cos(yw); return [ox + x1, oy - (p[2] * Math.cos(pt) + y1 * Math.sin(pt))]; };
+  const face = (pts, col, alpha) => { const q = pts.map(pj); ctx.fillStyle = col; ctx.globalAlpha = alpha; ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = C.steeldark; ctx.lineWidth = 1.5; ctx.stroke(); };
+  face([[-h, -h, h], [h, -h, h], [h, h, h], [-h, h, h]], C.beam, 0.9);     // +z (topo)
+  face([[-h, -h, -h], [h, -h, -h], [h, -h, h], [-h, -h, h]], C.beam, 0.75); // −y (frente)
+  face([[h, -h, -h], [h, h, -h], [h, h, h], [h, -h, h]], C.beam, 0.6);      // +x
+  const scale = 46 / Math.max(r.sMax, r.tTmax, r.tVmax, 1e-9);
+  const vec = (from, dir, val, col, lab) => {
+    if (Math.abs(val) * scale < 1.5) return;
+    const L = clamp(Math.abs(val) * scale, 8, 60) * Math.sign(val);
+    const a = pj(from), b = pj([from[0] + dir[0] * L, from[1] + dir[1] * L, from[2] + dir[2] * L]);
+    arrow(ctx, a[0], a[1], b[0], b[1], col, 2.4, 8);
+    text(ctx, lab, b[0] + 5, b[1] - 8, col, 12, 'left', FM, '600');
+  };
+  // face +x: σx (normal), τxy, τxz
+  vec([h + 4, 0, 0], [1, 0, 0], r.sx, r.sx >= 0 ? C.tens : C.comp, 'σx');
+  vec([h + 2, -h * 0.2, h * 0.55], [0, 1, 0], r.txy, C.amber, 'τxy');
+  vec([h + 2, h * 0.55, -h * 0.2], [0, 0, 1], r.txz, C.green, 'τxz');
+  // complementares: face −y carrega τyx = τxy na direção −x; face +z carrega τzx = τxz na direção +x
+  vec([h * 0.3, -h - 2, -h * 0.3], [-1, 0, 0], r.txy, C.amber, '');
+  vec([-h * 0.2, h * 0.2, h + 2], [1, 0, 0], r.txz, C.green, '');
+  const top = pj([0, 0, h]);
+  if (Math.abs(S.beta % 360) < 1) text(ctx, 'face z = superfície livre: nada age aqui', W / 2, 18, C.muted, 11, 'center');
+  text(ctx, 'z', pj([0, 0, h + 30])[0], pj([0, 0, h + 30])[1], C.muted, 14, 'center', FSER, 'italic');
+  text(ctx, 'x', pj([h + 76, 0, 0])[0], pj([h + 76, 0, 0])[1] + 14, C.muted, 14, 'center', FSER, 'italic');
+  text(ctx, '−y (frente)', pj([0, -h - 10, -h])[0] - 4, pj([0, -h - 10, -h])[1] + 14, C.muted, 11, 'right');
+  text(ctx, 'σy = σz = τyz = 0', W / 2, H - 12, C.ink, 12, 'center', FM, '600');
+}
+
+/* ---------- painel ---------- */
+const ALTS = [['A', ['sx', 'txy', 'tyz']], ['B', ['sx', 'tyz', 'sz']], ['C', ['sy', 'txy', 'txz']], ['D', ['sz', 'txy', 'txz']], ['E', ['sy', 'sz', 'tyz']]];
+const NAME = { sx: 'σx', sy: 'σy', sz: 'σz', txy: 'τxy', txz: 'τxz', tyz: 'τyz' };
+function updateText(r) {
+  const eps = 1e-3 * Math.max(r.sMax, r.tTmax, r.tVmax, 1);
+  $('eF').textContent = `Vz = ${Math.round(r.V)} N · My = ${Math.round(S.F)} × ${Math.round(S.a)} = ${fmt(r.My / 1000, 1)} N·m · Tx = ${Math.round(S.F)} × ${Math.round(S.b)} = ${fmt(r.T / 1000, 1)} N·m`;
+  const comp = [
+    ['sx', r.sx, 'flexão: My·z/I. Zero só na linha neutra (z = 0).'],
+    ['sy', 0, 'nada traciona a barra na direção y.'],
+    ['sz', 0, 'nada traciona a barra na direção z.'],
+    ['txy', r.txy, 'torção (−T·z/J). No topo a torção aponta em y.'],
+    ['txz', r.txz, 'torção (T·y/J) + cortante. No topo os dois são zero.'],
+    ['tyz', 0, 'não há cisalhamento entre fibras no plano yz.']
+  ];
+  $('comp').innerHTML = comp.map(([k, v, why]) => { const nz = Math.abs(v) > eps; return `<div class="${nz ? 'nz' : ''}"><b><em>${NAME[k].replace(/([στ])(\w+)/, '<i>$1</i><sub>$2</sub>')}</em><span>${nz ? fmt(v, 1) + ' MPa' : '0'}</span></b><small>${why}</small></div>`; }).join('');
+  const val = { sx: r.sx, sy: 0, sz: 0, txy: r.txy, txz: r.txz, tyz: 0 };
+  let correct = [];
+  $('alts').innerHTML = ALTS.map(([L, ks]) => {
+    const bad = ks.filter(k => Math.abs(val[k]) > eps); const ok = bad.length === 0; if (ok) correct.push(L);
+    return `<div class="${ok ? 'ok' : ''}"><span class="mk">${ok ? '✓' : '✗'}</span><span><b>${L})</b> ${ks.map(k => NAME[k]).join(', ')}</span><span class="why">${ok ? 'as três são nulas' : bad.map(k => NAME[k]).join(', ') + ' ≠ 0'}</span></div>`;
+  }).join('');
+  const atP = S.beta === 0;
+  if (atP) setStatus('ok', 'Ponto P: só a alternativa E tem as três tensões nulas');
+  else setStatus('warn', `Fora de P (β = ${S.beta}°): alternativas certas aqui: ${correct.join(', ')}`);
+  let h;
+  if (atP) h = `<b>Gabarito: E.</b> No topo, σx = ${fmt(r.sx, 1)} MPa (flexão, tração) e τxy = ${fmt(r.txy, 1)} MPa (torção) não são nulas. τxz é zero porque o cortante some na fibra extrema e a torção, no topo, aponta em y. σy, σz e τyz são nulas em qualquer ponto da barra.`;
+  else if (Math.abs(Math.cos(S.beta * DEG)) < 0.02) h = `Na lateral, sobre a linha neutra, a flexão zera (σx = 0) e a torção passa a apontar em z, somando-se ao cortante: τxz = ${fmt(r.txz, 1)} MPa. Aqui as alternativas A e B também estariam certas. Por isso a questão fixa o ponto P.`;
+  else h = `Num ponto genérico, as três tensões não nulas aparecem juntas: σx = ${fmt(r.sx, 1)}, τxy = ${fmt(r.txy, 1)} e τxz = ${fmt(r.txz, 1)} MPa. σy, σz e τyz continuam zero.`;
+  h += ` No ponto: σ₁ = ${fmt(r.s1, 1)} MPa, σ₂ = ${fmt(r.s2, 1)} MPa, von Mises = ${fmt(r.vm, 1)} MPa.`;
+  $('hint').innerHTML = h;
+}
+loop((dt, doText) => {
+  const k = Math.min(1, dt * 7);
+  for (const key of ['F', 'a', 'b', 'd']) S[key] += (P[key] - S[key]) * k;
+  S.beta = P.beta;
+  const r = solve(S);
+  drawScene(r); drawSec(r); drawCube(r);
+  if (doText) updateText(r);
+});
+})();
+
+})(Hub.doc("questao10"), Hub.raf("questao10"));
 Hub.start();
 </script>
