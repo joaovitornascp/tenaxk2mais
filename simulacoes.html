@@ -1710,7 +1710,9 @@ nav{max-width:900px;margin:0 auto;display:flex;gap:10px 18px;flex-wrap:wrap}
 @media (max-width:680px){#sim-questao10 .stage,#sim-questao10 .sliders,#sim-questao10 .notes{grid-template-columns:1fr}
 #sim-questao10 .stage figure + figure{border-left:0;border-top:1px solid var(--line)}
 #sim-questao10 .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-#sim-questao10 #questao10-scene{aspect-ratio:640/400;touch-action:none;cursor:grab;min-width:520px}
+#sim-questao10 .v3d{position:relative}
+#sim-questao10 #questao10-scene{display:block;width:100%;aspect-ratio:640/400;touch-action:none;cursor:grab}
+#sim-questao10 #questao10-lab{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #sim-questao10 .stage figure.wide{overflow-x:auto}
 #sim-questao10 .comp b em{font-style:normal}
 #sim-questao10 #questao10-sec{aspect-ratio:360/300;touch-action:none;cursor:pointer}
@@ -1731,6 +1733,8 @@ nav{max-width:900px;margin:0 auto;display:flex;gap:10px 18px;flex-wrap:wrap}
 #sim-questao10 .two{grid-template-columns:1fr}
 #sim-questao10 .alts .why{display:none}}</style>
 <section class="sim" id="sim-questao10" hidden>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <div class="wrap">
   <header>
     <div class="eyebrow">Questão de prova · CESGRANRIO/TRANSPETRO 2023</div>
@@ -1741,8 +1745,8 @@ nav{max-width:900px;margin:0 auto;display:flex;gap:10px 18px;flex-wrap:wrap}
 
   <section class="panel stage">
     <figure class="wide">
-      <figcaption>A peça e os esforços no engaste<small>arraste a figura para girar a vista · ponto P no topo da seção em A</small></figcaption>
-      <canvas id="questao10-scene" aria-label="Barra em L engastada com força em C e esforços internos no engaste"></canvas>
+      <figcaption>A peça e os esforços no engaste<small>cena 3D: arraste para girar, use a roda ou a pinça para aproximar · ponto P no topo da seção em A</small></figcaption>
+      <div class="v3d"><canvas id="questao10-scene" aria-label="Cena 3D da barra em L engastada com força em C e esforços internos no engaste"></canvas><canvas id="questao10-lab" aria-hidden="true"></canvas></div>
     </figure>
     <figure>
       <figcaption>Seção no engaste (plano yz)<small>toque no contorno para mover o ponto · cores: σx da flexão</small></figcaption>
@@ -5278,7 +5282,9 @@ function solve(s) {
 }
 
 /* ---------- projeção 3D ---------- */
-const SC = setup('scene', 640, 400), SE = setup('sec', 360, 300), CU = setup('cube', 360, 300);
+const HAS3D = typeof THREE !== 'undefined' && !!THREE.OrbitControls;
+const SC = setup('lab', 640, 400), SE = setup('sec', 360, 300), CU = setup('cube', 360, 300);
+if (!HAS3D) { SC.cv.style.pointerEvents = 'auto'; SC.cv.style.cursor = 'grab'; }
 function proj(p, k, ox, oy) {
   const x1 = p[0] * Math.cos(yaw) + p[1] * Math.sin(yaw), y1 = -p[0] * Math.sin(yaw) + p[1] * Math.cos(yaw);
   return [ox + x1 * k, oy - (p[2] * Math.cos(pitch) + y1 * Math.sin(pitch) * 1)];
@@ -5351,6 +5357,114 @@ function drawScene(r) {
   curvedArrow(ctx, [S.a * 0.3, 0, 0], 1, rad * 3, k, ox, oy, C.violet, 1, 'My = ' + fmt(r.My / 1000, 0) + ' N·m', true);
   if (S.b > 1) curvedArrow(ctx, [S.a * 0.7, 0, 0], 0, rad * 3, k, ox, oy, C.amber, 1, 'Tx = ' + fmt(r.T / 1000, 0) + ' N·m', false);
   text(ctx, 'arraste para girar', W - 10, H - 10, C.muted, 11, 'right');
+}
+
+
+/* ---------- cena 3D (three.js) ---------- */
+const U = 1 / 100;                                   // mm → unidades da cena
+const T3 = (x, y, z) => new THREE.Vector3(x * U, z * U, -y * U);   // (x, y, z) do problema → three, com y para cima
+let G3 = null;
+function init3() {
+  const cv = $('scene');
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(34, 640 / 400, 0.05, 100);
+  camera.position.set(5.0, 2.9, 6.0);
+  const controls = new THREE.OrbitControls(camera, cv);
+  controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+  controls.minDistance = 3; controls.maxDistance = 22; controls.target.set(1.4, 0, 1);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a4656, 0.8));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.9); dl.position.set(5, 9, 7); scene.add(dl);
+  const dl2 = new THREE.DirectionalLight(0x9fc4ff, 0.25); dl2.position.set(-6, 2, -4); scene.add(dl2);
+  const mat = (col, rough = 0.42, metal = 0.35) => new THREE.MeshStandardMaterial({ color: col, roughness: rough, metalness: metal });
+  const M = { bar: mat('#c9d3de'), wall: mat('#8f9aa7', 0.95, 0), red: mat('#e04a3a', 0.5, 0.1), green: mat('#2fae66', 0.5, 0.1), violet: mat('#9a5ad8', 0.5, 0.1), amber: mat('#e08a1e', 0.5, 0.1), blue: mat('#3a8be0', 0.4, 0.2), axis: mat('#7d8896', 0.6, 0) };
+  const cylG = new THREE.CylinderGeometry(1, 1, 1, 56);
+  const AB = new THREE.Mesh(cylG, M.bar); AB.rotation.z = -Math.PI / 2; scene.add(AB);
+  const BC = new THREE.Mesh(cylG, M.bar); BC.rotation.x = Math.PI / 2; scene.add(BC);
+  const elbow = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20), M.bar); scene.add(elbow);
+  const wall = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1, 1), M.wall); scene.add(wall);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 12, 72), M.blue); ring.rotation.y = Math.PI / 2; scene.add(ring);
+  const pt = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 14), M.red); scene.add(pt);
+  const up = new THREE.Vector3(0, 1, 0);
+  function mkArrow(m) {
+    const g = new THREE.Group();
+    const sh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 18), m), hd = new THREE.Mesh(new THREE.ConeGeometry(1, 1, 26), m);
+    g.add(sh, hd); g.userData = { sh, hd }; scene.add(g); return g;
+  }
+  function setArrow(g, from, dir, len, rad) {
+    const { sh, hd } = g.userData, hl = Math.min(len * 0.35, rad * 8);
+    g.position.copy(from); g.quaternion.setFromUnitVectors(up, dir.clone().normalize());
+    sh.scale.set(rad, Math.max(len - hl, 0.001), rad); sh.position.set(0, (len - hl) / 2, 0);
+    hd.scale.set(rad * 2.7, hl, rad * 2.7); hd.position.set(0, len - hl / 2, 0);
+  }
+  function mkCurl(m) {     // arco de 280° no plano XY, girando no sentido +z, com ponta de seta
+    const g = new THREE.Group(), span = Math.PI * 1.55;
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(1, 0.05, 10, 72, span), m);
+    const hd = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.36, 22), m);
+    hd.position.set(Math.cos(span), Math.sin(span), 0); hd.rotation.z = span;
+    g.add(arc, hd); scene.add(g); return g;
+  }
+  const F = mkArrow(M.red), V = mkArrow(M.green), axes3 = [mkArrow(M.axis), mkArrow(M.axis), mkArrow(M.axis)];
+  const My = mkCurl(M.violet), Tx = mkCurl(M.amber);
+  My.rotation.y = Math.PI;        // eixo do arco → −z da cena = +y do problema
+  Tx.rotation.y = Math.PI / 2;    // eixo do arco → +x
+  G3 = { cv, renderer, scene, camera, controls, AB, BC, elbow, wall, ring, pt, F, V, axes3, My, Tx, setArrow, w: 0, M };
+}
+function draw3(r) {
+  if (!G3) init3();
+  const g = G3, w = g.cv.clientWidth; if (!w) return;
+  const h = Math.round(w * 400 / 640), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (g.w !== w) {
+    g.renderer.setPixelRatio(dpr); g.renderer.setSize(w, h, false);
+    g.camera.aspect = w / h; g.camera.updateProjectionMatrix(); g.w = w;
+    SC.cv.width = Math.round(w * dpr); SC.cv.height = Math.round(h * dpr);
+  }
+  const rad = Math.max(S.d / 2, 16) * U, a = S.a * U, b = S.b * U, Lmax = Math.max(a, b, 2);
+  g.AB.scale.set(rad, a, rad); g.AB.position.set(a / 2, 0, 0);
+  g.BC.visible = b > 0.005; g.BC.scale.set(rad, Math.max(b, 0.001), rad); g.BC.position.set(a, 0, b / 2);
+  g.elbow.scale.setScalar(rad); g.elbow.position.set(a, 0, 0);
+  const wh = Math.max(2.4, Lmax * 0.9), ww = Math.max(2.2, b * 1.6 + 1);
+  g.wall.scale.set(1, wh, ww); g.wall.position.set(-0.07, 0, b * 0.3);
+  g.ring.scale.setScalar(rad * 1.03); g.ring.position.set(0.02, 0, 0);
+  const bt = S.beta * DEG, pP = new THREE.Vector3(0.03, rad * Math.cos(bt), -rad * Math.sin(bt));
+  g.pt.position.copy(pP); g.pt.scale.setScalar(Math.max(rad * 0.42, 0.05));
+  const Lf = 0.7 + S.F / 2000 * 1.5, fTop = new THREE.Vector3(a, rad + 0.06 + Lf, b);
+  g.setArrow(g.F, fTop, new THREE.Vector3(0, -1, 0), Lf, 0.028);
+  const vBot = new THREE.Vector3(0.22, -rad - 1.25, 0);
+  g.setArrow(g.V, vBot, new THREE.Vector3(0, 1, 0), 1.0, 0.026);
+  const o = new THREE.Vector3(0, 0, 0);
+  const tips = [new THREE.Vector3(a + 1.1, 0, 0), new THREE.Vector3(0, 0, -1.7), new THREE.Vector3(0, 1.6, 0)];
+  tips.forEach((tp, i) => g.setArrow(g.axes3[i], o, tp.clone().normalize(), tp.length(), 0.011));
+  const cr = Math.max(rad * 3.1, 0.42);
+  g.My.scale.setScalar(cr); g.My.position.set(a * 0.3, 0, 0);
+  g.Tx.visible = b > 0.005; g.Tx.scale.setScalar(cr); g.Tx.position.set(a * 0.62, 0, 0);
+  g.ring.material.color.set(C.accent);
+  const tgt = new THREE.Vector3(a * 0.45, -0.1, b * 0.45);
+  g.controls.target.lerp(tgt, 0.08);
+  g.controls.update();
+  g.renderer.render(g.scene, g.camera);
+  // rótulos por cima
+  const ctx = SC.ctx; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  const sc = w / 640;
+  const L = (v, s, col, dx = 0, dy = 0, size = 13, align = 'left', font = FM, weight = '600') => {
+    const p = v.clone().project(g.camera); if (p.z > 1) return;
+    const x = (p.x + 1) / 2 * w + dx * sc, y = (1 - p.y) / 2 * h + dy * sc;
+    ctx.font = `${weight} ${size * Math.max(sc, 0.8)}px ${font}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4; ctx.strokeStyle = C.card; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); ctx.fillStyle = col; ctx.fillText(s, x, y);
+  };
+  const ser = (v, s, dx, dy, col = C.ink, size = 17) => L(v, s, col, dx, dy, size, 'center', FSER, 'italic');
+  ser(o, 'A', -22, 20); ser(new THREE.Vector3(a, 0, 0), 'B', 16, -16);
+  if (b > 0.005) ser(new THREE.Vector3(a, 0, b), 'C', -20, 18);
+  ser(pP, S.beta === 0 ? 'P' : 'ponto', -26, -4, C.tens, 17);
+  ser(tips[0], 'x', 10, 0, C.muted, 16); ser(tips[1], 'y', 8, -8, C.muted, 16); ser(tips[2], 'z', 10, -4, C.muted, 16);
+  L(fTop, 'F = ' + Math.round(S.F) + ' N', C.tens, 10, -4);
+  L(vBot, 'Vz = ' + Math.round(r.V) + ' N', C.green, -8, 8, 13, 'right');
+  L(new THREE.Vector3(a * 0.3, cr * 1.05, 0), 'My = F·AB = ' + fmt(r.My / 1000, 0) + ' N·m', C.violet, 30, -16, 13, 'center');
+  if (b > 0.005) L(new THREE.Vector3(a * 0.62, -cr * 1.05, 0), 'Tx = F·BC = ' + fmt(r.T / 1000, 0) + ' N·m', C.amber, 0, 14, 13, 'center');
+  L(new THREE.Vector3(a * 0.82, rad, 0), 'AB = ' + Math.round(S.a) + ' mm', C.muted, 0, -16, 12, 'center', FM, '');
+  if (b > 0.005) L(new THREE.Vector3(a, -rad, b / 2), 'BC = ' + Math.round(S.b) + ' mm', C.muted, 14, 12, 12, 'left', FM, '');
+  ctx.font = `${11 * Math.max(sc, 0.8)}px ${FS}`; ctx.textAlign = 'right'; ctx.fillStyle = C.muted; ctx.fillText('arraste para girar · roda/pinça para zoom', w - 10, h - 10);
 }
 
 /* ---------- seção yz ---------- */
@@ -5459,7 +5573,8 @@ loop((dt, doText) => {
   for (const key of ['F', 'a', 'b', 'd']) S[key] += (P[key] - S[key]) * k;
   S.beta = P.beta;
   const r = solve(S);
-  drawScene(r); drawSec(r); drawCube(r);
+  if (HAS3D) draw3(r); else drawScene(r);
+  drawSec(r); drawCube(r);
   if (doText) updateText(r);
 });
 })();
